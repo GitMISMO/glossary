@@ -36,6 +36,7 @@ docs/mockups/           layout explorations, kept for reference, not deployed
   draft.json            work in progress, saved daily by the console
 docs/
   console.md            running the console, one-time setup, recovery
+  saving-pattern.md     how saving works, written for reuse elsewhere
   data-notes.md         data shape, known quirks, verified counts
   encoding.md           damaged characters, repair rules, platform test
   deployment.md         hosting plan and what AWS needs to provision
