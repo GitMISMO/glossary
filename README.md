@@ -37,6 +37,7 @@ docs/mockups/           layout explorations, kept for reference, not deployed
 docs/
   console.md            running the console, one-time setup, recovery
   saving-pattern.md     how saving works, written for reuse elsewhere
+  saving-pattern-immediate.md  the same, for an editor that publishes on save
   data-notes.md         data shape, known quirks, verified counts
   encoding.md           damaged characters, repair rules, platform test
   deployment.md         hosting plan and what AWS needs to provision

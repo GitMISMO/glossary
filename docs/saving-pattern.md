@@ -7,6 +7,10 @@ and publishes it periodically, with no server of your own.
 The short version: **the browser holds a working copy, a Git repository holds the truth,
 and almost all the difficulty is in the guards rather than the saving.**
 
+> If the project you are reusing this for publishes on save — no staging, no draft — read
+> **`saving-pattern-immediate.md`** instead. It is the same architecture with the middle
+> two states removed, and it says which parts drop out and which matter more.
+
 ---
 
 ## 1. Three states, not two
