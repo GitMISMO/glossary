@@ -37,7 +37,7 @@ token or know it exists.
 1. Create a fine-grained access token:
    - GitHub → Settings → Developer settings → Personal access tokens → Fine-grained
    - **Resource owner**: the account that owns the repository, not your personal account
-   - **Repository access**: only `mismo-business-glossary`
+   - **Repository access**: only `glossary`
    - **Repository permissions**: **Contents: read and write** — nothing else
    - **Expiration**: up to a year. Diarise the renewal; it is your job, not theirs.
 2. Open the console and press **Sign in…** in the panel on the left

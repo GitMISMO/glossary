@@ -576,7 +576,7 @@
   <div class="field"><label>Your name</label><input type="text" id="repoEditor" placeholder="e.g. Jordan Ellis">
     <div class="fh">Recorded on every change so the history says who made it. The access token belongs to the account rather than the person, so without this every entry looks identical no matter who is facilitating.</div></div>
   <div class="field"><label>Repository</label><input type="text" id="repoFull" placeholder="owner/repository">
-    <div class="fh">For example <code>MISMOStandards/mismo-business-glossary</code>.</div></div>
+    <div class="fh">For example <code>GitMISMO/glossary</code>.</div></div>
   <div class="field"><label>Branch</label><input type="text" id="repoBranch" placeholder="main"></div>
   <div class="field"><label>Access token</label><input type="password" id="repoToken" placeholder="github_pat_…">
     <div class="fh">A fine-grained token scoped to this one repository, with <strong>Contents: read and write</strong>. Anyone who can use this browser profile can publish, so treat the machine accordingly.</div></div>
@@ -2774,7 +2774,13 @@ async function restoreBackup(file){
 
    Writes go through the Git Data API (blob -> tree -> commit -> ref), not the
    Contents API, which refuses anything over 1MB. */
-const REPO_DEFAULTS={full:'MISMOStandards/mismo-business-glossary', branch:'main'};
+/* Renamed Sept 2026: the glossary moved from MISMOStandards to the GitMISMO org and
+   then from mismo-business-glossary to glossary, so the Pages path matches the URL
+   tools.mismo.org links to. The old default still resolved only because GitHub
+   redirects a moved repository — fine for a browser, not something to rely on for
+   API writes. Anyone who saved the old value in their settings keeps it; this is
+   only the default offered to someone setting the console up fresh. */
+const REPO_DEFAULTS={full:'GitMISMO/glossary', branch:'main'};
 const DATA_PATH='data/glossary.json';
 const DRAFT_PATH='.console/draft.json';
 const REF_PATH='data/reference.json';

@@ -5,7 +5,7 @@ object storage plus a CDN. No EC2, no load balancer, no database.
 
 Two targets:
 
-- **GitHub Pages** — live now at `mismogh.github.io/mismo-business-glossary`, and serving
+- **GitHub Pages** — live now at `gitmismo.github.io/glossary`, and serving
   both the public page and the console. Used for review while AWS is provisioned.
 - **AWS S3 + CloudFront** — the production target, on MISMO's existing AWS contract.
 
