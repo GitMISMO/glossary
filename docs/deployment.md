@@ -1,15 +1,60 @@
 # Deployment
 
-Both pages are static HTML with no server side. That keeps hosting simple and cheap:
-object storage plus a CDN. No EC2, no load balancer, no database.
+Both pages are static HTML with no server side. That keeps hosting simple and cheap.
 
-Two targets:
+**Production is GitHub Pages**, at `tools.mismo.org/glossary/`. The Deploy workflow in
+`.github/workflows/deploy.yml` publishes on every push to `main` and needs no cloud
+credentials of any kind.
 
-- **GitHub Pages** — live now at `gitmismo.github.io/glossary`, and serving
-  both the public page and the console. Used for review while AWS is provisioned.
-- **AWS S3 + CloudFront** — the production target, on MISMO's existing AWS contract.
+## Why not S3 and CloudFront
 
-The same files serve both. Nothing built for Pages is wasted at cutover.
+An earlier version of this document specified S3 with CloudFront, Origin Access Control,
+an ACM certificate and an IAM deployment role, with a hostname of its own at
+`glossary.mismo.org`. That plan was correct for a glossary hosted on its own. It was
+dropped in September 2026 when MISMO's tools were consolidated onto one host, because
+GitHub Pages already provides every part of it:
+
+| The AWS plan asked for | What replaced it |
+|---|---|
+| S3 bucket, versioning for rollback | The git repository. Every publish is a commit, attributable and revertible — better than object versioning, which cannot say who or why. |
+| CloudFront, compression enabled | Pages' own CDN, which compresses text responses. `data/glossary.json` is ~2.7MB raw and was the main argument for CloudFront. |
+| ACM certificate in `us-east-1` | Provisioned and renewed by GitHub, free. This was the longest lead time in the project and it is gone. |
+| DNS alias for `glossary.mismo.org` | One CNAME for `tools.mismo.org`, shared by every tool. |
+| IAM role with GitHub OIDC trust | Nothing. `actions/deploy-pages` publishes with the workflow's own token; no AWS identity exists. |
+
+The AWS path has **not** been deleted from the workflow — the `deploy-s3` job still runs
+if the repository variable `DEPLOY_TARGET` is set to `aws`, with the role, region, bucket
+and distribution supplied as variables. If the decision is ever revisited, the list below
+is what to provision. Nothing in this repository is specific to Pages.
+
+---
+
+## Where the console lives, and what that costs
+
+The console ships as part of the site, at `/glossary/console/`. It has no write access of
+its own: publishing requires an access token that the facilitator supplies and that stays
+in their own browser.
+
+**That token is the thing to watch.** It lives in IndexedDB under the database name
+`mismo-glossary-v2`, and browsers scope storage by *origin* — scheme and host, with the
+path ignored. Every MISMO tool is served from `tools.mismo.org`, so every tool shares one
+storage area, and any page on that host can read that database. Today the secret sitting
+there is a real GitHub personal access token with write access to the repository.
+
+The relay migration improves this rather than worsening it. Once the console saves through
+the relay (see `saving-pattern.md` and `_dev/aws/SETUP.md` in the Hub), no GitHub token is
+stored at all. What replaces it is a facilitator passcode whose worst case is an unwanted
+commit — visible in history and revertible — instead of a credential that can rewrite the
+repository. Two things to do at that point:
+
+- Rename the IndexedDB database to match the shared-host convention, `tools:glossary`, so
+  it cannot collide with another tool's storage.
+- Namespace the console's `localStorage` keys as `tools:glossary:<name>`.
+
+A separate hostname for the console — the old plan's `glossary-admin.mismo.org` — is the
+only thing that would give it genuinely separate storage, since host-level protection
+cannot be applied to a path. That is worth considering if the console ever holds something
+of real value again. With a low-value passcode it is not urgent.
 
 ---
 
@@ -36,7 +81,9 @@ Hand this list to whoever administers the AWS account.
 
 ### 3. ACM certificate
 
-- For **`glossary.mismo.org`** — decided 8 September 2026.
+- For whatever hostname is chosen. `glossary.mismo.org` was decided on 8 September 2026
+  and then superseded by `tools.mismo.org/glossary/`; this section applies only if the
+  AWS path is revived.
 - Optionally a second name for the console, e.g. `glossary-admin.mismo.org`. See below.
 - **Must be issued in `us-east-1`**, regardless of which region the bucket lives in.
   CloudFront only reads certificates from that region. This is the single most common
@@ -89,54 +136,27 @@ Worth getting right up front, because it is annoying to retrofit:
 - Every deploy issues a CloudFront invalidation so a publish is visible immediately
   rather than whenever the edge cache happens to expire.
 
-The workflow in `.github/workflows/deploy.yml` handles the invalidation.
+The `deploy-s3` job in `.github/workflows/deploy.yml` handles the invalidation. None of
+this applies to the Pages deployment, which has no invalidation step and no cache
+configuration to set.
 
 ---
 
-## The console is hosted too
-
-Decided and in place. `console/index.html` ships with the site and is served at
-`/console/`. Two things make that safe:
-
-- **It has no write access of its own.** Publishing requires a GitHub access token that
-  the facilitator supplies and which lives only in their browser. Without one the console
-  is a read-only view of a glossary that is public anyway.
-- **It never writes to AWS.** The console commits to the Git repository; the repository
-  triggers the deployment. So the AWS deployment credentials are needed only by the
-  automated workflow, never by a person or a browser.
-
-That last point is worth stating plainly for a security review: **there is no path from
-the console to the S3 bucket**, and no human uploads files to it.
-
-### Where the console should live
-
-Today the console is served from `/console/` on the same site. That works, but it ties
-the two together in one way that matters: **password protection generally applies to a
-whole site, not a path.** AWS Amplify's built-in protection is per application. On
-CloudFront a path rule is possible but needs an edge function written and maintained.
-
-If MISMO ever wants the editing tool behind a password while the glossary stays public,
-the clean answer is a second hostname — `glossary-admin.mismo.org` — serving the console
-alone. It also keeps an internal tool off the public standards address.
-
-Nothing needs to change today. But **a certificate can cover both names at no extra cost
-if it is requested that way**, and the DNS record can be created at the same time as the
-first. Asking for both now costs nothing; asking later means going back to whoever
-controls the domain for a second round.
-
----
-
----
-
-## Cutover checklist
+## Status
 
 - [x] Public page reads `data/glossary.json` and performs acceptably at 8,397 terms
 - [x] Permalinks resolve (hash-based, so no rewrite rule is needed on any host)
-- [x] Console hosting decided: shipped with the site, protected by requiring a token to write
-- [ ] AWS resources provisioned; certificate validated in `us-east-1`
-- [ ] Deployment role/user created and its credentials added to GitHub
-- [ ] `deploy.yml` switched from the Pages job to the S3 job
-- [ ] DNS cut over
-- [ ] Facilitator's draft saved to the repository **before** the URL changes — the
-      console's working copy is per-origin and does not follow the tool to a new domain.
-      Signing in at the new URL and loading the online copy restores it.
+- [x] Console shipped with the site, at `/glossary/console/`
+- [x] Repositories renamed so the Pages path matches the URL (`GitMISMO/glossary`)
+- [x] Deployed via GitHub Pages with no cloud credentials
+- [ ] `tools.mismo.org` DNS record in place, and **Enforce HTTPS** ticked once the
+      certificate issues
+- [ ] Console migrated from a pasted GitHub token to the save relay
+- [ ] IndexedDB renamed to `tools:glossary` and `localStorage` keys namespaced
+      `tools:glossary:<name>` (do this with the relay migration, not before — renaming the
+      database orphans any draft sitting in the old one)
+
+One carry-over from the old cutover plan still applies whenever the URL changes: **the
+facilitator's working copy is per-origin and does not follow the tool to a new address.**
+Any draft should be saved to the repository before the move. Signing in at the new URL and
+loading the online copy restores it.
