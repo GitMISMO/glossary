@@ -713,7 +713,13 @@ function download(name,text){
 }
 
 /* ============================================================================ STORE */
-const DB='mismo-glossary-v2',STORE='kv';
+/* Namespaced to match every other MISMO tool: resources:<app>. Every tool is served
+   from one origin, and browsers scope IndexedDB by origin, so an unnamespaced database
+   name is a collision waiting for the next app that picks something generic.
+   Renamed September 2026, at the move to resources.mismo.org — storage is per-origin, so
+   the working copy does not survive that move either way. A facilitator with unsaved work
+   must publish it before the domain changes, which docs/deployment.md already says. */
+const DB='resources:glossary',STORE='kv';
 let _db;
 const db=()=>_db?Promise.resolve(_db):new Promise((res,rej)=>{
   const r=indexedDB.open(DB,1);
