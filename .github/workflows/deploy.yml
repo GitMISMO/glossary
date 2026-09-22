@@ -105,10 +105,15 @@ jobs:
           cp index.html _site/
           cp -r data _site/
           # The console ships too. It has no write access of its own: publishing
-          # requires an access token the facilitator supplies, held in their own
-          # browser. Without one it is a read-only view of a glossary that is
-          # public anyway. It also has to be served over HTTP now, since it reads
-          # data/glossary.json and browsers block fetch() on file:// URLs.
+          # goes through MISMO's save relay, which checks the facilitator's email
+          # and password and holds the only GitHub credential. Without an account
+          # it is a read-only view of a glossary that is public anyway. It also has
+          # to be served over HTTP, since it reads data/glossary.json and browsers
+          # block fetch() on file:// URLs.
+          #
+          # _internal/ is deliberately NOT copied. It holds the account list, and
+          # both this job and the S3 job below publish only named folders, so it
+          # never reaches the site.
           cp -r console _site/
 
       - uses: actions/configure-pages@v5

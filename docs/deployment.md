@@ -32,29 +32,26 @@ is what to provision. Nothing in this repository is specific to Pages.
 ## Where the console lives, and what that costs
 
 The console ships as part of the site, at `/glossary/console/`. It has no write access of
-its own: publishing requires an access token that the facilitator supplies and that stays
-in their own browser.
+its own: publishing goes through MISMO's save relay, which checks the facilitator's email
+and password and holds the only GitHub credential.
 
-**That token is the thing to watch.** It lives in IndexedDB under the database name
-`mismo-glossary-v2`, and browsers scope storage by *origin* — scheme and host, with the
-path ignored. Every MISMO tool is served from `tools.mismo.org`, so every tool shares one
-storage area, and any page on that host can read that database. Today the secret sitting
-there is a real GitHub personal access token with write access to the repository.
+**No GitHub token is stored in the browser any more.** Before the move to the relay, a
+real GitHub personal access token sat in IndexedDB — able to rewrite anything in the
+repository, including the site and its build workflow — and because every MISMO tool
+shares one origin, any page on the host could read it. What replaces it is a facilitator
+password whose worst case is an unwanted glossary commit: visible in history, attributed
+to a verified account, and revertible. The relay refuses to write anything outside
+`data/` and `.console/`.
 
-The relay migration improves this rather than worsening it. Once the console saves through
-the relay (see `saving-pattern.md` and `_dev/aws/SETUP.md` in the Hub), no GitHub token is
-stored at all. What replaces it is a facilitator passcode whose worst case is an unwanted
-commit — visible in history and revertible — instead of a credential that can rewrite the
-repository. Two things to do at that point:
+A connection saved before the migration is found and deleted the first time the console
+loads, so old tokens do not linger in browsers that used the console before.
 
-- Rename the IndexedDB database to match the shared-host convention, `tools:glossary`, so
-  it cannot collide with another tool's storage.
-- Namespace the console's `localStorage` keys as `tools:glossary:<name>`.
+Storage follows the shared-host convention: the IndexedDB database is `resources:glossary`.
 
 A separate hostname for the console — the old plan's `glossary-admin.mismo.org` — is the
 only thing that would give it genuinely separate storage, since host-level protection
-cannot be applied to a path. That is worth considering if the console ever holds something
-of real value again. With a low-value passcode it is not urgent.
+cannot be applied to a path. It is not needed while the console holds only a password
+with limited reach.
 
 ---
 

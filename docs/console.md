@@ -31,28 +31,25 @@ repository, the panel says so rather than failing silently.
 
 ## One-time setup
 
-Do this once, on the facilitator's machine, on their behalf. They never need to see the
-token or know it exists.
+Publishing goes through MISMO's save relay, the same one the Initiative Hub uses. The
+relay holds the only GitHub credential; facilitators never handle one.
 
-1. Create a fine-grained access token:
-   - GitHub → Settings → Developer settings → Personal access tokens → Fine-grained
-   - **Resource owner**: the account that owns the repository, not your personal account
-   - **Repository access**: only `glossary`
-   - **Repository permissions**: **Contents: read and write** — nothing else
-   - **Expiration**: up to a year. Diarise the renewal; it is your job, not theirs.
-2. Open the console and press **Sign in…** in the panel on the left
-3. Enter the facilitator's name, the repository (`owner/repository`), the branch
-   (`main`), and the token. The name is recorded on every change — the token belongs
-   to the account rather than the person, so without it the history cannot tell one
-   facilitator from another.
-4. Press **Check and save**, then accept the offer to load from the repository.
+1. Give the facilitator an account. In the Initiative Hub's admin panel, add them with
+   their MISMO email. A password is generated and shown once — pass it on to them.
+2. Make sure their account is in this repository's `_internal/facilitators.json`. Until
+   single sign-on is switched on, each tool keeps its own list, so a Hub account does not
+   automatically work here.
+3. They open the console, press **Sign in…** in the panel on the left, and enter their
+   email and password.
+4. They accept the offer to load from the repository.
 
-The token is stored in this browser only and is sent nowhere except GitHub. Anyone who
-can use this browser profile can publish, so treat the machine as you would one holding
-any other publishing credential.
+Every save is recorded under the name on their account, verified by the relay. There is
+no name to type, so the history cannot be attributed to the wrong person.
 
-When the token expires the console says so plainly, keeps the draft safe locally, and
-carries on letting them edit. Nothing is lost; it just stops saving until reconnected.
+The password stays in their browser and is sent only to the save relay. The relay will
+only change `data/` and `.console/` in this repository — never the site, the console
+itself, the account list or the build workflow — so a leaked password means a bad
+glossary edit, not a changed website.
 
 ## The members' spreadsheet
 
@@ -128,23 +125,17 @@ over every version since. The panel says when this is the case and offers to loa
 The facilitator will change over time. Nothing about the glossary is tied to an
 individual, so a handover is short:
 
-1. **Revoke the outgoing token.** GitHub → Settings → Developer settings → Fine-grained
-   tokens → delete it. This takes effect immediately and everywhere, including any copy
-   still sitting in the old browser. Revocation, not a password, is the real control
-   here.
+1. **Remove the outgoing facilitator's account** from `_internal/facilitators.json`, or
+   through the admin panel once it manages this tool. Their next save is refused.
+   Removal, not a password change, is the real control.
 2. **Ask them to press Save draft now before they finish**, so nothing is stranded. The
    hourly save means at most an hour is ever at risk, but a clean final save costs
    nothing.
-3. **Issue a new token** for the incoming facilitator, on the same terms: this
-   repository only, Contents read and write.
-4. On their machine, press **Sign in…**, enter their name and the new token, then accept
-   the offer to load the online copy.
+3. **Add an account for the incoming facilitator** and pass on their password.
+4. On their machine, they press **Sign in…**, enter their email and password, then
+   accept the offer to load from the repository.
 
-They receive the published glossary and the most recent saved draft. Nothing needs to
-be copied off the old laptop, and the old laptop keeps nothing usable.
-
-Because each person enters their own name, the history shows who made which change
-across the whole succession, even though every commit is authored by the same account.
+There is no GitHub token to revoke or reissue. There never is, for facilitators.
 
 ## If two people ever edit
 
@@ -155,8 +146,17 @@ relying on the safeguard.
 
 ## If something goes wrong
 
-**"The access token was rejected."** It expired or was revoked. Issue a new one and
-press Connect. The draft is untouched.
+**"That email and password were not recognised."** Check it is the same pair used for
+the Initiative Hub, and that the account is listed in this repository's
+`_internal/facilitators.json`. A lost password is reset by an administrator. The draft
+is untouched either way.
+
+**"Someone else saved while you were working."** Another facilitator published after
+you loaded. Reload, then reapply anything that was lost.
+
+**"The saving service refused to change …"** The console tried to write outside `data/`
+and `.console/`. That should never happen in normal use and means something is wrong
+with the console itself, not the account.
 
 **A publish failed.** Nothing was written; the repository and the draft are both as
 they were. Retry. If it keeps failing, the change-set CSV still downloads, so a version

@@ -570,21 +570,17 @@
 </div></div>
 
 <div class="modal-bg" id="repoBg"><div class="modal">
-  <h2>Connect to the repository</h2>
-  <p class="hint">This only needs doing once on this machine. The access token is kept in this browser and is never sent anywhere except GitHub.</p>
+  <h2>Sign in to save</h2>
+  <p class="hint">The same email and password you use for the Initiative Hub. It stays in this browser, and is only ever sent to MISMO&rsquo;s saving service.</p>
   <div class="err" id="repoErr"></div>
-  <div class="field"><label>Your name</label><input type="text" id="repoEditor" placeholder="e.g. Jordan Ellis">
-    <div class="fh">Recorded on every change so the history says who made it. The access token belongs to the account rather than the person, so without this every entry looks identical no matter who is facilitating.</div></div>
-  <div class="field"><label>Repository</label><input type="text" id="repoFull" placeholder="owner/repository">
-    <div class="fh">For example <code>GitMISMO/glossary</code>.</div></div>
-  <div class="field"><label>Branch</label><input type="text" id="repoBranch" placeholder="main"></div>
-  <div class="field"><label>Access token</label><input type="password" id="repoToken" placeholder="github_pat_…">
-    <div class="fh">A fine-grained token scoped to this one repository, with <strong>Contents: read and write</strong>. Anyone who can use this browser profile can publish, so treat the machine accordingly.</div></div>
+  <div class="field"><label>MISMO email</label><input type="email" id="repoEmail" placeholder="you@mismo.org" autocomplete="username"></div>
+  <div class="field"><label>Password</label><input type="password" id="repoPassword" autocomplete="current-password">
+    <div class="fh">Every save is recorded under the name on your account, so the history always shows who made each change.</div></div>
   <div class="modal-foot">
     <button class="btn danger" id="repoForget">Disconnect</button>
     <div style="flex:1;"></div>
     <button class="btn" id="repoCancel">Cancel</button>
-    <button class="btn primary" id="repoTest">Check and save</button>
+    <button class="btn primary" id="repoTest">Sign in</button>
   </div>
 </div></div>
 
@@ -2787,6 +2783,38 @@ async function restoreBackup(file){
    API writes. Anyone who saved the old value in their settings keeps it; this is
    only the default offered to someone setting the console up fresh. */
 const REPO_DEFAULTS={full:'GitMISMO/glossary', branch:'main'};
+
+/* Saving goes through MISMO's shared relay rather than straight to GitHub.
+
+   Before this, the console committed to GitHub directly, which meant every facilitator
+   held a real GitHub access token in this browser — able to write anything in the
+   repository, including the site itself and its build workflow. Now the browser holds
+   only a MISMO email and password, which the relay checks; the relay holds the one
+   GitHub credential, and it will only write the folders this project declares
+   (data/ and .console/). A leaked password becomes a bad glossary edit, not a changed
+   website.
+
+   Reading still goes to GitHub directly. The repository is public, so no credential is
+   needed to read it — and GitHub's API answers with no caching, which the draft check
+   below depends on. The one cost: unauthenticated reads are limited to 60 an hour per
+   network address. A normal session uses a handful. */
+const RELAY_URL='https://rgvdi67cg27o5kcmiytcqbqnrm0hmztx.lambda-url.us-east-1.on.aws';
+const RELAY_PROJECT='glossary';
+
+async function relayFetch(path, opts={}){
+  const headers={'X-Facilitator-Key':repo.key, ...(opts.headers||{})};
+  const r=await fetch(`${RELAY_URL}/${RELAY_PROJECT}${path}`,{...opts,headers,cache:'no-store'});
+  let body=null; try{ body=await r.json(); }catch(e){}
+  if(!r.ok){
+    const code=body?.error||'';
+    const msg = r.status===401 ? 'That email and password were not recognised.'
+      : r.status===403 && code==='PATH_NOT_WRITABLE' ? `The saving service refused to change ${body.path}.`
+      : r.status===409 ? 'Someone else saved while you were working. Reload before publishing.'
+      : body?.message || `The saving service returned ${r.status}${code?' ('+code+')':''}.`;
+    const e=new Error(msg); e.status=r.status; e.code=code; throw e;
+  }
+  return body;
+}
 const DATA_PATH='data/glossary.json';
 const DRAFT_PATH='.console/draft.json';
 const REF_PATH='data/reference.json';
@@ -2799,8 +2827,8 @@ let repo=null;                            // {full, branch, token}
 let editor=null;                          // who is making the changes, for attribution
 let lastAutoSave=null, lastSavedVocab=null, repoState=null;    // repoState: {ok, login, error, lastCommit}
 
-const ghHeaders=extra=>({Authorization:`Bearer ${repo.token}`,
-  'X-GitHub-Api-Version':'2022-11-28', ...extra});
+// No Authorization header: the repository is public, and reading it needs no credential.
+const ghHeaders=extra=>({'X-GitHub-Api-Version':'2022-11-28', ...extra});
 const ghURL=p=>`https://api.github.com/repos/${repo.full}${p}`;
 
 async function gh(path,opts={}){
@@ -2849,28 +2877,14 @@ async function ghReadFile(path){
 /* One commit, however many files. Built through the Git Data API so file size
    is not a constraint and the draft and the published data can move together. */
 async function ghCommit(files,message){
-  const ref=await gh(`/git/ref/heads/${encodeURIComponent(repo.branch)}`);
-  const parent=ref.object.sha;
-  const base=await gh(`/git/commits/${parent}`);
-  const blobs=[];
-  for(const f of files){
-    const b=await gh('/git/blobs',{method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({content:toBase64(f.content),encoding:'base64'})});
-    blobs.push({path:f.path,mode:'100644',type:'blob',sha:b.sha});
-  }
-  const tree=await gh('/git/trees',{method:'POST',
+  /* The relay performs the same atomic commit the console used to build itself — blobs,
+     tree, commit, ref — and returns the new commit's SHA, so every caller of this
+     function is unchanged. The commit is authored as the signed-in account, which the
+     relay verified, rather than as whatever name was typed into a form. */
+  const r=await relayFetch('/commit',{method:'POST',
     headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({base_tree:base.tree.sha,tree:blobs})});
-  const commit=await gh('/git/commits',{method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({message,tree:tree.sha,parents:[parent]})});
-  // Not forced: if the branch moved under us, this fails rather than discarding
-  // someone else's commit.
-  await gh(`/git/refs/heads/${encodeURIComponent(repo.branch)}`,{method:'PATCH',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({sha:commit.sha,force:false})});
-  return commit.sha;
+    body:JSON.stringify({files:files.map(f=>({path:f.path,content:f.content})),message})});
+  return r.commit;
 }
 
 /* ---- draft file ---------------------------------------------------------- */
@@ -2914,13 +2928,18 @@ function applyDraftFile(payload,baseRows){
 }
 
 /* ---- operations ---------------------------------------------------------- */
-async function repoConnect(full,branch,token){
-  const probe={full,branch,token}, prev=repo;
+/* The account is checked by reading reference.json through the relay — a small file the
+   relay will only return to a recognised account, so a 401 means the credentials are
+   wrong. It confirms the saving service is reachable at the same time. */
+async function checkAccount(){ await relayFetch('/data/reference'); }
+
+async function repoConnect(email,password){
+  const probe={full:REPO_DEFAULTS.full, branch:REPO_DEFAULTS.branch, key:`${email}:${password}`, email},
+        prev=repo;
   repo=probe;
   try{
-    const me=await (await fetch('https://api.github.com/user',{headers:ghHeaders()})).json();
-    await gh(`/git/ref/heads/${encodeURIComponent(branch)}`);   // proves branch access
-    repoState={ok:true, login:me.login||'(token)', error:null};
+    await checkAccount();
+    repoState={ok:true, login:email, error:null};
     await checkRemoteDraft();
     await idbSet('repo',probe); await idbSet('lastAutoSave',lastAutoSave);
     return true;
@@ -3087,13 +3106,8 @@ async function checkRemoteDraft(){
 async function verifyRepo(){
   if(!repo) return;
   try{
-    const me=await fetch('https://api.github.com/user',{headers:ghHeaders()});
-    if(!me.ok) throw new Error(me.status===401
-      ? 'The access token was rejected. It may have expired.'
-      : `GitHub returned ${me.status}.`);
-    const who=await me.json();
-    await gh(`/git/ref/heads/${encodeURIComponent(repo.branch)}`);
-    repoState={ok:true, login:who.login||'(token)', error:null};
+    await checkAccount();
+    repoState={ok:true, login:repo.email||'', error:null};
 
     await checkRemoteDraft();
   }catch(e){ repoState={ok:false, error:e.message}; }
@@ -3652,10 +3666,8 @@ $('btnResync').onclick=async()=>{
 };
 
 function openRepoModal(){
-  $('repoEditor').value=editor||'';
-  $('repoFull').value=repo?.full||REPO_DEFAULTS.full;
-  $('repoBranch').value=repo?.branch||REPO_DEFAULTS.branch;
-  $('repoToken').value=repo?.token||'';
+  $('repoEmail').value=repo?.email||'';
+  $('repoPassword').value='';
   $('repoErr').classList.remove('show');
   $('repoBg').classList.add('open');
 }
@@ -3667,32 +3679,26 @@ $('repoForget').onclick=async()=>{
   $('repoBg').classList.remove('open'); renderRail();
 };
 $('repoTest').onclick=async()=>{
-  const full=$('repoFull').value.trim(), branch=$('repoBranch').value.trim()||'main',
-        token=$('repoToken').value.trim(), name=$('repoEditor').value.trim();
+  const email=$('repoEmail').value.trim().toLowerCase(), password=$('repoPassword').value;
   const err=$('repoErr');
-  if(!name){ err.innerHTML='<strong>Your name is required</strong>, so changes can be attributed.';
+  if(!email || !email.includes('@')){ err.innerHTML='<strong>Your MISMO email is required.</strong>';
     err.classList.add('show'); return; }
-  if(!/^[\w.-]+\/[\w.-]+$/.test(full)){
-    err.innerHTML='<strong>Repository</strong> should look like <code>owner/repository</code>.';
-    err.classList.add('show'); return;
-  }
-  if(!token){ err.innerHTML='<strong>An access token is required.</strong>'; err.classList.add('show'); return; }
+  if(!password){ err.innerHTML='<strong>Your password is required.</strong>'; err.classList.add('show'); return; }
   $('repoTest').disabled=true; $('repoTest').textContent='Checking…';
   try{
-    editor=name; await idbSet('editor',editor);
-    await repoConnect(full,branch,token);
+    editor=email; await idbSet('editor',editor);
+    await repoConnect(email,password);
     $('repoBg').classList.remove('open'); renderRail();
     if(confirm('Connected.\n\nLoad the glossary and any saved draft from the repository now?\n\nThis replaces what is currently in this browser.')){
       const r=await repoLoad();
       alert(`Loaded ${r.terms.toLocaleString()} terms${r.draft?' and a saved draft':''} from the repository.`);
     }
   }catch(e){
-    err.innerHTML=`<strong>Could not connect:</strong> ${esc(e.message)}`
-      +`<ul><li>Check the token has <strong>Contents: read and write</strong> on this repository.</li>`
-      +`<li>Check the resource owner is the account that owns it.</li>`
-      +`<li>Check the branch name.</li></ul>`;
+    err.innerHTML=`<strong>Could not sign in:</strong> ${esc(e.message)}`
+      +(e.status===401 ? `<ul><li>Use the same email and password as the Initiative Hub.</li>`
+      +`<li>Lost your password? An administrator can reset it.</li></ul>` : '');
     err.classList.add('show');
-  }finally{ $('repoTest').disabled=false; $('repoTest').textContent='Check and save'; }
+  }finally{ $('repoTest').disabled=false; $('repoTest').textContent='Sign in'; }
 };
 async function saveDraftNow(btn){
   // The same hazard as autosave, but the person asked for it, so warn rather
@@ -3827,6 +3833,15 @@ async function bootstrap(force){
         fixCount=(await idbGet('fixCount'))||0;
         newCounter=(await idbGet('newCounter'))||1;
         repo=(await idbGet('repo'))||null;
+        /* A connection saved before the move to the relay holds a real GitHub access token.
+           It is no longer used for anything, and a working credential sitting in browser
+           storage is exactly the risk the relay removes — so delete it rather than keep
+           it around, and ask the person to sign in with their MISMO account instead.
+           Their draft is untouched; only the credential is discarded. */
+        if(repo && repo.token && !repo.key){
+          repo=null; await idbSet('repo',null);
+          console.info('Removed a stored GitHub token left from before the move to the relay.');
+        }
         editor=(await idbGet('editor'))||null;
         lastAutoSave=(await idbGet('lastAutoSave'))||null;
         lastSavedVocab=(await idbGet('lastSavedVocab'))||null;
