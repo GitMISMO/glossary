@@ -429,9 +429,11 @@
 <div class="masthead">
   <div class="mast-in">
     <span class="brand">MISMO</span>
-    <div><h1>Business Glossary — Management Console</h1>
+    <div><script src="/assets/session.js"></script>
+<h1>Business Glossary — Management Console</h1>
       <div class="sub">Edit the glossary, review changes, publish a version</div></div>
     <div class="mast-right">
+      <div id="rs-account"></div>
       <span class="count" id="dbStatus">Loading…</span>
       <button class="btn sm" id="btnTour" title="A guided walkthrough of the console">Getting started</button>
       <a class="btn sm" id="btnPublic" href="../" target="_blank" rel="noopener"
@@ -2801,8 +2803,18 @@ const REPO_DEFAULTS={full:'GitMISMO/glossary', branch:'main'};
 const RELAY_URL='https://rgvdi67cg27o5kcmiytcqbqnrm0hmztx.lambda-url.us-east-1.on.aws';
 const RELAY_PROJECT='glossary';
 
+/* Signed in through the shared sign-in? Use that. It is the same relay and the same
+   account either way; this simply stops the console asking for credentials of its own
+   once someone has signed in anywhere on resources.mismo.org. The stored email and
+   password still work for anyone who has not. */
+function sessionActive(){
+  return !!(window.ResourcesSession && window.ResourcesSession.current());
+}
+
 async function relayFetch(path, opts={}){
-  const headers={'X-Facilitator-Key':repo.key, ...(opts.headers||{})};
+  const headers = sessionActive()
+    ? { 'Authorization': 'Bearer ' + window.ResourcesSession.token(), ...(opts.headers||{}) }
+    : { 'X-Facilitator-Key': (repo && repo.key) || '', ...(opts.headers||{}) };
   const r=await fetch(`${RELAY_URL}/${RELAY_PROJECT}${path}`,{...opts,headers,cache:'no-store'});
   let body=null; try{ body=await r.json(); }catch(e){}
   if(!r.ok){
@@ -2932,6 +2944,41 @@ function applyDraftFile(payload,baseRows){
    relay will only return to a recognised account, so a 401 means the credentials are
    wrong. It confirms the saving service is reachable at the same time. */
 async function checkAccount(){ await relayFetch('/data/reference'); }
+
+/* Adopt a shared sign-in as this console's connection. No password is asked for or
+   stored: the session already proves who they are, and the relay checks it per request. */
+if (window.ResourcesSession) {
+  window.ResourcesSession.onChange(function (sess) {
+    if (!sess && repo && repo.viaSession) { repo = null; repoState = { ok:false, error:null }; renderAll(); }
+    else if (sess && (!repo || repo.viaSession)) { adoptSession().then(renderAll); }
+  });
+}
+
+async function adoptSession(){
+  const s = window.ResourcesSession && window.ResourcesSession.current();
+  if (!s) return false;
+  const probe = { full: REPO_DEFAULTS.full, branch: REPO_DEFAULTS.branch, email: s.email, viaSession: true };
+  const prev = repo;
+  repo = probe;
+  try {
+    await checkAccount();
+    repoState = { ok:true, login:s.email, error:null };
+    /* A draft check that fails says nothing about whether they are signed in, so it must
+       not undo the connection. Worth keeping non-fatal: it reads GitHub directly, which
+       is rate limited, and a limit hit should not look like being signed out. */
+    try { await checkRemoteDraft(); } catch (e) {}
+    await idbSet('repo', probe);
+    return true;
+  } catch (e) {
+    repo = prev;
+    /* Signed in, but without access to the glossary. Say so plainly rather than leaving
+       a Sign in button that would succeed and change nothing. */
+    repoState = { ok:false, error: e.status === 403 || e.status === 401
+      ? `Signed in as ${s.email}, but that account does not have access to the Business Glossary.`
+      : e.message };
+    return false;
+  }
+}
 
 async function repoConnect(email,password){
   const probe={full:REPO_DEFAULTS.full, branch:REPO_DEFAULTS.branch, key:`${email}:${password}`, email},
@@ -3364,7 +3411,16 @@ function renderRail(){
 
   // Wired on every render, since the rail is rebuilt each time.
   const on=(id,fn)=>{ const e=$(id); if(e) e.onclick=fn; };
-  on('railConnect',openRepoModal);
+  /* The shared sign-in when it is loaded, the console's own form otherwise. */
+  on('railConnect', async () => {
+    if (window.ResourcesSession) {
+      try { await window.ResourcesSession.signIn(); } catch (e) { return; }   // cancelled
+      if (await adoptSession()) { renderAll(); return; }
+      renderAll();                                                           // show why not
+      return;
+    }
+    openRepoModal();
+  });
   on('railLoadNewer',e=>loadFromRepo(e.target));
   on('railVocab',()=>openVocab('FocusArea'));
   on('railIssues',openIssues);
@@ -3847,7 +3903,10 @@ async function bootstrap(force){
         lastSavedVocab=(await idbGet('lastSavedVocab'))||null;
         if(!vocab?.TermType?.length) seedVocab();
         renderAll();
-        if(repo) verifyRepo();
+        /* A session from any other MISMO tool counts here, so someone who signed in on
+           the Hub arrives already connected. */
+        if (sessionActive()) adoptSession().then(renderAll);
+        else if (repo) verifyRepo();
         maybeOfferTour();
         return;
       }
@@ -3859,6 +3918,11 @@ async function bootstrap(force){
     baseline=master.map(r=>({...r}));   // shipped file is version 0; the draft starts identical
     touched={}; seedVocab(); resolved={}; fixCount=0; staged={};
     await persist(); renderAll();
+    /* Same as the path above: a session from any other MISMO tool counts here. This is
+       the branch taken on a machine with nothing stored yet, which is exactly the case
+       where someone has just signed in elsewhere and opened the console for the first
+       time. */
+    if (sessionActive()) adoptSession().then(renderAll);
     maybeOfferTour();
   }catch(err){
     console.warn('Baseline load failed:',err);
