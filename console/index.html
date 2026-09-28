@@ -2819,7 +2819,9 @@ async function relayFetch(path, opts={}){
   let body=null; try{ body=await r.json(); }catch(e){}
   if(!r.ok){
     const code=body?.error||'';
-    const msg = r.status===401 ? 'That email and password were not recognised.'
+    /* A signed-in session that has run out also comes back 401. Saying "email and
+       password not recognised" to someone who typed neither was wrong. */
+    const msg = r.status===401 ? ((repo && repo.viaSession) ? 'Your sign-in has expired. Sign in again to save online.' : 'That email and password were not recognised.')
       : r.status===403 && code==='PATH_NOT_WRITABLE' ? `The saving service refused to change ${body.path}.`
       : r.status===409 ? 'Someone else saved while you were working. Reload before publishing.'
       : body?.message || `The saving service returned ${r.status}${code?' ('+code+')':''}.`;
