@@ -2971,11 +2971,19 @@ async function adoptSession(){
     return true;
   } catch (e) {
     repo = prev;
-    /* Signed in, but without access to the glossary. Say so plainly rather than leaving
-       a Sign in button that would succeed and change nothing. */
-    repoState = { ok:false, error: e.status === 403 || e.status === 401
-      ? `Signed in as ${s.email}, but that account does not have access to the Business Glossary.`
-      : e.message };
+    if (e.status === 403 && e.code === 'NO_ACCESS') {
+      /* Signed in, but without access to the glossary: the standard refusal every
+         resources.mismo.org tool uses (session.js), rather than a line of this page's
+         own. Not gated, because the console still works on this browser's draft
+         without an account, so Close just closes it. */
+      repoState = { ok:false, error: 'This account does not have access to the Business Glossary.' };
+      window.ResourcesSession.signIn({ reason: 'no-access', toolName: 'the Business Glossary', gated: false }).catch(() => {});
+    } else if (e.status === 401) {
+      /* An expired or unrecognised session is not a refusal: it needs signing in again. */
+      repoState = { ok:false, error: 'Your sign-in has expired. Sign in again to save online.' };
+    } else {
+      repoState = { ok:false, error: e.message };
+    }
     return false;
   }
 }
@@ -3411,7 +3419,10 @@ function renderRail(){
 
   // Wired on every render, since the rail is rebuilt each time.
   const on=(id,fn)=>{ const e=$(id); if(e) e.onclick=fn; };
-  /* The shared sign-in when it is loaded, the console's own form otherwise. */
+  /* Only the shared sign-in, as in every resources.mismo.org tool. If session.js did not
+     load, say so rather than falling back to this page's old form: one sign-in design
+     everywhere (Sept 28, 2026). The old form's markup is still in the page but nothing
+     opens it now. */
   on('railConnect', async () => {
     if (window.ResourcesSession) {
       try { await window.ResourcesSession.signIn(); } catch (e) { return; }   // cancelled
@@ -3419,7 +3430,8 @@ function renderRail(){
       renderAll();                                                           // show why not
       return;
     }
-    openRepoModal();
+    repoState = { ok:false, error: 'The sign-in could not load. Reload the page.' };
+    renderAll();
   });
   on('railLoadNewer',e=>loadFromRepo(e.target));
   on('railVocab',()=>openVocab('FocusArea'));
