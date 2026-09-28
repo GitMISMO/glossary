@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-rs-gate>
 <head>
+<script src="/assets/session.js"></script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MISMO Business Glossary — Management Console</title>
@@ -429,8 +430,7 @@
 <div class="masthead">
   <div class="mast-in">
     <span class="brand">MISMO</span>
-    <div><script src="/assets/session.js"></script>
-<h1>Business Glossary — Management Console</h1>
+    <div><h1>Business Glossary — Management Console</h1>
       <div class="sub">Edit the glossary, review changes, publish a version</div></div>
     <div class="mast-right">
       <div id="rs-account"></div>
@@ -2603,6 +2603,7 @@ async function revertChange(id,kind){
 }
 
 async function publishVersion(){
+  if(viewOnly()){ alert('Your account has view access to the Business Glossary Console. It can read the console but not publish.'); return; }
   const d=draftDiff();
   if(!d.total){ alert('There are no draft changes to publish.'); return; }
   /* The same guard autosave has, and the one that matters most. A browser that
@@ -2810,6 +2811,11 @@ const RELAY_PROJECT='glossary';
 function sessionActive(){
   return !!(window.ResourcesSession && window.ResourcesSession.current());
 }
+/* View access: reads the console, never saves or publishes. The relay refuses those
+   anyway (VIEW_ONLY); this is so the page does not offer them. */
+function viewOnly(){
+  return !!(window.ResourcesSession && window.ResourcesSession.role(RELAY_PROJECT) === 'view');
+}
 
 async function relayFetch(path, opts={}){
   const headers = sessionActive()
@@ -2951,7 +2957,9 @@ async function checkAccount(){ await relayFetch('/data/reference'); }
    stored: the session already proves who they are, and the relay checks it per request. */
 if (window.ResourcesSession) {
   window.ResourcesSession.onChange(function (sess) {
-    if (!sess && repo && repo.viaSession) { repo = null; repoState = { ok:false, error:null }; renderAll(); }
+    /* Signed out anywhere: the console is gated, so back to the whole-page sign-in.
+       The draft is in this browser and is still there after signing in. */
+    if (!sess) { location.reload(); return; }
     else if (sess && (!repo || repo.viaSession)) { adoptSession().then(renderAll); }
   });
 }
@@ -2975,11 +2983,11 @@ async function adoptSession(){
     repo = prev;
     if (e.status === 403 && e.code === 'NO_ACCESS') {
       /* Signed in, but without access to the glossary: the standard refusal every
-         resources.mismo.org tool uses (session.js), rather than a line of this page's
-         own. Not gated, because the console still works on this browser's draft
-         without an account, so Close just closes it. */
-      repoState = { ok:false, error: 'This account does not have access to the Business Glossary.' };
-      window.ResourcesSession.signIn({ reason: 'no-access', toolName: 'the Business Glossary', gated: false }).catch(() => {});
+         resources.mismo.org tool uses (session.js). Gated (Sept 28, 2026): the whole page,
+         nothing of the console behind it. Normally the gate at the bottom of this file
+         refuses first; this catches access removed while the page was open. */
+      repoState = { ok:false, error: 'This account does not have access to the Business Glossary Console.' };
+      window.ResourcesSession.signIn({ reason: 'no-access', toolName: 'the Business Glossary Console', title: 'Business Glossary Console', gated: true }).catch(() => {});
     } else if (e.status === 401) {
       /* An expired or unrecognised session is not a refusal: it needs signing in again. */
       repoState = { ok:false, error: 'Your sign-in has expired. Sign in again to save online.' };
@@ -3129,6 +3137,7 @@ async function repoPublish(note){
    repository's. */
 async function maybeAutoSave(){
   if(!repo||!repoState?.ok) return;
+  if(viewOnly()) return;        // view access: nothing is saved online
   if(tourOn) return;            // the tour stages an example; never commit it
   if(repoState.behind) return;              // the repository is ahead; load first
   if(!lastAutoSave && repoState.remoteSavedAt) return;   // never reconciled here
@@ -3310,13 +3319,18 @@ function renderRail(){
   const daysSince=t=>t?Math.floor((Date.now()-new Date(t))/86400000):null;
   const saveAge=daysSince(lastAutoSave), backupAge=daysSince(lastBackupAt);
 
-  const cta = (connected && repoState.behind)
+  const vo = viewOnly();
+  const cta = vo
+    ? `<div class="rcta"><div class="t">View only</div>
+        <div class="d">Your account can read the console but not save or publish. Anything you change
+          stays in this browser.</div></div>`
+    : (connected && repoState.behind)
     ? `<div class="rcta"><div class="t">The online copy is newer</div>
         <div class="d">A newer draft was saved${repoState.remoteEditor?` by ${esc(repoState.remoteEditor)}`:''}
           on ${when(repoState.remoteSavedAt)}. This browser is showing an older
           copy${d.total?' and has changes of its own':''}.</div>
         <button class="btn primary" id="railLoadNewer" style="width:100%">Load the newer draft</button></div>`
-    : !repo
+    : (!repo && !sessionActive())
     ? `<div class="rcta"><div class="t">Not signed in</div>
         <div class="d">Changes are being kept in this browser only. Sign in to save your work online
           and to publish new versions.</div>
@@ -3376,7 +3390,7 @@ function renderRail(){
         <div class="rrow"><span>Removed</span><b>${d.removed.length.toLocaleString()}</b></div>`
        :`<div class="rsay">The draft matches ${version>1?`published version ${version-1}`:'the shipped baseline'}.</div>`}
       <button class="btn" id="railDraft" style="width:100%; margin-top:8px;">See what changed</button>
-      ${d.total?`<button class="btn ok" id="railPublish" style="width:100%;"${pendingN?' disabled title="Apply or discard the pending changes first"':''}>Publish version ${version}</button>`:''}
+      ${d.total&&!vo?`<button class="btn ok" id="railPublish" style="width:100%;"${pendingN?' disabled title="Apply or discard the pending changes first"':''}>Publish version ${version}</button>`:''}
     </div>
 
     <div class="rsec2 ${connected?(saveAge>=1?'attn':'ok'):'bad'}" id="secSafe">
@@ -3388,7 +3402,7 @@ function renderRail(){
           saveAge>=1?` <span class="stale">Last save was ${saveAge} day(s) ago.</span>`:''}${
           !lastBackupAt&&d.total?` <span class="stale">No backup has ever been downloaded.</span>`
           :backupAge>=30?` <span class="stale">The backup is ${backupAge} days old.</span>`:''}</div>
-        <button class="btn" id="railSave" style="width:100%; margin-top:8px;">Save draft now</button>`
+        ${vo?'':`<button class="btn" id="railSave" style="width:100%; margin-top:8px;">Save draft now</button>`}`
        :`<div class="rsay">Kept in this browser only. Nothing is saved online until you sign in.</div>
          ${lastBackupAt?`<div class="rrow" style="margin-top:6px;"><span>Backup file</span><b>${when(lastBackupAt)}</b></div>`:''}`}
     </div>
@@ -3953,7 +3967,19 @@ async function bootstrap(force){
     };
   }
 }
-bootstrap();
+/* Gated like every resources.mismo.org tool that needs an account (Sept 28, 2026):
+   signed out, the whole-page sign-in; signed in without access, the whole-page refusal;
+   nothing of the console shows until the relay says View or Edit. The console opens
+   only then. */
+(function gate(){
+  const RS = window.ResourcesSession;
+  if (!RS) { $('boot').innerHTML = '<h2>The sign-in could not load</h2><p class="hint">Reload the page.</p>'; return; }
+  RS.requireAccess(RELAY_PROJECT, { toolName: 'the Business Glossary Console', title: 'Business Glossary Console' })
+    .then(() => bootstrap(), e => {
+      $('boot').innerHTML = '<h2>The console could not open</h2><p class="hint">' +
+        (e && e.code === 'OFFLINE' ? 'The sign-in service could not be reached. Check your connection, then reload.' : 'Reload the page to try again.') + '</p>';
+    });
+})();
 </script>
 </body>
 </html>
