@@ -6,13 +6,21 @@ Two related things live in this repository:
   look). Search, an A–Z index, and a "Narrow the list" panel with a drop-down and a
   definition for each classification (term type, focus area, source). Under the search it
   shows the latest version's stage and date, which the console sets when a version is
-  published (`meta.stage`: `candidate-recommendation` or `comment-period`, and
-  `meta.published`). Links to terms are `#slug`, as before.
+  published (`meta.stage`: `final` or `comment-period`, `meta.published`, and the version
+  number in `meta.label`, e.g. `2026.01`). Links to terms are `#slug`, as before.
 - **`console/index.html`** — the management console. An admin tool that replaces the
   current CSV-with-an-`Action`-column upload process with real validation, staged
   review, vocabulary governance, and a draft/release cycle. Redesigned Sept 2026 in the
   Summit HQ layout: a sections rail, the terms list with the editor beside it, and pages
-  instead of pop-ups.
+  instead of pop-ups. Publishing asks for the version number (2026.01), whether it is out
+  for a 30-Day Comment Period or Final, and the Version History wording, which the publisher
+  approves. The Versions page downloads each version's change-set, its whole glossary as a
+  CSV, and its Excel release workbook (Comment or Final, named
+  `Business Glossary Release_MM.DD.YY_Final.xlsx` / `_Comment.xlsx`), and logs each workbook
+  made. The workbook is rebuilt from the files the version published, in the layout of the
+  2026.01 workbook: Disclaimer Language, Cover, Table of Contents, Version History (one
+  colour per version), Change Detail (everything changed since the previous version number),
+  Clean Glossary, Term Type, Source Attribution and Focus Area.
 - **`console-classic/index.html`** — the previous console, kept for its guided tour and
   recovery tools (revert to baseline, load an official export). The new console's data
   layer is copied from it unchanged, so both share one local store and one draft file.

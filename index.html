@@ -704,14 +704,12 @@ window.addEventListener('hashchange',openFromHash);
 build(); A.v='1'; paint();
 
 /* ---------- the status of the latest version, and the three ways of showing it ---------- */
-/* Published either for the comment period or as a Candidate Recommendation. The date is the
-   one the working group publishes; September 30, 2026 in this mockup. */
-/* Set by the console when a version is published: a Candidate Recommendation, or out for a
-   30-Day Comment Period, and the date. A file published before that existed has neither, and
-   the line then just gives the date. */
-const STAGE_KEY={'candidate-recommendation':'cr','comment-period':'cp'};
+/* Set by the console when a version is published: Final, or out for a 30-Day Comment
+   Period, and the date. A file published before that existed has neither, and the line then
+   just gives the date. */
+const STAGE_KEY={'final':'f','comment-period':'cp'};
 const STATUS={stage:STAGE_KEY[D.meta.stage]||'',date:String(D.meta.published||D.meta.version||'').slice(0,10),sv:'c'};
-const STAGE={cr:{short:'Candidate Recommendation',line:'as a Candidate Recommendation'},cp:{short:'30-Day Comment Period',line:'for a 30-Day Comment Period'}};
+const STAGE={f:{short:'Final',line:'as Final'},cp:{short:'30-Day Comment Period',line:'for a 30-Day Comment Period'}};
 const statusDate=()=>new Date(STATUS.date+'T12:00:00').toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});
 const statusText=()=>STATUS.stage?`Latest version published ${STAGE[STATUS.stage].line} on ${statusDate()}`:`Latest version published on ${statusDate()}`;
 const STATS=()=>[[n(T.length),'terms'],[V.fa.length,'focus areas'],[V.tt.length,'term types'],[V.src.length,'sources']];
@@ -722,7 +720,7 @@ function paintStats(){
       <span class="stat ${STATUS.stage}"><span class="sdot"></span>${esc(statusText())}</span></div>`;
   if(STATUS.sv==='b') el.innerHTML=`<div class="M-b"><div class="cells">${STATS().map(([v,l])=>`<div><b>${v}</b><span>${l}</span></div>`).join('')}</div>
       <div class="stat ${STATUS.stage}"><span class="tag">${st.short}</span><span>Latest version published ${statusDate()}</span></div></div>`;
-  if(STATUS.sv==='c') el.innerHTML=`<div class="M-c"><span class="stat ${STATUS.stage}"><span class="sdot"></span><span>Latest version published ${STATUS.stage==='cr'?'as a <b>Candidate Recommendation</b> ':STATUS.stage==='cp'?'for a <b>30-Day Comment Period</b> ':''}on ${statusDate()}</span></span>
+  if(STATUS.sv==='c') el.innerHTML=`<div class="M-c"><span class="stat ${STATUS.stage}"><span class="sdot"></span><span>Latest version published ${STATUS.stage==='f'?'as <b>Final</b> ':STATUS.stage==='cp'?'for a <b>30-Day Comment Period</b> ':''}on ${statusDate()}</span></span>
       <span class="nums">${STATS().map(([v,l])=>`<span><b>${v}</b> ${l}</span>`).join('<i>·</i>')}</span></div>`;
   const f=$('fStatus'); if(f) f.textContent=statusText();
   document.querySelectorAll('[data-sv]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sv===STATUS.sv)));
