@@ -397,6 +397,16 @@ footer.g .in{max-width:1180px;margin:0 auto;padding:16px 24px;display:flex;gap:1
 .A-hero h1{max-width:820px}
 .A-hero .search{max-width:none}
 @media (max-width:720px){ .A-hero .in,.A-az .in,.A-body,footer.g .in{padding-inline:16px} }
+/* The search box's clear button: ours, not the browser's. It appears only once there is
+   something to clear, and fades rather than blinking in. */
+.search input{padding-right:52px}
+.search input::-webkit-search-cancel-button,.search input::-webkit-search-decoration{-webkit-appearance:none;appearance:none}
+.qx{position:absolute;right:12px;top:50%;width:32px;height:32px;margin-top:-16px;border:0;border-radius:50%;background:var(--sunk);color:var(--ink-2);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  opacity:0;pointer-events:none;transform:scale(.8);transition:opacity .15s ease,transform .15s ease,background-color .15s ease,color .15s ease}
+.qx.on{opacity:1;pointer-events:auto;transform:none}
+.qx:hover{background:var(--line-2);color:var(--ink)}
+.qx:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
+.qx svg{position:static;width:14px;height:14px}
 
 .boot{max-width:1180px;margin:0 auto;padding:60px 24px;color:var(--ink-2)}
 .boot h2{margin:0 0 8px;color:var(--ink)}
@@ -542,12 +552,16 @@ function build(){
   R.innerHTML=masthead+`<section class="A-hero"><div class="in">
       <h1>Standard definitions for the terms used across the mortgage industry</h1>
       <label class="search"><span class="vh">Search the glossary</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"></label>
+        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"><button type="button" class="qx" id="aQx" aria-label="Clear the search" tabindex="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></label>
       <div class="A-meta" id="aStats"></div>
     </div></section>
     <nav class="A-az" aria-label="Jump to a letter"><div class="in" id="aAz"></div></nav>
     <div class="A-body"><section class="A-main" id="aMain" aria-live="polite"></section><aside class="A-side" id="aSide" aria-label="Classifications"></aside></div>`+footer;
-  let tm; $('aQ').addEventListener('input',e=>{ clearTimeout(tm); tm=setTimeout(()=>{ A.st.q=e.target.value; A.shown=40; A.open=null; paint(); },120); });
+  const syncQx=()=>$('aQx').classList.toggle('on',!!$('aQ').value);
+  const clearQ=()=>{ $('aQ').value=''; syncQx(); A.st.q=''; A.shown=40; A.open=null; paint(); setHash(null); $('aQ').focus(); };
+  $('aQx').addEventListener('click',e=>{ e.preventDefault(); clearQ(); });
+  $('aQ').addEventListener('keydown',e=>{ if(e.key==='Escape'&&$('aQ').value){ e.preventDefault(); e.stopPropagation(); clearQ(); } });
+  let tm; $('aQ').addEventListener('input',e=>{ syncQx(); clearTimeout(tm); tm=setTimeout(()=>{ A.st.q=e.target.value; A.shown=40; A.open=null; paint(); },120); });
   R.addEventListener('click',e=>{
     const L=e.target.closest('[data-letter]'); if(L){ A.st.letter=A.st.letter===L.dataset.letter?'':L.dataset.letter; A.shown=40; paint(); return; }
     const tg=e.target.closest('[data-toggle]'); if(tg){ const [k,x]=tg.dataset.toggle.split(':'); toggle(k,+x); A.popHover=tg.dataset.toggle; paint(true); return; }
@@ -577,6 +591,7 @@ function setHash(t){ try{ history.replaceState(null,'',t?'#'+t.slug:location.pat
 function toggle(k,x){ A.st.sel[k].has(x)?A.st.sel[k].delete(x):A.st.sel[k].add(x); A.shown=40; }
 /* keep: a tick inside an open panel redraws around it and keeps the focus where it was. */
 function paint(keep){
+  if($('aQx')) $('aQx').classList.toggle('on',!!$('aQ').value);
   const f=keep&&document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.toggle:null;
   A.res=run(A.st); paintAz(); paintMain(); paintSide(); fitPop();
   if(f){ const el=document.querySelector(`[data-toggle="${f}"]`); if(el) el.focus({preventScroll:true}); }
