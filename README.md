@@ -19,7 +19,7 @@ Two related things live in this repository:
   `Business Glossary Release_MM.DD.YY_Final.xlsx` / `_Comment.xlsx`), and logs each workbook
   made. The workbook is rebuilt from the files the version published, in the layout of the
   2026.01 workbook: Disclaimer Language, Cover, Table of Contents, Version History (one
-  colour per version), Change Detail (everything changed since the previous version number),
+  colour per version), Change Detail (what changed in that publish),
   Clean Glossary, Term Type, Source Attribution and Focus Area.
 - **`console-classic/index.html`** — the previous console, kept for its guided tour and
   recovery tools (revert to baseline, load an official export). The new console's data
