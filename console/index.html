@@ -2412,9 +2412,9 @@ function dialog({title,body,ok='OK',cancel='Cancel',danger=false,wide=false,onOk
 const say=(title,html)=>dialog({title,body:`<p style="margin:0">${html}</p>`,ok:'OK',cancel:null});
 
 /* The saving service turns away a request over its size limit. Said plainly, since
-   "413 (TOO_LARGE)" tells nobody what to do. Publishing sends the whole glossary (2.8 MB),
-   which the service accepts only once IT has deployed the update that raises the limit. */
-function tooLarge(e,what){ return e&&e.status===413?`${what} is larger than the saving service accepts. Publishing the glossary needs the saving-service update that is with IT (it raises the limit for commits to 5.5 MB). Until then, ask Claude to publish the version directly from the repository.`:null; }
+   "413 (TOO_LARGE)" tells nobody what to do. Publishing sends the whole glossary (2.8 MB);
+   the service has accepted up to 5.5 MB for it since IT deployed relay request 7 (29 Sept). */
+function tooLarge(e,what){ return e&&e.status===413?`${what} is larger than the saving service accepts (5.5 MB for the glossary). Nothing was saved. Ask Claude to publish this version directly from the repository.`:null; }
 
 /* ---------- saving online: every apply ends here ---------- */
 async function saveOnline(reason){
