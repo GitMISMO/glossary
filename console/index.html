@@ -2097,7 +2097,6 @@ async function buildReleaseWorkbook({rel,stage,snap,ref,changes,history}){
         .map((t,i)=>({cells:[[`Tab ${i+1}`,XS.toc],[t,XS.toc]]})),{cells:[]},
       {ht:46.8,cells:[['Note: ',XS.tocNoteB],['For MISMO fields defined as "TYPE" please refer to the MISMO published Logical Data Dictionary for the complete list of enumerated values',XS.tocNote]]}]}],
     ['3 Version History',{tab:'FFFF00',widths:[14.9,10.7,67.3,43],rows:[H(['Date','Version #','Description','Contributor'],XS.hdr),
-      {cells:[0,1,2,3].map(j=>['',cIdx(history[0].label)+(j?1:0)])},
       ...history.map(h=>{ const s=cIdx(h.label); return {cells:[[xserial(h.date),s,'n'],[h.label,s+1],[h.description,s+1],[h.contributor,s+1]]}; })]}],
     ['4 Change Detail',{tab:'00B050',freeze:{c:2,r:1},filter:`A1:H${changes.length+1}`,widths:[38,38.1,49,19.1,12.1,37,30,13.1],
       rows:[H(['ID','Term','Definition','Source Attribution','Term Type','Focus Area',AKA_COL,'Action'],XS.hdr),
