@@ -2162,6 +2162,11 @@ function dialog({title,body,ok='OK',cancel='Cancel',danger=false,wide=false,onOk
 }
 const say=(title,html)=>dialog({title,body:`<p style="margin:0">${html}</p>`,ok:'OK',cancel:null});
 
+/* The saving service turns away a request over its size limit. Said plainly, since
+   "413 (TOO_LARGE)" tells nobody what to do. Publishing sends the whole glossary (2.8 MB),
+   which the service accepts only once IT has deployed the update that raises the limit. */
+function tooLarge(e,what){ return e&&e.status===413?`${what} is larger than the saving service accepts. Publishing the glossary needs the saving-service update that is with IT (it raises the limit for commits to 5.5 MB). Until then, ask Claude to publish the version directly from the repository.`:null; }
+
 /* ---------- saving online: every apply ends here ---------- */
 async function saveOnline(reason){
   if(viewOnly()){ saveState={ok:false,msg:'View only: changes stay in this browser.'}; render(); return false; }
@@ -2172,7 +2177,7 @@ async function saveOnline(reason){
     const sha=await repoSaveDraft(reason);
     saveState={ok:true,at:lastAutoSave,sha};
     render(); return true;
-  }catch(e){ saveState={ok:false,msg:'Not saved online: '+e.message}; render(); return false; }
+  }catch(e){ saveState={ok:false,msg:'Not saved online: '+(tooLarge(e,'The draft')||e.message)}; render(); return false; }
 }
 function saveAnyway(){
   if(localIsOlder()) return loadOnline();
@@ -2974,7 +2979,7 @@ async function doPublish(note){
   releases.unshift(rel);
   let sha;
   try{ sha=await repoPublish(note); }
-  catch(e){ releases.shift(); say(`Version ${version} was not published`,`${esc(e.message)}<br><br>Nothing has changed in the repository and the draft is untouched, so this can be tried again.`); return false; }
+  catch(e){ releases.shift(); say(`Version ${version} was not published`,`${esc(tooLarge(e,'The glossary file')||e.message)}<br><br>Nothing has changed in the repository and the draft is untouched, so this can be tried again.`); return false; }
   rel.commit=sha;
   download(`GlossaryChangeSet_v${version}_${stamp()}.csv`, toCSV(rows,CHANGESET_COLS));
   baseline=master.map(r=>({...r}));
