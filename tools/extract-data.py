@@ -11,6 +11,7 @@ cols = d["cols"]
 idx = {c: i for i, c in enumerate(cols)}
 
 # The public page consumes lowercase keys with aka/related as ID arrays.
+# (An aka entry may also be a plain name that is not a glossary term; the page shows it as text.)
 # The console baseline has no AKA/Related columns, so they start empty.
 terms = []
 for r in d["rows"]:

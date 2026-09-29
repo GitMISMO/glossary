@@ -8,6 +8,11 @@ Two related things live in this repository:
 - **`console/index.html`** — the management console. An admin tool that replaces the
   current CSV-with-an-`Action`-column upload process with real validation, staged
   review, vocabulary governance, and a draft/release cycle.
+- **`console-next/index.html`** — the redesigned console, in preview (Sept 2026). The same
+  data layer, local store and draft file as `console/`, with the Summit HQ layout: a
+  sections rail, the terms list with the editor beside it, and pages instead of pop-ups.
+  Both work on one draft, so either can be used; `console/` stays the default until the
+  switch.
 
 This is a **standalone project**. It is not part of the MISMO Initiative Hub and does
 not share that project's data or design system.
@@ -31,6 +36,8 @@ data/
   reference.json        focus area / term type / source descriptions
 console/
   index.html            management console
+console-next/
+  index.html            the redesigned console (preview), same draft as console/
 docs/mockups/           layout explorations, kept for reference, not deployed
 .console/
   draft.json            work in progress, saved daily by the console
