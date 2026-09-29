@@ -2232,13 +2232,12 @@ function render(){
   else if(view==='backups') renderBackups(M,c);
   wireActs(M);
 }
-function topBar(title,c,extra,noPublish){
-  const pub=!noPublish&&!viewOnly();
+/* No Publish button up here (Sept 29, 2026): publishing happens on Draft & Publish only. */
+function topBar(title,c,extra){
   return `<div class="bar"><h1>${esc(title)}</h1>
     <span class="meta">${n(master.length)} terms · ${c.d.total?`${n(c.d.total)} change${c.d.total===1?'':'s'} since ${esc(sinceLabel())}`:`draft matches ${esc(sinceLabel())}`}</span>
     ${c.iss?`<button class="chipw" type="button" data-go="issues">${n(c.iss)} need${c.iss===1?'s':''} a decision</button>`:'<span class="chipw ok">Nothing needs a decision</span>'}
-    <span class="acts">${extra||''}
-      ${pub?`<button class="btn sm p" type="button" data-go="publish"${c.d.total?'':' disabled title="Nothing applied since the last version"'}>Publish Version ${version}</button>`:''}</span></div>`;
+    <span class="acts">${extra||''}</span></div>`;
 }
 function wireGo(M){ M.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.go))); }
 const opt=(arr,v,all)=>`<option value="">${all}</option>`+arr.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');
@@ -2895,7 +2894,7 @@ function renderPublish(M,c){
   const slice=K.items.slice((dpage-1)*PER,dpage*PER);
   const saved=lastAutoSave?`Last saved online ${esc(whenShort(lastAutoSave))}${repoState?.remoteEditor&&!saveState?.ok?` by ${esc(repoState.remoteEditor)}`:editor?` by ${esc(editor)}`:''}.`:'';
   const blockers=[Object.keys(staged).length?`${n(Object.keys(staged).length)} staged term change${Object.keys(staged).length===1?'':'s'}`:'',vocabPending.length?`${n(vocabPending.length)} staged classification change${vocabPending.length===1?'':'s'}`:''].filter(Boolean);
-  M.innerHTML=topBar('Draft & Publish',c,'',true)+`<div class="page"><div class="pagein">${statusBanner()}
+  M.innerHTML=topBar('Draft & Publish',c,'')+`<div class="page"><div class="pagein">${statusBanner()}
     <header class="mast"><div><div class="eyebrow">Draft</div><h2>${d.total?`${n(d.total)} change${d.total===1?'':'s'} since ${esc(sinceLabel())}`:`The draft matches ${esc(sinceLabel())}`}</h2>
       <div class="sub">Everything applied from staging and not yet published. Each apply saves the draft online, so this is what everyone signed in sees. ${saved} Publishing makes it version ${version} of the public glossary.</div></div>
       ${vo?'':`<button class="btn p" type="button" id="pubBtn"${d.total||net.length?'':' disabled'}>Publish Version ${version}</button>`}</header>
