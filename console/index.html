@@ -2962,11 +2962,60 @@ function publishDialog(){
   dialog({title:`Publish version ${version}?`,ok:`Publish version ${version}`,
     body:`<p style="margin:0">${n(d.added.length)} added · ${n(d.edited.length)} edited · ${n(d.removed.length)} removed${net.length?` · ${n(net.length)} classification change${net.length===1?'':'s'}`:''}. The public glossary shows this version a minute or two after it is published, and a change-set CSV downloads as the record of what changed.</p>
       ${linkOnly?`<p style="margin:0;color:var(--ink-2)">${n(linkOnly)} of the edits change only also-known-as or related terms. The upload format has no column for those, so they are published here but are not in the change-set CSV.</p>`:''}
+      <div class="f"><span class="lab">Published as</span>
+        <label class="radio"><input type="radio" name="pubStage" value="candidate-recommendation"><span>A <b>Candidate Recommendation</b></span></label>
+        <label class="radio"><input type="radio" name="pubStage" value="comment-period"><span>For a <b>30-Day Comment Period</b></span></label></div>
+      <div class="f"><label for="pubDate">Publication date</label><input class="inp" type="date" id="pubDate" value="${todayISO()}" style="max-width:200px"></div>
+      <p style="margin:0;color:var(--ink-2)">The public glossary shows this under the search: “Latest version published as a Candidate Recommendation on …”.</p>
+      <div class="err" id="pubErr"></div>
       <div class="f"><label for="pubNote">Note for the version history (optional)</label><textarea class="inp" id="pubNote" rows="3"></textarea></div>`,
-    onOk:L=>doPublish(L.querySelector('#pubNote').value.trim())});
+    onOk:L=>{ const st=L.querySelector('[name="pubStage"]:checked'), dt=L.querySelector('#pubDate').value;
+      if(!st){ L.querySelector('#pubErr').textContent='Choose whether this version is a Candidate Recommendation or out for a 30-Day Comment Period.'; return false; }
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(dt)){ L.querySelector('#pubErr').textContent='Enter the publication date.'; return false; }
+      return doPublish(L.querySelector('#pubNote').value.trim(),st.value,dt); }});
 }
 /* The classic console's publishVersion, step for step, with the prompts moved on to the page. */
-async function doPublish(note){
+const todayISO=()=>{ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const STAGE_NAME={'candidate-recommendation':'Candidate Recommendation','comment-period':'30-Day Comment Period'};
+/* The classic repoPublish, unchanged except that the glossary file's meta now carries the stage
+   and publication date the public page shows under its search box. */
+let publishMeta=null;
+repoPublish=async function(note){
+  const sorted=[...master].sort((a,b)=>
+    String(a.Term||'').replace(/\s+/g,' ').trim().toLowerCase()
+      .localeCompare(String(b.Term||'').replace(/\s+/g,' ').trim().toLowerCase(),'en',{numeric:true}));
+  const out=JSON.stringify({
+    meta:{version:new Date().toISOString().slice(0,10), source:`console v${version}`, count:sorted.length,
+          note:'Published from the management console.',
+          ...(publishMeta?{stage:publishMeta.stage,published:publishMeta.date}:{})},
+    terms:sorted.map(r=>({id:r.ID,term:r.Term,definition:r.Definition,source:r.Source,
+      termType:r.TermType,focusArea:r.FocusArea,aka:splitMulti(r.AKA),related:splitMulti(r.Related)}))
+  },null,0).replace(/\},\{"id"/g,'},\n{"id"');
+  const empty=JSON.stringify({format:1,app:'mismo-glossary-console',
+    savedAt:new Date().toISOString(),note:'No changes since the last published version.',
+    summary:{added:0,edited:0,removed:0,staged:0,nextVersion:version+1},
+    diff:{added:[],edited:[],removed:[]},
+    vocab,vocabLog:[],vocabPending:[],staged:{},resolved,touched:{},releases,version:version+1,fixCount,newCounter});
+  let live={};
+  try{ const t=await ghReadFile(REF_PATH); if(t) live=JSON.parse(t); }
+  catch(e){ console.warn('reference.json not read before publish:',e); }
+  const merged=mergeRef(live, refDoc);
+  const ref={};
+  for(const [field,key] of Object.entries(REF_KEY)){
+    ref[key]={};
+    for(const v of [...vocab[field]].sort())
+      ref[key][v]= realDesc(merged[key]?.[v]) ? merged[key][v] : '__UNDOCUMENTED__';
+  }
+  refDoc=mergeRef(refDoc, ref);
+  const refOut=JSON.stringify(ref,null,2)+'\n';
+  return ghCommit([{path:DATA_PATH,content:out},{path:REF_PATH,content:refOut},
+                   {path:DRAFT_PATH,content:empty}],
+    `Publish version ${version}${publishMeta?` as a ${STAGE_NAME[publishMeta.stage]} (${publishMeta.date})`:''}${note?` — ${note}`:''}\n\n`
+    +`${master.length.toLocaleString()} terms.`
+    +(editor?`\nPublished by ${editor}.`:''));
+};
+async function doPublish(note,stage,date){
+  publishMeta=stage?{stage,date}:null;
   if(!(await recheck())){ say('Not published',repoState.behind?'A newer draft was saved online since this page loaded. Load it first, so the version you publish includes it.':'The online draft could not be read just now, so publishing was stopped. Try again in a moment.'); render(); return false; }
   const d=draftDiff();
   const rows=buildChangeSet(d);
@@ -2975,7 +3024,7 @@ async function doPublish(note){
      in once it is known. */
   const rel={version, publishedAt:new Date().toISOString(),
     counts:{added:d.added.length,edited:d.edited.length,removed:d.removed.length},
-    changeSet:rows, note, commit:null};
+    changeSet:rows, note, commit:null, ...(stage?{stage,published:date}:{})};
   releases.unshift(rel);
   let sha;
   try{ sha=await repoPublish(note); }
@@ -3080,7 +3129,7 @@ function renderVersions2(M,c){
   const ok=repo&&repoState?.ok;
   M.innerHTML=topBar('Versions',c,'')+`<div class="page"><div class="pagein">${statusBanner()}
     <header class="mast"><div><div class="eyebrow">Glossary</div><h2>Versions</h2><div class="sub">Each version published from the console, newest first. The next one is version ${version}.</div></div></header>
-    <div class="card">${releases.length?releases.map(r=>`<div class="ver"><b>Version ${esc(r.version)}</b><span>${esc(new Date(r.publishedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}))}</span>
+    <div class="card">${releases.length?releases.map(r=>`<div class="ver"><b>Version ${esc(r.version)}</b>${r.stage?`<i class="tag ${r.stage==='comment-period'?'update':'add'}">${esc(STAGE_NAME[r.stage]||r.stage)}</i>`:''}<span>${esc(new Date(r.published?r.published+'T12:00:00':r.publishedAt).toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'}))}</span>
       <span>${n(r.counts?.added)} added · ${n(r.counts?.edited)} edited · ${n(r.counts?.removed)} removed</span>${r.commit?`<span class="muted">commit ${esc(r.commit.slice(0,8))}</span>`:''}
       <span class="vacts"><button class="btn sm" type="button" data-cs="${esc(r.version)}" title="Only the terms that changed in this version">Change-set</button>
         <button class="btn sm" type="button" data-fg="${esc(r.version)}"${r.commit&&ok?'':' disabled'} title="${r.commit?(ok?'The whole glossary exactly as this version published it':'Connect to fetch it'):'Published before the commit was recorded, so the file cannot be fetched'}">Full glossary</button></span>

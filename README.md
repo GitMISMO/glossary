@@ -2,9 +2,12 @@
 
 Two related things live in this repository:
 
-- **`index.html`** — the public glossary browse page. Search, letter-grouped index,
-  faceted filtering by focus area / term type / source, and a reference panel that
-  explains what each classification means.
+- **`index.html`** — the public glossary browse page (redesigned Sept 2026, in the Summit HQ
+  look). Search, an A–Z index, and a "Narrow the list" panel with a drop-down and a
+  definition for each classification (term type, focus area, source). Under the search it
+  shows the latest version's stage and date, which the console sets when a version is
+  published (`meta.stage`: `candidate-recommendation` or `comment-period`, and
+  `meta.published`). Links to terms are `#slug`, as before.
 - **`console/index.html`** — the management console. An admin tool that replaces the
   current CSV-with-an-`Action`-column upload process with real validation, staged
   review, vocabulary governance, and a draft/release cycle. Redesigned Sept 2026 in the
