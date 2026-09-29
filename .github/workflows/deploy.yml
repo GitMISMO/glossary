@@ -123,7 +123,9 @@ jobs:
           # both this job and the S3 job below publish only named folders, so it
           # never reaches the site.
           cp -r console _site/
-          # The redesigned console, in preview: same data layer and draft file.
+          # The classic console, kept for its tour and recovery tools; same draft.
+          cp -r console-classic _site/
+          # The preview address from Sept 28, 2026, now forwarding to console/.
           cp -r console-next _site/
 
       - uses: actions/configure-pages@v5
@@ -170,6 +172,9 @@ jobs:
       - name: Upload console
         run: |
           aws s3 sync console/ "s3://${{ vars.S3_BUCKET }}/console/" \
+            --delete \
+            --cache-control "no-cache"
+          aws s3 sync console-classic/ "s3://${{ vars.S3_BUCKET }}/console-classic/" \
             --delete \
             --cache-control "no-cache"
           aws s3 sync console-next/ "s3://${{ vars.S3_BUCKET }}/console-next/" \

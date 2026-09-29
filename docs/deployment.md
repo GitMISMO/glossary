@@ -31,7 +31,8 @@ is what to provision. Nothing in this repository is specific to Pages.
 
 ## Where the console lives, and what that costs
 
-The console ships as part of the site, at `/glossary/console/`. It has no write access of
+The console ships as part of the site, at `/glossary/console/` (the Sept 2026 redesign),
+with the previous one at `/glossary/console-classic/`; both work on the same draft. It has no write access of
 its own: publishing goes through MISMO's save relay, which checks the facilitator's email
 and password and holds the only GitHub credential.
 
