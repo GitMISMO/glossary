@@ -51,7 +51,6 @@ console-classic/
   index.html            the previous console, same draft as console/
 console-next/
   index.html            forwards the Sept 2026 preview address to console/
-docs/mockups/           layout explorations, kept for reference, not deployed
 .console/
   draft.json            work in progress, saved daily by the console
 docs/
