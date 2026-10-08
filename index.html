@@ -603,7 +603,7 @@ function paintAz(){
 const picked=()=>['fa','tt','src'].reduce((s,k)=>s+A.st.sel[k].size,0);
 const byCount=(k,c)=>V[k].map((v,x)=>({v,x,c:c[k][x],key:k+':'+x})).sort((a,b)=>b.c-a.c||a.v.localeCompare(b.v));
 const noteHTML=`<div class="S-note"><b>Two similar names.</b> #MBAGlossary is a focus area and MBA Glossary is a source. Both come from the MBA glossary, recorded in two different fields.</div>`;
-const GUIDE={tt:'What kind of thing a term is: a data point, a document, a process, a person or organization.',fa:'The part of the mortgage business a term belongs to. A term can have several focus areas.',src:'Where the definition comes from, such as MISMO’s Data Dictionary or the MBA Glossary.'};
+const GUIDE={tt:'What kind of thing a term is, such as Data, a Document, a Process, an Actor or a Regulation.',fa:'The part of the mortgage business a term belongs to. A term can have several focus areas.',src:'Where the definition comes from, such as MISMO’s Data Dictionary or the MBA Glossary.'};
 /* When more than one thing is picked, "and" or "or" is itself a blank in the sentence. */
 const modeBlank=()=>picked()>1?`<span class="Q-mode">matching <button type="button" data-mode="${A.st.mode==='all'?'any':'all'}" title="Switch between matching all and any">${A.st.mode==='all'?'all':'any'} ▾</button> of them</span>`:'';
 const CHEV='<svg class="chev" viewBox="0 0 12 12" aria-hidden="true"><path d="M3 4.5L6 7.5l3-3" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
