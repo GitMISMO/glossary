@@ -261,6 +261,10 @@ select.sel,select.inp{-webkit-appearance:none;appearance:none;background-image:v
 .issue{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;align-items:center;padding:12px 16px;border-top:1px solid var(--line)}
 .issue:first-child{border-top:0}
 .issue .it{font-size:14px;font-weight:600}
+.issue .stg{display:inline-block;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:#7a4b00;background:#fff3d6;border:1px solid #f0d79a;border-radius:999px;padding:1px 7px;margin-right:4px;vertical-align:1px}
+.issue .id.kept{color:var(--ink3,#546f88);font-style:italic}
+.srow .flag{border:1px solid #e9b7b0;background:#fdecea;color:#8c2f25;font:inherit;font-size:12px;font-weight:700;border-radius:999px;padding:3px 10px;cursor:pointer}
+.srow .flag:hover{background:#fadad6}
 .issue .id{font-size:12.5px;color:var(--ink-2)}
 .issue .r{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .vt{display:flex;gap:6px;flex-wrap:wrap}
@@ -415,8 +419,8 @@ c57 -33 76 -84 76 -200 0 -116 -19 -167 -76 -200 -32 -19 -52 -20 -294 -20
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 6l-6 6 6 6"/></svg></button></div>
   <nav>
     <button type="button" data-view="terms" title="Terms"><svg class="i" viewBox="0 0 24 24"><path d="M5 4.5h11a3 3 0 013 3V20H8a3 3 0 01-3-3V4.5z"/><path d="M5 17a3 3 0 013-3h11M9 8.5h6"/></svg><span>Terms</span><b class="dot" id="dTerms"></b></button>
-    <button type="button" data-view="issues" title="Needs a Decision"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/></svg><span>Needs a Decision</span><b class="dot warn" id="dIssues"></b></button>
     <button type="button" data-view="staging" title="Staging"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M3.5 12L12 16.5 20.5 12M3.5 16.5L12 21l8.5-4.5"/></svg><span>Staging</span><b class="dot" id="dStaging"></b></button>
+    <button type="button" data-view="issues" title="Needs a Decision"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/></svg><span>Needs a Decision</span><b class="dot warn" id="dIssues"></b></button>
     <button type="button" data-view="publish" title="Draft &amp; Publish"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 8.5L12 4l5 4.5"/><path d="M4.5 15v3.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V15"/></svg><span>Draft &amp; Publish</span><b class="dot" id="dPublish"></b></button>
   </nav>
   <div class="rgrp"><span class="glbl">Glossary</span>
@@ -551,6 +555,7 @@ let lastBackupAt=null;  // so the console can warn when a backup is stale
 let vocab={TermType:[],FocusArea:[],Source:[]};
 let staged={};          // key -> {action,data,origin}
 let issues=[];
+let stagedIssues=[];     // the checks' items on staged terms: these block applying (7 Oct 2026)
 let resolved={};        // issue id -> 'skipped'. Deliberate suppressions only.
 let fixCount=0;         // approved corrections, counted separately
 let page=1; const PAGE_SIZE=10;
@@ -623,6 +628,18 @@ function fixReplacementChar(s){
   return out;
 }
 
+/* The checks agreed on 7 Oct 2026 (Business Glossary Console: Checks). */
+const INVIS_RE=/[\u00a0\u200b-\u200f\u2028\u2029\ufeff\x00-\x08\x0b\x0c\x0e-\x1f]/;
+const INVIS_STRIP=/[\u200b-\u200f\u2028\u2029\ufeff\x00-\x08\x0b\x0c\x0e-\x1f]/g;
+const STRAY_QUOTE=/["\u201c\u201d]'["\u201c\u201d]/;
+const VARIANTS=[['acknowledgement','acknowledgment'],['judgement','judgment'],['cancelled','canceled'],['modelling','modeling'],['labelled','labeled'],['catalogue','catalog'],['organisation','organization'],['licence','license']];
+const nearKey=v=>String(v||'').toLowerCase().replace(/&/g,' and ').replace(/[^a-z0-9]/g,'');
+const varKey=v=>{ let x=String(v||'').toLowerCase(); VARIANTS.forEach(([a,b])=>{ x=x.split(a).join(b); }); return nearKey(x); };
+const defKey=v=>{ const x=String(v||'').toLowerCase().replace(/\s+/g,' ').trim(); return x.length>=25?x:''; };
+const CROSS_META={
+  'near-dupe':{title:'Near-duplicate names',severity:'error',desc:'Names that match once case, hyphens, spaces and punctuation are ignored, and "&" is read as "and". Usually the same term entered twice.'},
+  'spelling':{title:'Spelling variants',severity:'error',desc:'Names that differ only by a known spelling variant, such as Acknowledgement and Acknowledgment. Keep one spelling (American by default).'},
+  'same-def':{title:'Same definition on two terms',severity:'error',desc:'Two or more terms share a definition word for word: a copy-paste error to correct, or synonyms to link as also known as.'}};
 const ISSUE_RULES=[
   {type:'entity',severity:'error',title:'HTML entity in stored text',
    desc:'An encoded entity where the literal character was intended — usually an artefact of a web form.',
@@ -649,9 +666,23 @@ const ISSUE_RULES=[
   {type:'doublespace',severity:'warning',title:'Repeated internal spaces',
    desc:'Two or more consecutive spaces inside the text.',
    fields:['Term','Definition'], detect:v=>/\S {2,}\S/.test(v), fix:v=>v.replace(/ {2,}/g,' ')},
-  {type:'blank-type',severity:'warning',title:'Missing term type',
-   desc:'No term type recorded. The correct value cannot be inferred, so this needs a decision.',
-   fields:['TermType'], detect:v=>v.trim()==='', fix:null},
+  /* Every term carries a source, a term type and at least one focus area (7 Oct 2026; was term type only). */
+  {type:'blank-type',severity:'warning',title:'Missing classification',
+   desc:'No source, term type or focus area recorded. Every term needs all three. The correct value cannot be inferred, so this needs a decision.',
+   fields:['Source','TermType','FocusArea'], detect:v=>v.trim()==='', fix:null},
+  /* Exactly one source and one term type; focus areas may be several (7 Oct 2026). */
+  {type:'multi-value',severity:'error',title:'More than one source or term type',
+   desc:'A term carries exactly one source and exactly one term type (focus areas may be several). Choose which is right.',
+   fields:['Source','TermType'], detect:v=>splitMulti(v).length>1, fix:null},
+  {type:'invisible',severity:'warning',title:'Invisible character',
+   desc:'A non-breaking, zero-width or control character. Invisible in most tools, but it breaks matching and searching. A non-breaking space becomes a normal one; the others are removed.',
+   fields:MASTER_COLS, detect:v=>INVIS_RE.test(v), fix:v=>v.replace(/\u00a0/g,' ').replace(INVIS_STRIP,'')},
+  {type:'stray-quote',severity:'error',title:'Stray quote marks in a name',
+   desc:'Quote characters left inside a name by broken quoting, such as Architect"\'"s. The apostrophe proposed is inferred: read it before approving.',
+   fields:['Term'], detect:v=>STRAY_QUOTE.test(v), fix:v=>v.replace(new RegExp(STRAY_QUOTE.source,'g'),'\u2019')},
+  {type:'apostrophe',severity:'warning',title:'Straight apostrophe in a name',
+   desc:'Names use the curly apostrophe (\u2019), as nearly all already do.',
+   fields:['Term'], detect:v=>v.includes("'"), fix:v=>v.replace(/(\w)'(?=\w)/g,'$1\u2019').replace(/(s)'(?=\s|$)/g,'$1\u2019')},
   {type:'dead-link',severity:'error',title:'Link to a term that does not exist',
    desc:'The definition links to another glossary term by name, and no term has that name. Usually the target was renamed or removed after the link was written. Correct the name, or remove the link.',
    fields:['Definition'],
@@ -666,12 +697,14 @@ const ISSUE_RULES=[
      return f?cellValues(row,f).some(x=>!effectiveVocab(key).includes(x)):false;},
    fix:null}
 ];
-const issueMeta=t=>ISSUE_RULES.find(r=>r.type===t)
+const issueMeta=t=>ISSUE_RULES.find(r=>r.type===t)||CROSS_META[t]
   ||{title:'Duplicate term name',desc:'Two rows share a term name. Which one should survive needs a decision.',severity:'error'};
 
 function detectIssues(){
   const found=[];
-  master.forEach((row,ri)=>{
+  /* Every check runs over the draft and over everything in Staging (7 Oct 2026). A staged term's items block
+     applying it until each is decided; the draft's are listed but block nothing. */
+  const scan=(row,ri,scope,stageKey)=>{
     ISSUE_RULES.forEach(rule=>rule.fields.forEach(key=>{
       const v=String(row[key]??'');
       let hit=false; try{hit=rule.detect(v,row,key);}catch(e){hit=false;}
@@ -698,12 +731,14 @@ function detectIssues(){
         pendingDel=unknown.filter(x=>staged4del.includes(x));
         if(!bad.length&&!pendingDel.length) return;
       }
-      found.push({id:`${rule.type}:${row.ID||ri}:${key}`,type:rule.type,severity:rule.severity,
+      found.push({id:`${scope==='staged'?'st:':''}${rule.type}:${row.ID||ri}:${key}`,type:rule.type,severity:rule.severity,scope,stageKey,base:`${rule.type}:${key}`,
         rowId:row.ID,rowIndex:ri,term:row.Term,field:key,before:v,after,fixable:!!rule.fix,
         bad,pendingDel,
         severityOverride: (rule.type==='off-vocab'&&!bad?.length&&pendingDel?.length)?'warn':null});
     }));
-  });
+  };
+  master.forEach((row,ri)=>scan(row,ri,'draft',null));
+  Object.entries(staged).forEach(([k,st])=>{ if(st.action!=='remove') scan({...st.data,ID:k},-1,'staged',k); });
   const seen=new Map();
   master.forEach((r,ri)=>{
     const n=String(r.Term||'').trim().toLowerCase(); if(!n) return;
@@ -711,10 +746,27 @@ function detectIssues(){
       term:r.Term,field:'Term',before:r.Term,after:null,fixable:false,note:`Also used by ID ${seen.get(n)}`});
     else seen.set(n,r.ID);
   });
+  /* Near-duplicate names, spelling variants and shared definitions, across the draft with staged edits in place,
+     so a staged term is compared with everything it would sit beside. */
+  const eff=[];
+  master.forEach((r,ri)=>{ const st=staged[r.ID]; if(st&&st.action==='remove') return;
+    const up=st&&st.action==='update'; eff.push({row:up?{...st.data,ID:r.ID}:r,ri,scope:up?'staged':'draft',key:r.ID}); });
+  Object.entries(staged).forEach(([k,st])=>{ if(st.action==='add') eff.push({row:{...st.data,ID:k},ri:-1,scope:'staged',key:k}); });
+  const groups=fn=>{ const m=new Map(); eff.forEach(e=>{ const g=fn(e.row); if(!g) return; if(!m.has(g)) m.set(g,[]); m.get(g).push(e); }); return [...m.values()].filter(g=>g.length>1); };
+  const cross=(type,gs,distinct,label)=>gs.forEach(g=>{
+    if(distinct&&new Set(g.map(e=>distinct(e.row))).size<2) return;
+    g.forEach(e=>{ const others=g.filter(o=>o!==e).map(o=>o.row.Term);
+      found.push({id:`${e.scope==='staged'?'st:':''}${type}:${e.key}`,type,severity:'error',scope:e.scope,stageKey:e.scope==='staged'?e.key:null,base:type,
+        rowId:e.key,rowIndex:e.ri,term:e.row.Term,field:type==='same-def'?'Definition':'Term',before:type==='same-def'?e.row.Definition:e.row.Term,
+        after:null,fixable:false,note:`${label} ${others.slice(0,3).join(', ')}${others.length>3?' and others':''}`}); }); });
+  cross('near-dupe',groups(r=>nearKey(r.Term)),r=>normName(r.Term),'Close to');
+  cross('spelling',groups(r=>varKey(r.Term)),r=>nearKey(r.Term),'Spelled differently from');
+  cross('same-def',groups(r=>defKey(r.Definition)),null,'Same definition as');
   // Deliberately not filtering on a "fixed" flag: once a correction is applied the
   // row no longer matches the rule, so it drops out on its own. Suppressing by
   // issue id would also hide the same field breaking again after a later import.
-  issues=found;
+  issues=found.filter(i=>i.scope!=='staged');
+  stagedIssues=found.filter(i=>i.scope==='staged');
   return issues;
 }
 
@@ -2292,8 +2344,31 @@ function fixStaged(i){ const s=staged[i.rowId]; return !!(i.fixable&&s&&s.action
    change is applied, which sends people looking for a problem that is already dealt with. */
 function stillOff(i){ if(i.type!=='off-vocab') return true; const ok=liveVocab(i.field);
   return cellValues({[i.field]:i.before},vfield(i.field)).some(v=>!ok.has(v)); }
-const openIss=()=>cached('iss',()=>{ detectIssues(); return issues.filter(i=>resolved[i.id]!=='skipped'&&!fixStaged(i)&&stillOff(i)); });
-const skippedIss=()=>cached('issSk',()=>{ openIss(); return issues.filter(i=>resolved[i.id]==='skipped'&&stillOff(i)); });
+/* A decision (7 Oct 2026): approve the proposed fix, correct the term, or keep it as is with a reason. Kept as is is
+   recorded with the value it was decided on, so the item comes back if that value changes. An old 'skipped' counts as
+   kept. A staged term's decisions travel with it, in its staged entry. */
+function keptRec(i){ if(i.scope==='staged'){ const st=staged[i.stageKey]; return st&&st.keep?st.keep[i.base]:null; }
+  const r=resolved[i.id]; return r==='skipped'?{reason:'',value:i.before}:(r&&typeof r==='object'?r:null); }
+const isKept=i=>{ const r=keptRec(i); return !!r&&String(r.value)===String(i.before); };
+const openIss=()=>cached('iss',()=>{ detectIssues(); return [...stagedIssues.filter(i=>!isKept(i)&&stillOff(i)),...issues.filter(i=>!isKept(i)&&!fixStaged(i)&&stillOff(i))]; });
+const skippedIss=()=>cached('issSk',()=>{ openIss(); return [...stagedIssues,...issues].filter(i=>isKept(i)&&stillOff(i)); });
+/* What holds Staging up: a staged term's undecided items. */
+const stagedBlockers=()=>openIss().filter(i=>i.scope==='staged');
+const blockersByKey=()=>cached('bk',()=>{ const m=new Map(); stagedBlockers().forEach(i=>m.set(i.stageKey,(m.get(i.stageKey)||0)+1)); return m; });
+function approveStagedFix(i){ const st=staged[i&&i.stageKey]; if(!st) return 'That staged change is no longer there';
+  if(String(st.data[i.field]??'')!==String(i.before)) return 'That field has changed since. Look again.';
+  st.data[i.field]=i.after; if(vfield(i.field)) st.fix=(st.fix||[]).concat([{field:i.field,before:i.before,after:i.after}]); return true; }
+function keepAsIs(i){ if(!i) return;
+  dialog({title:'Keep as is?',ok:'Keep as is',
+    body:`<p style="margin:0 0 10px">${esc(issueMeta(i.type).title)}: <b>${esc(i.term||'(untitled)')}</b>${i.scope==='staged'?' (staged)':''}</p>
+      <label style="display:block;font-weight:600;font-size:12.5px">Why is it right as it is?<textarea id="keepWhy" rows="3" style="display:block;width:100%;margin-top:6px;font:inherit"></textarea></label>
+      <p class="say muted" style="margin:8px 0 0">Recorded with your name. If the value changes later, this comes back for a decision.</p>`,
+    onOk:async L=>{ const why=String((L.querySelector('#keepWhy')||{}).value||'').trim(); if(!why){ toast('Give a reason for keeping it as is'); return false; }
+      const sess=window.ResourcesSession&&window.ResourcesSession.current&&window.ResourcesSession.current();
+      const rec={value:i.before,reason:why,by:(sess&&sess.name)||editor||'',at:new Date().toISOString()};
+      if(i.scope==='staged'){ const st=staged[i.stageKey]; if(!st) return; st.keep={...(st.keep||{}),[i.base]:rec}; } else resolved[i.id]=rec;
+      await persist(); touch(); toast('Kept as is'); render(); }}); }
+function unkeep(i){ if(i.scope==='staged'){ const st=staged[i.stageKey]; if(st&&st.keep){ delete st.keep[i.base]; } } else delete resolved[i.id]; }
 /* Spaces made visible, so a whitespace fix shows where the space is. */
 const vis=s=>esc(s).replace(/^ +| +$/g,m=>'·'.repeat(m.length)).replace(/ {2,}/g,m=>'·'.repeat(m.length));
 
@@ -2929,15 +3004,16 @@ function stagingHTML(){
   const ordered=all.slice().sort((a,b)=>(pk.has(b[0])?1:0)-(pk.has(a[0])?1:0));
   const shown=ordered.slice((spage-1)*PER,spage*PER);
   const cnt={add:0,update:0,remove:0,imp:0}; all.forEach(([,s])=>{cnt[s.action]=(cnt[s.action]||0)+1; if(s.origin==='import')cnt.imp++;});
-  const probs=stagedProblems();
+  const probs=stagedProblems(), blk=stagedBlockers(), blkTerms=blockersByKey().size;
   const rows=shown.map(([k,s])=>{
     const orig=idMap().get(k);
     const body=s.action==='update'&&orig?`<div class="diff">${diffFieldsOf(orig,s.data).map(f=>diffLine(f,orig[f],s.data[f])).join('')||'<span class="k">No field differs</span><span></span>'}</div>`
       :s.action==='add'?`<div class="diff">${EDIT_FIELDS.filter(f=>f!=='Term'&&String(s.data[f]||'').trim()).map(f=>diffLine(f,undefined,s.data[f])).join('')}</div>`
       :`<div class="diff"><span class="k">Definition</span><span class="v"><del>${esc(s.data.Definition||orig?.Definition||'')}</del></span></div>`;
-    const p=pk.get(k)||[];
+    const p=pk.get(k)||[], fl=blockersByKey().get(k)||0;
     return `<div class="srow"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
       <small>${({import:'from import',bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>
+      ${fl?`<button class="flag" type="button" data-decide="${esc(k)}" title="Open its items in Needs a Decision">Fails ${fl} check${fl===1?'':'s'} · see Needs a Decision</button>`:''}
       <span class="r">${s.action!=='remove'?`<button class="btn sm" type="button" data-edit="${esc(k)}">Edit</button>`:''}<button class="btn sm danger" type="button" data-unstage="${esc(k)}">Remove</button></span></div>
       ${body}${p.length?`<ul class="probs">${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`;
   }).join('');
@@ -2949,6 +3025,7 @@ function stagingHTML(){
     <div class="tiles"><div class="tile add"><b>${cnt.add}</b><span>Additions</span></div><div class="tile update"><b>${cnt.update}</b><span>Updates</span></div>
       <div class="tile remove"><b>${cnt.remove}</b><span>Removals</span></div><div class="tile imp"><b>${cnt.imp}</b><span>From import</span></div>
       <div class="tile"><b>${nT+nV}</b><span>Total staged</span></div></div>
+    ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each item is decided in <b>Needs a Decision</b>. Select the flag on the row.</span></div>`:''}
     ${nT?(probs.length?`<div class="checks"><span class="pill bad">${probs.length} problem${probs.length===1?'':'s'}</span><span>Fix these before applying. Select Edit on the row.</span></div>`
       :`<div class="checks"><span class="pill ok">Passed</span><span><b>All checks passed.</b> ${nT} row${nT===1?'':'s'} ready.</span></div>`):''}
     ${rows}
@@ -2956,7 +3033,7 @@ function stagingHTML(){
     ${vrows}
     ${!nT&&!nV?'<div class="empty" style="padding:6px 0">Nothing is staged. Changes you stage from a term collect here.</div>':''}
     <div class="sacts">
-      <button class="btn go" type="button" id="applyT"${!nT||probs.length?' disabled':''}>Apply term changes${nT?` (${nT})`:''}</button>
+      <button class="btn go" type="button" id="applyT"${!nT||probs.length||blk.length?' disabled':''}>Apply term changes${nT?` (${nT})`:''}</button>
       <button class="btn go" type="button" id="applyV"${!nV?' disabled':''}>Apply classification changes${nV?` (${nV})`:''}</button>
       <button class="btn" type="button" id="expC"${(!nT&&!extra)||probs.length?' disabled':''} title="${extra?`${nT} staged plus ${n(extra)} term(s) rewritten by an applied classification change`:''}">Export change-set CSV${nT+extra?` (${n(nT+extra)})`:''}</button>
       <button class="btn" type="button" id="expF">Export full glossary</button>
@@ -2965,6 +3042,7 @@ function stagingHTML(){
 }
 function wireStaging(root){
   root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>select(b.dataset.edit));
+  root.querySelectorAll('[data-decide]').forEach(b=>b.onclick=()=>{ ifocus=b.dataset.decide; showSkipped=false; itab='all'; ipage=1; go('issues'); });
   root.querySelectorAll('[data-unstage]').forEach(b=>b.onclick=async()=>{ delete staged[b.dataset.unstage]; await persist(); touch(); toast('Unstaged'); render(); });
   root.querySelectorAll('[data-unvocab]').forEach(b=>b.onclick=async()=>{ await unstageVocab(b.dataset.unvocab); touch(); toast('Unstaged'); render(); });
   const a=root.querySelector('#applyT'); if(a) a.onclick=confirmApplyTerms;
@@ -2996,6 +3074,7 @@ function exportChangeSet(){
 function confirmApplyTerms(){
   const list=Object.entries(staged); if(!list.length) return;
   if(stagedProblems().length) return;
+  if(stagedBlockers().length){ toast('Decide every staged item in Needs a Decision first'); return; }   /* nothing moves past Staging without a decision */
   const c={add:0,update:0,remove:0}; list.forEach(([,s])=>c[s.action]++);
   dialog({title:`Apply ${n(list.length)} term change${list.length===1?'':'s'}?`,ok:'Apply',
     body:`<p style="margin:0">${[c.add?`${c.add} added`:'',c.update?`${c.update} updated`:'',c.remove?`${c.remove} removed`:''].filter(Boolean).join(' · ')}. They move into the draft${viewOnly()?'':' and the draft is saved online'}. Each can still be reverted from Draft &amp; Publish until it is published.</p>`,
@@ -3003,6 +3082,7 @@ function confirmApplyTerms(){
 }
 async function applyTerms(){
   const list=Object.entries(staged); if(!list.length) return;
+  if(stagedBlockers().length) return;
   const now=new Date().toISOString();
   const gone=new Set(list.filter(([,s])=>s.action==='remove').map(([k])=>k));
   /* A fix to a governed field corrects the list with it, as the classic Approve did. */
@@ -3048,8 +3128,10 @@ async function applyVocab(){
 }
 
 /* ===== Needs a decision ===== */
+let ifocus=null;   // a staged term whose items the Staging flag opened (7 Oct 2026)
 function renderIssuesPage(M,c){
-  const all=showSkipped?skippedIss():openIss();
+  let all=showSkipped?skippedIss():openIss();
+  if(ifocus&&!showSkipped){ const f=all.filter(i=>i.stageKey===ifocus); if(f.length) all=f; else ifocus=null; }
   const types={}; all.forEach(i=>{ types[i.type]=(types[i.type]||0)+1; });
   if(itab!=='all'&&!types[itab]) itab='all';
   const list=itab==='all'?all:all.filter(i=>i.type===itab);
@@ -3064,39 +3146,42 @@ function renderIssuesPage(M,c){
       :i.type==='dead-link'&&i.bad?.length?`Links to <b>${i.bad.map(x=>esc('[['+x+']]')).join(', ')}</b>, which ${i.bad.length===1?'is':'are'} not a term in the glossary. Correct the name or remove the link.`
       :f&&(i.bad?.length||i.pendingDel?.length)?`${i.bad?.length?`<b>${i.bad.map(esc).join(', ')}</b> ${i.bad.length===1?'is':'are'} not in ${esc(f.label.toLowerCase())}`:''}${i.bad?.length&&i.pendingDel?.length?'; ':''}${i.pendingDel?.length?`<b>${i.pendingDel.map(esc).join(', ')}</b> ${i.pendingDel.length===1?'is':'are'} staged for removal. Nothing has changed on this term yet`:''}`
       :`${esc(String(i.before).slice(0,200))||'<em>(empty)</em>'}${i.note?` · ${esc(i.note)}`:''}`;
-    return `<div class="issue"><div style="min-width:0"><div class="it">${esc(meta(i.type).title)}: ${esc(i.term||'(untitled)')}</div>
-      <div class="id">${esc(LABEL[i.field]||fieldLabel(i.field))}. ${what}</div></div>
+    const kr=showSkipped?keptRec(i):null;
+    return `<div class="issue"><div style="min-width:0"><div class="it">${i.scope==='staged'?'<span class="stg">Staged</span> ':''}${esc(meta(i.type).title)}: ${esc(i.term||'(untitled)')}</div>
+      <div class="id">${esc(LABEL[i.field]||fieldLabel(i.field))}. ${what}${i.note&&i.fixable?` · ${esc(i.note)}`:''}</div>${kr?`<div class="id kept">Kept as is${kr.by?` by ${esc(kr.by)}`:''}${kr.reason?`: ${esc(kr.reason)}`:''}</div>`:''}</div>
       <div class="r">${showSkipped?`<button class="btn sm" type="button" data-unskip="${esc(i.id)}">Undo skip</button>`:`
-        ${i.fixable&&!vo?`<button class="btn sm p" type="button" data-fix="${esc(i.id)}">Stage fix</button>`:''}
+        ${i.fixable&&!vo?`<button class="btn sm p" type="button" data-fix="${esc(i.id)}">Approve fix</button>`:''}
         ${f&&i.bad?.length===1?`<button class="btn sm" type="button" data-addv="${esc(i.field)}|${esc(i.bad[0])}" title="Stage adding this value to the list">Add to list</button>`:''}
         ${f&&!i.bad?.length&&i.pendingDel?.length===1?`<button class="btn sm" type="button" data-keepv="${esc(i.field)}|${esc(i.pendingDel[0])}" title="Withdraw the staged removal">Keep it</button>`:''}
-        <button class="btn sm" type="button" data-open="${esc(i.rowId)}">Open term</button><button class="btn sm" type="button" data-skip="${esc(i.id)}">Skip</button>`}</div></div>`;
+        <button class="btn sm" type="button" data-open="${esc(i.rowId)}">Open term</button>${vo?'':`<button class="btn sm" type="button" data-keep="${esc(i.id)}">Keep as is</button>`}`}</div></div>`;
   };
   const sk=skippedIss().length;
-  M.innerHTML=topBar('Needs a Decision',c,fixable.length&&!vo?`<button class="btn sm" type="button" id="fixAll">${fixable.length===1?'Stage 1 fix':`Stage all ${n(fixable.length)} fixes`}</button>`:'')+
+  /* No "Stage all": every fix is a proposal, approved one at a time (7 Oct 2026). */
+  M.innerHTML=topBar('Needs a Decision',c,'')+
   `<div class="page"><div class="pagein">${statusBanner()}
-    <header class="mast"><div><div class="eyebrow">Review</div><h2>${showSkipped?'Skipped':'Needs a Decision'}</h2>
-      <div class="sub">Checked over the whole draft: stray HTML entities and garbled characters, spacing, missing term types, values outside the lists, links to terms that do not exist, and duplicate names. A fix is staged, never applied directly.${fixCount?` ${n(fixCount)} corrected so far.`:''}</div></div>
-      ${sk||showSkipped?`<button class="btn sm" type="button" id="skTog">${showSkipped?'Back to open issues':`Skipped (${n(sk)})`}</button>`:''}</header>
+    <header class="mast"><div><div class="eyebrow">Review</div><h2>${showSkipped?'Kept as is':'Needs a Decision'}</h2>
+      <div class="sub">Every check runs over the draft and over everything in Staging. Staged terms come first: one can't be applied until each of its items is decided, by approving the proposed fix, correcting the term, or keeping it as is with a reason. Items on terms already in the glossary block nothing.${fixCount?` ${n(fixCount)} corrected so far.`:''}</div></div>
+      ${sk||showSkipped?`<button class="btn sm" type="button" id="skTog">${showSkipped?'Back to open items':`Kept as is (${n(sk)})`}</button>`:''}</header>
     ${Object.keys(types).length>1?`<div class="vt" role="group" aria-label="Which kind"><button type="button" data-it="all" aria-pressed="${itab==='all'}">All <small>${n(all.length)}</small></button>${Object.entries(types).map(([t,k])=>`<button type="button" data-it="${esc(t)}" aria-pressed="${itab===t}">${esc(meta(t).title)} <small>${n(k)}</small></button>`).join('')}</div>`:''}
+    ${ifocus&&!showSkipped?`<div class="checks"><span class="pill bad">Staged</span><span>Showing the checks for <b>${esc(staged[ifocus]?.data.Term||'this staged term')}</b>. <button class="btn sm" type="button" data-unfocus>Show everything</button></span></div>`:''}
     ${itab!=='all'?`<p class="say muted" style="margin:0">${esc(meta(itab).desc)}</p>`:''}
-    <div class="card">${slice.length?slice.map(row).join(''):`<div class="empty">${showSkipped?'Nothing has been skipped.':'Nothing needs a decision.'}</div>`}</div>
+    <div class="card">${slice.length?slice.map(row).join(''):`<div class="empty">${showSkipped?'Nothing has been kept as is.':'Nothing needs a decision.'}</div>`}</div>
     ${pages>1?`<div class="pager" style="border:0;padding:0"><button class="btn sm" type="button" id="iPrev"${ipage<=1?' disabled':''}>Previous</button><span>Page ${n(ipage)} of ${n(pages)} · ${n(list.length)} ${showSkipped?'skipped':'open'}</span><button class="btn sm" type="button" id="iNext"${ipage>=pages?' disabled':''}>Next</button></div>`:''}
   </div></div>`;
   wireGo(M);
-  const find=id=>issues.find(i=>i.id===id);
+  const find=id=>[...stagedIssues,...issues].find(i=>i.id===id);
   M.querySelectorAll('[data-it]').forEach(b=>b.onclick=()=>{ itab=b.dataset.it; ipage=1; render(); });
-  M.querySelectorAll('[data-fix]').forEach(b=>b.onclick=async()=>{ const r=stageFix(find(b.dataset.fix)); await persist(); touch(); toast(r===true?'Fix staged':r); render(); });
-  M.querySelectorAll('[data-skip]').forEach(b=>b.onclick=async()=>{ resolved[b.dataset.skip]='skipped'; await persist(); touch(); toast('Skipped'); render(); });
-  M.querySelectorAll('[data-unskip]').forEach(b=>b.onclick=async()=>{ delete resolved[b.dataset.unskip]; await persist(); touch(); render(); });
+  M.querySelectorAll('[data-fix]').forEach(b=>b.onclick=async()=>{ const it=find(b.dataset.fix); const r=it&&it.scope==='staged'?approveStagedFix(it):stageFix(it); await persist(); touch();
+    toast(r===true?(it.scope==='staged'?'Fix approved':'Fix approved and staged'):r); render(); });
+  M.querySelectorAll('[data-keep]').forEach(b=>b.onclick=()=>keepAsIs(find(b.dataset.keep)));
+  M.querySelectorAll('[data-unskip]').forEach(b=>b.onclick=async()=>{ const it=find(b.dataset.unskip); if(it) unkeep(it); await persist(); touch(); render(); });
+  M.querySelectorAll('[data-unfocus]').forEach(b=>b.onclick=()=>{ ifocus=null; render(); });
   M.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>select(b.dataset.open));
   M.querySelectorAll('[data-addv]').forEach(b=>b.onclick=async()=>{ const [f,v]=b.dataset.addv.split('|'); if(effectiveVocab(f).includes(v)) return;
     stageVocab('add',f,null,v); await persist(); touch(); toast(`Adding "${v}" to ${CLS_LABEL[f].toLowerCase()} is staged`); render(); });
   M.querySelectorAll('[data-keepv]').forEach(b=>b.onclick=async()=>{ const [f,v]=b.dataset.keepv.split('|'); const p=vocabPending.find(x=>x.field===f&&x.op==='delete'&&x.from===v); if(p){ await unstageVocab(p.id); touch(); toast('Removal withdrawn'); render(); } });
   const ip=$('iPrev'), inx=$('iNext'); if(ip) ip.onclick=()=>{ ipage--; render(); }; if(inx) inx.onclick=()=>{ ipage++; render(); };
   const tg=$('skTog'); if(tg) tg.onclick=()=>{ showSkipped=!showSkipped; ipage=1; itab='all'; render(); };
-  const fa=$('fixAll'); if(fa) fa.onclick=async()=>{ let ok=0, no=0; fixable.forEach(i=>{ stageFix(i)===true?ok++:no++; }); await persist(); touch();
-    toast(`${n(ok)} fix${ok===1?'':'es'} staged${no?`. ${n(no)} left for another pass (the same field already has a staged change)`:''}`,3600); render(); };
 }
 /* A fix is staged on the term, carrying what the classic console needs to correct the
    governed list when it is applied. A field that already has a different staged change is
