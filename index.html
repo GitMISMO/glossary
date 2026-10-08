@@ -35,6 +35,9 @@ mark{background:var(--hl);color:var(--hl-ink);border-radius:2px;padding:0 1px}
 /* ---------- shared masthead, as Summit HQ ---------- */
 .hq{overflow:hidden;background:var(--navy);color:#fff;display:flex;align-items:center;gap:0;padding:0 24px;min-height:64px;box-shadow:0 1px 0 rgba(80,164,219,.28)}
 .plate{background:#fff;border-radius:5px;padding:9px 13px;display:flex;line-height:0;flex:0 0 auto}
+/* the logo leads to www.mismo.org (a page read outside MISMO) and grows on hover (Perry, 7 Oct 2026) */
+[data-mismo-home]{text-decoration:none;color:inherit;cursor:pointer;transition:transform .15s ease;transform-origin:left center}[data-mismo-home]:hover,[data-mismo-home]:focus-visible{transform:scale(1.06)}[data-mismo-home]:focus-visible{outline:2px solid #50a4db;outline-offset:3px}
+
 .plate svg{height:22px;width:auto}
 .rule{width:2px;height:32px;margin-inline:18px;border-radius:1px;background:var(--sky);flex:0 0 auto}
 .hqname{font-size:15.5px;font-weight:700;color:var(--sky);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -529,7 +532,7 @@ const pills=(k,t,attr)=>t[k].map(x=>`<button type="button" class="pill ${k}" ${a
 function toast(m){ const d=document.createElement('div'); d.className='toast'; d.setAttribute('role','status'); d.textContent=m; document.body.appendChild(d); setTimeout(()=>d.remove(),2200); }
 function copyLink(t){ const url='https://resources.mismo.org/glossary/#'+t.slug;
   (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>toast('Link copied: '+url),()=>toast(url)); }
-const masthead=`<header class="hq"><span class="plate">${LOGO}</span><span class="rule"></span><span class="hqname">Business Glossary</span>
+const masthead=`<header class="hq"><a class="plate" href="https://www.mismo.org/" data-mismo-home aria-label="MISMO, www.mismo.org" title="MISMO, www.mismo.org">${LOGO}</a><span class="rule"></span><span class="hqname">Business Glossary</span>
   <span class="hqr"><a class="dl" href="https://collaborate.mismo.org/viewdocument/business-glossary" target="_blank" rel="noopener" title="Opens the MISMO Resource Library. Signing in is required."><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg><span>Download the glossary</span><i>Members</i></a></span></header>`;
 const footer=`<footer class="g"><div class="in"><span id="fStatus"></span><span>${n(T.length)} terms</span><a href="https://collaborate.mismo.org/viewdocument/business-glossary" target="_blank" rel="noopener">Download the glossary (members)</a></div></footer>`;
 
