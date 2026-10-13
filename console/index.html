@@ -238,6 +238,12 @@ select.sel,select.inp{-webkit-appearance:none;appearance:none;background-image:v
 .tile{border:1px solid var(--line-2);border-radius:6px;background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .tile b{font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+/* Staging's tiles are filters too */
+.stiles button.tile{font:inherit;text-align:left;color:inherit;cursor:pointer;transition:border-color .12s,box-shadow .12s}
+.stiles button.tile:hover:not(:disabled){border-color:var(--btn)}
+.stiles button.tile[aria-pressed="true"]{border-color:var(--btn);box-shadow:inset 0 0 0 1px var(--btn)}
+.stiles button.tile:disabled{cursor:default;opacity:.7}
+#stagingCard .vt{margin:12px 0 4px}
 .tile.add b{color:var(--good)}.tile.update b{color:var(--warn)}.tile.remove b{color:var(--bad)}.tile.imp b{color:var(--accent)}
 .checks{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
 .pill{font-size:10.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:2px 8px;border-radius:999px}
@@ -2994,15 +3000,22 @@ function vocabRowHTML(p){
     <div class="diff"><span class="k">Value</span><span class="v">${p.op==='add'?`<ins>${esc(p.to)}</ins>`:p.op==='delete'?`<del>${esc(p.from)}</del>`:`<del>${esc(p.from)}</del> → <ins>${esc(p.to)}</ins>`}
       <small class="muted">(${eff})</small></span></div></div>`;
 }
-let spage=1;
+/* stab: which staged changes the list shows, set by the Which changes buttons or the tiles above them (both, as on
+   Draft & Publish: Perry and a colleague, 10 Oct 2026). Total staged and All show everything. */
+let spage=1, stab='all';
 function stagingHTML(){
   const all=Object.entries(staged);
-  const pages=Math.max(1,Math.ceil(all.length/PER)); if(spage>pages) spage=pages;
   /* Rows with problems first, so they are never on page 40 of a large tag. */
   const pk=problemsByKey();
   const ordered=all.slice().sort((a,b)=>(pk.has(b[0])?1:0)-(pk.has(a[0])?1:0));
-  const shown=ordered.slice((spage-1)*PER,spage*PER);
   const cnt={add:0,update:0,remove:0,imp:0}; all.forEach(([,s])=>{cnt[s.action]=(cnt[s.action]||0)+1; if(s.origin==='import')cnt.imp++;});
+  const inTab=([,s])=>stab==='all'||(stab==='import'?s.origin==='import':s.action===stab);
+  if(stab!=='all'&&!all.some(inTab)) stab='all';   /* nothing of that kind left: back to everything */
+  const list=ordered.filter(inTab);
+  const pages=Math.max(1,Math.ceil(list.length/PER)); if(spage>pages) spage=pages;
+  const shown=list.slice((spage-1)*PER,spage*PER);
+  const TABS=[['all','All',all.length,'term changes'],['add','Additions',cnt.add,'additions'],['update','Updates',cnt.update,'updates'],['remove','Removals',cnt.remove,'removals'],['import','From import',cnt.imp,'from import']];
+  const tabNoun=(TABS.find(t=>t[0]===stab)||TABS[0])[3];
   const probs=stagedProblems(), blk=stagedBlockers(), blkTerms=blockersByKey().size;
   const rows=shown.map(([k,s])=>{
     const orig=idMap().get(k);
@@ -3021,15 +3034,15 @@ function stagingHTML(){
   const extra=classificationEdits().filter(r=>!staged[r.ID]).length;
   return `<div class="card" id="stagingCard"><div class="ch"><h3>Staging</h3></div><div class="cb">
     <p class="say">Nothing here has changed the draft yet. Apply term edits and classification changes separately, or export the term edits as a change-set CSV. Applying moves them into <b>Draft &amp; Publish</b>${vo?'':' and saves the draft online'}.</p>
-    <div class="tiles"><div class="tile add"><b>${cnt.add}</b><span>Additions</span></div><div class="tile update"><b>${cnt.update}</b><span>Updates</span></div>
-      <div class="tile remove"><b>${cnt.remove}</b><span>Removals</span></div><div class="tile imp"><b>${cnt.imp}</b><span>From import</span></div>
-      <div class="tile"><b>${nT+nV}</b><span>Total staged</span></div></div>
+    <div class="tiles stiles" role="group" aria-label="Show">${[['add','add',cnt.add,'Additions'],['update','update',cnt.update,'Updates'],['remove','remove',cnt.remove,'Removals'],['imp','import',cnt.imp,'From import'],['','all',nT+nV,'Total staged']].map(([cls,k,c,l])=>
+      `<button type="button" class="tile ${cls}" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''} title="${k==='all'?'Show everything staged':'Show just the '+l.toLowerCase()}"><b>${c}</b><span>${l}</span></button>`).join('')}</div>
     ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each item is decided in <b>Needs a Decision</b>. Select the flag on the row.</span></div>`:''}
     ${nT?(probs.length?`<div class="checks"><span class="pill bad">${probs.length} problem${probs.length===1?'':'s'}</span><span>Fix these before applying. Select Edit on the row.</span></div>`
       :`<div class="checks"><span class="pill ok">Passed</span><span><b>All checks passed.</b> ${nT} row${nT===1?'':'s'} ready.</span></div>`):''}
+    ${nT?`<div class="vt" role="group" aria-label="Which changes">${TABS.map(([k,l,c])=>`<button type="button" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''}>${l} <small>${n(c)}</small></button>`).join('')}</div>`:''}
     ${rows}
-    ${pages>1?`<div class="pager" style="border:0;padding:0"><button class="btn sm" type="button" id="sPrev"${spage<=1?' disabled':''}>Previous</button><span>Page ${n(spage)} of ${n(pages)} · ${n(all.length)} term changes</span><button class="btn sm" type="button" id="sNext"${spage>=pages?' disabled':''}>Next</button></div>`:''}
-    ${vrows}
+    ${pages>1?`<div class="pager" style="border:0;padding:0"><button class="btn sm" type="button" id="sPrev"${spage<=1?' disabled':''}>Previous</button><span>Page ${n(spage)} of ${n(pages)} · ${n(list.length)} ${tabNoun}</span><button class="btn sm" type="button" id="sNext"${spage>=pages?' disabled':''}>Next</button></div>`:''}
+    ${stab==='all'?vrows:''}
     ${!nT&&!nV?'<div class="empty" style="padding:6px 0">Nothing is staged. Changes you stage from a term collect here.</div>':''}
     <div class="sacts">
       <button class="btn go" type="button" id="applyT"${!nT||probs.length||blk.length?' disabled':''}>Apply term changes${nT?` (${nT})`:''}</button>
@@ -3040,6 +3053,7 @@ function stagingHTML(){
     </div></div></div>`;
 }
 function wireStaging(root){
+  root.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ stab=b.dataset.st; spage=1; render(); });
   root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>select(b.dataset.edit));
   root.querySelectorAll('[data-decide]').forEach(b=>b.onclick=()=>{ ifocus=b.dataset.decide; showSkipped=false; itab='all'; ipage=1; go('issues'); });
   root.querySelectorAll('[data-unstage]').forEach(b=>b.onclick=async()=>{ delete staged[b.dataset.unstage]; await persist(); touch(); toast('Unstaged'); render(); });
