@@ -506,6 +506,16 @@ const cellValues=(row,f)=>f.multi?splitMulti(row[f.key])
 /* ============================================================================ CSV
    RFC 4180, inline rather than a CDN dependency: the glossary contains quoted
    fields with embedded newlines, which naive line-splitting silently drops. */
+/* Excel's plain "CSV (Comma delimited)" is saved in Windows encoding, not UTF-8 (Perry, 15 Oct 2026: it should just
+   read a regular CSV). A file is read as UTF-16 if it says so, as UTF-8 if it is valid UTF-8, and otherwise as Windows
+   encoding, so ’ ® • and the like arrive intact whichever way it was saved. */
+async function readCSVFile(f){
+  const buf=new Uint8Array(await f.arrayBuffer());
+  if(buf[0]===0xFF&&buf[1]===0xFE) return {text:new TextDecoder('utf-16le').decode(buf.subarray(2)),enc:'UTF-16'};
+  if(buf[0]===0xFE&&buf[1]===0xFF) return {text:new TextDecoder('utf-16be').decode(buf.subarray(2)),enc:'UTF-16'};
+  try{ return {text:new TextDecoder('utf-8',{fatal:true}).decode(buf),enc:'UTF-8'}; }
+  catch(e){ return {text:new TextDecoder('windows-1252').decode(buf),enc:'Windows'}; }
+}
 function parseCSV(text){
   if(text.charCodeAt(0)===0xFEFF) text=text.slice(1);
   const rows=[]; let row=[],field='',q=false;
@@ -3708,7 +3718,7 @@ function renderBackups(M,c){
   on('bk',async()=>{ await exportBackup(); touch(); render(); toast('Backup downloaded'); });
   on('xl',e=>downloadExcel(e.currentTarget));
   $('rsFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) restoreDialog(f); };
-  $('impFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) f.text().then(t=>{ $('impText').value=t; checkImport(t); }); };
+  $('impFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) readCSVFile(f).then(({text})=>{ $('impText').value=text; checkImport(text); }); };
   on('impGo',()=>checkImport($('impText').value));
   wireImport();
 }
@@ -3724,7 +3734,7 @@ function checkImport(text){
   importWarnings=heads.filter(h=>h&&!KNOWN.includes(h)).map(h=>{ const m=near(h);
     return `The column <b>${esc(h)}</b> isn\u2019t one the importer knows, so it was ignored.${m?` Did you mean <b>${esc(m)}</b>?`:''}`; });
   if(parsed.some(r=>String(r.Action||'').trim().toLowerCase()==='update')) ['Source','TermType','FocusArea'].filter(c=>!heads.includes(c)).forEach(c=>importWarnings.push(`There is no <b>${c}</b> column, so every update in this file would <b>blank</b> its ${VOCAB_LABEL[c][1]}. Add the column with each term\u2019s values, or remove those updates.`));
-  if(String(text).includes('\ufffd')) importWarnings.push('This file isn\u2019t saved as UTF-8, so characters like \u2019 \u00ae and \u2022 are garbled (shown as \ufffd). In Excel, choose <b>File \u203a Save As \u203a CSV UTF-8 (Comma delimited)</b> and import that file.');
+  if(String(text).includes('\ufffd')) importWarnings.push('Some characters in this file were already lost before it was saved (shown as \ufffd), so they can\u2019t be read back. Staging flags each one with a suggested fix; check them against the source.');
   const idOf=nm=>{ const t=master.find(r=>String(r.Term||'').replace(/\s+/g,' ').trim().toLowerCase()===String(nm).replace(/\s+/g,' ').trim().toLowerCase()); return t?t.ID:String(nm).trim(); };
   const linksFrom=v=>splitMulti(v).map(idOf).join('|');
   const hasAka=(AKA_COL in parsed[0])||('AKA' in parsed[0]), hasRel=(REL_COL in parsed[0])||('Related' in parsed[0]);
@@ -3780,7 +3790,7 @@ function wireImport(){
   };
 }
 async function restoreDialog(file){
-  const text=await file.text(); const rows=parseCSV(text);
+  const {text}=await readCSVFile(file); const rows=parseCSV(text);
   if(!rows.length||!('Term' in rows[0])) return say('Not a glossary backup','Expected the columns that Download Backup writes.');
   dialog({title:`Restore ${n(rows.length)} terms?`,danger:true,ok:'Restore',
     body:`<p style="margin:0">This replaces the glossary in this browser, and it becomes the baseline the draft is compared with. A backup holds the terms only: staged edits and the classification lists are rebuilt from them.</p>
