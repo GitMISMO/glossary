@@ -238,6 +238,13 @@ select.sel,select.inp{-webkit-appearance:none;appearance:none;background-image:v
 .tile{border:1px solid var(--line-2);border-radius:6px;background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .tile b{font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+/* the problem highlighted on the term */
+mark.bad{background:#FADBD7;color:#8E1F14;border-radius:2px;padding:0 1px;box-shadow:inset 0 -1px 0 #E39A90}
+mark.good{background:#D9F1E5;color:#0B5A3C;border-radius:2px;padding:0 1px;box-shadow:inset 0 -1px 0 #8FCDAE}
+mark.warn{background:#FCEFD6;color:#7A5112;border-radius:2px;padding:0 1px}
+.hlf{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3);margin-bottom:2px}
+.hlv,.hlfix,.hlnote{display:block;line-height:1.5;overflow-wrap:anywhere} .hlfix{margin-top:3px;color:var(--ink-2)} .hlnote{margin-top:3px;color:var(--ink-2)}
+.hlk{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#0B5A3C;background:#D9F1E5;border-radius:3px;padding:0 5px;margin-right:4px}
 /* a staged term's checks, decided on the term */
 .sissues{display:flex;flex-direction:column;gap:6px;margin-top:10px}
 .sissue{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border:1px solid var(--bad-soft,#F3D4D0);border-left:3px solid var(--bad,#B3372C);background:var(--surface);border-radius:4px;padding:9px 12px}
@@ -3026,17 +3033,57 @@ function vocabRowHTML(p){
 }
 /* stab: which staged changes the list shows, set by the Which changes buttons or the tiles above them (both, as on
    Draft & Publish: Perry and a colleague, 10 Oct 2026). Total staged and All show everything. */
+/* The issue, highlighted on the term (Perry, 15 Oct 2026): the current text with the problem in red (no
+   strikethrough) and, where there is a proposed fix, the result with the change in green. For a fix, what changes
+   is found by comparing the two, word by word and space by space; spaces and line breaks in a highlight show as
+   middle dots and arrows so a double space can be seen. Long text is trimmed to the stretch around the problem. */
+const HL_TOK=/&#?[A-Za-z0-9]+;|\s+|[A-Za-z0-9]+|[^\sA-Za-z0-9]/g;   /* an entity such as &amp; is one piece */
+function hlDiff(a,b){
+  const x=String(a).match(HL_TOK)||[], y=String(b).match(HL_TOK)||[];
+  let p=0; while(p<x.length&&p<y.length&&x[p]===y[p]) p++;
+  let q=0; while(q<x.length-p&&q<y.length-p&&x[x.length-1-q]===y[y.length-1-q]) q++;
+  const xm=x.slice(p,x.length-q), ym=y.slice(p,y.length-q), n=xm.length, m=ym.length;
+  const keepX=new Array(n).fill(false), keepY=new Array(m).fill(false);
+  if(n&&m&&n*m<=250000){ const L=Array.from({length:n+1},()=>new Uint16Array(m+1));
+    for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) L[i][j]=xm[i]===ym[j]?L[i+1][j+1]+1:Math.max(L[i+1][j],L[i][j+1]);
+    let i=0,j=0; while(i<n&&j<m){ if(xm[i]===ym[j]){ keepX[i]=keepY[j]=true; i++; j++; } else if(L[i+1][j]>=L[i][j+1]) i++; else j++; } }
+  const tag=(all,keep)=>all.map((t,k)=>[t,k>=p&&k<all.length-q&&!keep[k-p]]);
+  return { a:tag(x,keepX), b:tag(y,keepY) };
+}
+const hlVis=t=>esc(t).replace(/ /g,'\u00b7').replace(/\r?\n/g,'\u21b5').replace(/\t/g,'\u2192').replace(/\u00a0/g,'\u2423');
+function hlHTML(toks,cls,room=110){
+  const first=toks.findIndex(t=>t[1]); let from=0,to=toks.length;
+  if(first>=0){ let c=0; from=first; while(from>0&&c<room){ c+=toks[from-1][0].length; from--; }
+    let last=first; for(let k=first;k<toks.length;k++) if(toks[k][1]) last=k; c=0; to=last+1; while(to<toks.length&&c<room){ c+=toks[to][0].length; to++; } }
+  else if(toks.reduce((s,t)=>s+t[0].length,0)>room*2){ let c=0; to=0; while(to<toks.length&&c<room*2){ c+=toks[to][0].length; to++; } }
+  let out='', open=false;
+  for(let k=from;k<to;k++){ const [t,f]=toks[k]; if(f&&!open){ out+=`<mark class="${cls}">`; open=true; } if(!f&&open){ out+='</mark>'; open=false; } out+=f?hlVis(t):esc(t); }
+  if(open) out+='</mark>';
+  return (from>0?'\u2026':'')+out+(to<toks.length?'\u2026':'');
+}
+const hlMatch=(v,re)=>(String(v).match(HL_TOK)||[]).map(t=>[t,re.test(t)]);
+function issueWhatHTML(i){
+  const f=vfield(i.field), v=String(i.before??'');
+  if(i.fixable&&i.after!=null){ const d=hlDiff(v,i.after);
+    return `<span class="hlv">${hlHTML(d.a,'bad')}</span><span class="hlfix"><span class="hlk">Fix</span> ${hlHTML(d.b,'good')}</span>`; }
+  if(i.type==='dead-link'&&i.bad?.length){ let h=esc(v.slice(0,300)); i.bad.forEach(x=>{ const t=esc('[['+x+']]'); h=h.split(t).join(`<mark class="bad">${t}</mark>`); });
+    return `<span class="hlv">${h}${v.length>300?'\u2026':''}</span><span class="hlnote">Links to <b>${i.bad.map(x=>esc('[['+x+']]')).join(', ')}</b>, which ${i.bad.length===1?'is':'are'} not a term in the glossary. Correct the name or remove the link.</span>`; }
+  if(f&&(i.bad?.length||i.pendingDel?.length)){ const vals=cellValues({[i.field]:v},f);
+    const shown=vals.map(x=>i.bad?.includes(x)?`<mark class="bad">${esc(x)}</mark>`:i.pendingDel?.includes(x)?`<mark class="warn">${esc(x)}</mark>`:esc(x)).join(' | ');
+    return `<span class="hlv">${shown}</span><span class="hlnote">${i.bad?.length?`<b>${i.bad.map(esc).join(', ')}</b> ${i.bad.length===1?'is':'are'} not in ${esc(f.label.toLowerCase())}`:''}${i.bad?.length&&i.pendingDel?.length?'; ':''}${i.pendingDel?.length?`<b>${i.pendingDel.map(esc).join(', ')}</b> ${i.pendingDel.length===1?'is':'are'} staged for removal. Nothing has changed on this term yet`:''}</span>`; }
+  if(!v.trim()) return `<span class="hlv"><mark class="bad">(empty)</mark></span>${i.note?`<span class="hlnote">${esc(i.note)}</span>`:''}`;
+  if(i.type==='replacement-manual') return `<span class="hlv">${hlHTML(hlMatch(v,/^\uFFFD$/),'bad')}</span>`;
+  if(i.type==='multi-value') return `<span class="hlv">${hlHTML(hlMatch(v,/^\|$/),'bad')}</span>`;
+  return `<span class="hlv">${hlHTML(hlMatch(v,/(?!)/),'bad')}</span>${i.note?`<span class="hlnote">${esc(i.note)}</span>`:''}`;
+}
 let spage=1, stab='all';
 /* A staged term's failing check, decided where the term is being fixed (Perry, 15 Oct 2026: it shouldn't also sit in
    Needs a Decision): what's wrong, the proposed fix, and Approve fix, Add to list or Keep as is. */
 function stagedIssueHTML(i){
   const f=vfield(i.field), vo=viewOnly(), m=issueMeta(i.type);
-  const what=i.fixable?`<del>${vis(String(i.before).slice(0,240))}</del> \u2192 <ins>${vis(String(i.after).slice(0,240))}</ins>`
-    :i.type==='dead-link'&&i.bad?.length?`Links to <b>${i.bad.map(x=>esc('[['+x+']]')).join(', ')}</b>, which ${i.bad.length===1?'is':'are'} not a term in the glossary.`
-    :f&&i.bad?.length?`<b>${i.bad.map(esc).join(', ')}</b> ${i.bad.length===1?'is':'are'} not in ${esc(f.label.toLowerCase())}`
-    :`${esc(String(i.before).slice(0,200))||'<em>(empty)</em>'}${i.note?` \u00b7 ${esc(i.note)}`:''}`;
-  return `<div class="sissue"><div style="min-width:0"><div class="it"><b>${esc(m.title)}</b> \u00b7 ${esc(LABEL[i.field]||fieldLabel(i.field)||i.field)}</div>
-      <div class="id">${what}</div>${m.desc?`<div class="sd">${esc(m.desc)}</div>`:''}</div>
+  const what=issueWhatHTML(i);
+  return `<div class="sissue"><div style="min-width:0"><div class="it"><b>${esc(m.title)}</b></div>
+      <div class="id"><span class="hlf">${esc(LABEL[i.field]||fieldLabel(i.field)||i.field)}</span>${what}</div>${m.desc?`<div class="sd">${esc(m.desc)}</div>`:''}</div>
     <div class="r">${i.fixable&&!vo?`<button class="btn sm p" type="button" data-sfix="${esc(i.id)}">Approve fix</button>`:''}${f&&i.bad?.length===1&&!vo?`<button class="btn sm" type="button" data-saddv="${esc(i.field)}|${esc(i.bad[0])}" title="Stage adding this value to the list">Add to list</button>`:''}${vo?'':`<button class="btn sm" type="button" data-skeep="${esc(i.id)}">Keep as is</button>`}</div></div>`;
 }
 function stagingHTML(){
@@ -3196,13 +3243,10 @@ function renderIssuesPage(M,c){
   const meta=t=>issueMeta(t);
   const row=i=>{
     const f=vfield(i.field);
-    const what=i.fixable?`<del>${vis(String(i.before).slice(0,200))}</del> → <ins>${vis(String(i.after).slice(0,200))}</ins>`
-      :i.type==='dead-link'&&i.bad?.length?`Links to <b>${i.bad.map(x=>esc('[['+x+']]')).join(', ')}</b>, which ${i.bad.length===1?'is':'are'} not a term in the glossary. Correct the name or remove the link.`
-      :f&&(i.bad?.length||i.pendingDel?.length)?`${i.bad?.length?`<b>${i.bad.map(esc).join(', ')}</b> ${i.bad.length===1?'is':'are'} not in ${esc(f.label.toLowerCase())}`:''}${i.bad?.length&&i.pendingDel?.length?'; ':''}${i.pendingDel?.length?`<b>${i.pendingDel.map(esc).join(', ')}</b> ${i.pendingDel.length===1?'is':'are'} staged for removal. Nothing has changed on this term yet`:''}`
-      :`${esc(String(i.before).slice(0,200))||'<em>(empty)</em>'}${i.note?` · ${esc(i.note)}`:''}`;
+    const what=issueWhatHTML(i);   /* the problem highlighted on the term (15 Oct 2026) */
     const kr=showSkipped?keptRec(i):null;
     return `<div class="issue"><div style="min-width:0"><div class="it">${i.scope==='staged'?'<span class="stg">Staged</span> ':''}${esc(meta(i.type).title)}: ${esc(i.term||'(untitled)')}</div>
-      <div class="id">${esc(LABEL[i.field]||fieldLabel(i.field))}. ${what}${i.note&&i.fixable?` · ${esc(i.note)}`:''}</div>${kr?`<div class="id kept">Kept as is${kr.by?` by ${esc(kr.by)}`:''}${kr.reason?`: ${esc(kr.reason)}`:''}</div>`:''}</div>
+      <div class="id"><span class="hlf">${esc(LABEL[i.field]||fieldLabel(i.field))}</span>${what}${i.note&&i.fixable?`<span class="hlnote">${esc(i.note)}</span>`:''}</div>${kr?`<div class="id kept">Kept as is${kr.by?` by ${esc(kr.by)}`:''}${kr.reason?`: ${esc(kr.reason)}`:''}</div>`:''}</div>
       <div class="r">${showSkipped?`<button class="btn sm" type="button" data-unskip="${esc(i.id)}">Undo skip</button>`:`
         ${i.fixable&&!vo?`<button class="btn sm p" type="button" data-fix="${esc(i.id)}">Approve fix</button>`:''}
         ${f&&i.bad?.length===1?`<button class="btn sm" type="button" data-addv="${esc(i.field)}|${esc(i.bad[0])}" title="Stage adding this value to the list">Add to list</button>`:''}
