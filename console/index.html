@@ -294,6 +294,10 @@ select.sel,select.inp{-webkit-appearance:none;appearance:none;background-image:v
 .scrim{position:fixed;inset:0;z-index:20;background:var(--scrim);display:flex;align-items:center;justify-content:center;padding:16px}
 .dlg{background:var(--surface);color:var(--ink);border-radius:8px;box-shadow:var(--shadow);width:100%;max-width:560px;max-height:calc(100% - 32px);display:flex;flex-direction:column}
 .dlg.wide{max-width:820px}
+.iss-causes{margin:6px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.iss-wrap{border:1px solid var(--line-2);border-radius:4px;overflow:auto;max-height:46vh}
+table.iss{width:100%;border-collapse:collapse;font-size:12.5px} table.iss th{position:sticky;top:0;background:var(--sunk);text-align:left;padding:7px 9px;font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+table.iss td{padding:6px 9px;border-top:1px solid var(--line);vertical-align:top} table.iss td:first-child{color:var(--ink-3);white-space:nowrap}
 .dlg h3{margin:0;padding:18px 20px 0;font-size:17px}
 .dlg .db{padding:10px 20px;overflow:auto;display:flex;flex-direction:column;gap:12px;font-size:13.5px}
 .dlg .df{padding:12px 20px 18px;display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
@@ -1032,6 +1036,21 @@ async function unstageVocab(id){
 }
 
 /* ============================================================================ IMPORT (change-sets only) */
+/* Each problem says exactly what is wrong with the row (Perry, 15 Oct 2026: "that flag is not clear"). */
+const VOCAB_LABEL={TermType:['Term type','term types','Term types'],FocusArea:['Focus area','focus areas','Focus areas'],Source:['Source','sources','Sources']};
+function importProblems(o){
+  const out=[], id=String(o.ID||'').trim();
+  if(!ACTIONS.includes(o._a)) return [`Action is ${String(o.Action||'').trim()?'"'+String(o.Action).trim()+'"':'blank'}: it must be add, update or remove`];
+  if(o._a==='add'&&id) out.push(`Additions must not carry an ID (this row has ${id}): one is assigned on upload`);
+  if(o._a!=='add'&&!id) out.push(`${o._a==='update'?'An update':'A removal'} needs the term\u2019s ID, and this row has none`);
+  if(o._a!=='add'&&id&&!master.some(m=>m.ID===id)) out.push(`ID ${id} doesn\u2019t match any term in the glossary`);
+  if(o._a!=='remove'){
+    if(!String(o.Term||'').trim()) out.push('The Term is blank');
+    if(!String(o.Definition||'').trim()) out.push('The Definition is blank');
+    VOCAB_FIELDS.forEach(f=>cellValues(o,f).forEach(v=>{ if(!validVocab(f.key).includes(v)) out.push(`${VOCAB_LABEL[f.key][0]} "${v}" isn\u2019t one of the glossary\u2019s ${VOCAB_LABEL[f.key][1]}`); }));
+  }
+  return out;
+}
 const IMPORT_CHECKS=[
   {msg:'Action must be add, update or remove', bad:r=>!ACTIONS.includes(r._a)},
   {msg:'Additions must not carry an ID — one is assigned on upload', bad:r=>r._a==='add'&&String(r.ID||'').trim()},
@@ -2404,7 +2423,7 @@ const stagedProblems=()=>cached('sp',()=>{ const out=[]; problemsByKey().forEach
 let view='terms', sel=null, form=null, lastPage=1;
 let q='', fType='', fArea='', fSrc='', fStatus='';
 let cTab='TermType', dtab=null, dpage=1, itab='all', ipage=1, showSkipped=false;
-let importRows=null;
+let importWarnings=[], importRows=null;
 
 /* ---------- filtering the terms list ---------- */
 function termList(){
@@ -3630,8 +3649,16 @@ function renderBackups(M,c){
 /* The classic importer's checks, unchanged. Links arrive as names and are resolved to IDs. */
 function checkImport(text){
   const parsed=parseCSV(String(text||''));
+  importWarnings=[];
   if(!parsed.length){ importRows=null; $('impMsg').innerHTML='<div class="banner bad"><span>No rows found.</span></div>'; return; }
   if(!('Action' in parsed[0])){ importRows=null; $('impMsg').innerHTML=`<div class="banner bad"><span>This file has no Action column, so it is not a change-set. Found columns: ${esc(Object.keys(parsed[0]).join(', '))}.</span></div>`; return; }
+  /* The file itself: columns the importer can't see, and characters a non-UTF-8 save garbles (15 Oct 2026). */
+  const KNOWN=[...CHANGESET_COLS,'AKA','Related'], heads=Object.keys(parsed[0]);
+  const near=h=>{ const k=x=>x.toLowerCase().replace(/[^a-z]/g,''); return KNOWN.find(c=>k(c)===k(h)||k(c)+'s'===k(h)||k(c)===k(h)+'s'); };
+  importWarnings=heads.filter(h=>h&&!KNOWN.includes(h)).map(h=>{ const m=near(h);
+    return `The column <b>${esc(h)}</b> isn\u2019t one the importer knows, so it was ignored.${m?` Did you mean <b>${esc(m)}</b>?`:''}`; });
+  if(parsed.some(r=>String(r.Action||'').trim().toLowerCase()==='update')) ['Source','TermType','FocusArea'].filter(c=>!heads.includes(c)).forEach(c=>importWarnings.push(`There is no <b>${c}</b> column, so every update in this file would <b>blank</b> its ${VOCAB_LABEL[c][1]}. Add the column with each term\u2019s values, or remove those updates.`));
+  if(String(text).includes('\ufffd')) importWarnings.push('This file isn\u2019t saved as UTF-8, so characters like \u2019 \u00ae and \u2022 are garbled (shown as \ufffd). In Excel, choose <b>File \u203a Save As \u203a CSV UTF-8 (Comma delimited)</b> and import that file.');
   const idOf=nm=>{ const t=master.find(r=>String(r.Term||'').replace(/\s+/g,' ').trim().toLowerCase()===String(nm).replace(/\s+/g,' ').trim().toLowerCase()); return t?t.ID:String(nm).trim(); };
   const linksFrom=v=>splitMulti(v).map(idOf).join('|');
   const hasAka=(AKA_COL in parsed[0])||('AKA' in parsed[0]), hasRel=(REL_COL in parsed[0])||('Related' in parsed[0]);
@@ -3642,7 +3669,7 @@ function checkImport(text){
     o.AKA=r[AKA_COL]!==undefined?linksFrom(r[AKA_COL]):r.AKA!==undefined?r.AKA:(!hasAka&&had?had.AKA:'');
     o.Related=r[REL_COL]!==undefined?linksFrom(r[REL_COL]):r.Related!==undefined?r.Related:(!hasRel&&had?had.Related:'');
     o._a=String(o.Action||'').trim().toLowerCase(); o._i=i+2;
-    o._problems=IMPORT_CHECKS.filter(c=>{try{return c.bad(o);}catch(e){return false;}}).map(c=>c.msg);
+    o._problems=importProblems(o);
     return o;
   });
   $('impMsg').innerHTML=importSummaryHTML(importRows); wireImport();
@@ -3653,11 +3680,30 @@ function importSummaryHTML(rows){
   return `<div class="tiles"><div class="tile"><b>${rows.length}</b><span>Rows</span></div><div class="tile add"><b>${k('add')}</b><span>Additions</span></div>
       <div class="tile update"><b>${k('update')}</b><span>Updates</span></div><div class="tile remove"><b>${k('remove')}</b><span>Removals</span></div>
       <div class="tile${bad.length?' remove':''}"><b>${bad.length}</b><span>Rejected</span></div></div>
-    ${bad.length?`<div class="banner bad"><span><b>${bad.length} row${bad.length===1?'':'s'} cannot be staged.</b><br>${bad.slice(0,6).map(r=>`Row ${r._i}, ${esc(String(r.Term||'(untitled)').slice(0,50))}: ${esc(r._problems[0])}`).join('<br>')}${bad.length>6?`<br>and ${bad.length-6} more`:''}</span></div>`:''}
+    ${(importWarnings||[]).length?`<div class="banner warn"><span><b>Check the file before staging.</b><br>${importWarnings.join('<br>')}</span></div>`:''}
+    ${bad.length?`<div class="banner bad"><span><b>${bad.length} row${bad.length===1?'':'s'} cannot be staged.</b><br>${bad.slice(0,6).map(r=>`Row ${r._i}, ${esc(String(r.Term||'(untitled)').slice(0,50))}: ${esc(r._problems.join('; '))}`).join('<br>')}${bad.length>6?`<br>and ${bad.length-6} more`:''}
+      <br><button class="btn sm" type="button" id="impIssues" style="margin-top:8px">See all ${bad.length} issue${bad.length===1?'':'s'}</button></span></div>`:''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">${ok.length?`<button class="btn p" type="button" id="impStage">Stage ${ok.length} valid row${ok.length===1?'':'s'}</button>`:'<span class="muted">Nothing valid to stage.</span>'}<button class="btn" type="button" id="impCancel">Clear</button></div>`;
 }
+/* Every rejected row, in a pop-out: the causes first, with how many rows each affects and what to do, then each row
+   with all its problems; downloadable as a CSV to work through (15 Oct 2026). */
+function issuesDialog(){
+  const bad=(importRows||[]).filter(r=>r._problems.length); if(!bad.length) return;
+  const by=new Map(); bad.forEach(r=>r._problems.forEach(p=>by.set(p,(by.get(p)||0)+1)));
+  const fix=p=>{ const m=p.match(/^(Term type|Focus area|Source) "(.*)" isn\u2019t one/); if(!m) return '';
+    const key=Object.keys(VOCAB_LABEL).find(k=>VOCAB_LABEL[k][0]===m[1]);
+    return `Add it under <b>Classifications \u203a ${VOCAB_LABEL[key][2]}</b>, or change these rows to one of: ${esc(effectiveVocab(key).join(', '))}.`; };
+  const causes=[...by.entries()].sort((a,b)=>b[1]-a[1]).map(([p,n])=>`<li><b>${esc(p)}</b> \u00b7 ${n} row${n===1?'':'s'}${fix(p)?`<br><span class="muted">${fix(p)}</span>`:''}</li>`).join('');
+  const rows=bad.map(r=>`<tr><td>${r._i}</td><td>${esc(String(r.Term||'(untitled)'))}</td><td>${esc(r._a||String(r.Action||''))}</td><td>${r._problems.map(esc).join('<br>')}</td></tr>`).join('');
+  dialog({title:`${bad.length} row${bad.length===1?'':'s'} can\u2019t be staged`, wide:true, ok:'Close', cancel:null,
+    body:`<div><div class="label">${by.size===1?'The cause':'The causes'}</div><ul class="iss-causes">${causes}</ul></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><div class="label" style="margin:0">Every row (${bad.length})</div><button class="btn sm" type="button" id="issCsv">Download as CSV</button></div>
+      <div class="iss-wrap"><table class="iss"><thead><tr><th>Row</th><th>Term</th><th>Action</th><th>Issues</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    onOpen:L=>{ const b=L.querySelector('#issCsv'); if(b) b.onclick=()=>download(`GlossaryImportIssues_${stamp()}.csv`, toCSV(bad.map(r=>({Row:r._i,ID:r.ID||'',Term:r.Term||'',Action:r._a||r.Action||'',Issues:r._problems.join('; ')})),['Row','ID','Term','Action','Issues'])); }});
+}
 function wireImport(){
-  const s=$('impStage'), c=$('impCancel');
+  const s=$('impStage'), c=$('impCancel'), iss=$('impIssues');
+  if(iss) iss.onclick=issuesDialog;
   if(c) c.onclick=()=>{ importRows=null; $('impMsg').innerHTML=''; const t=$('impText'); if(t) t.value=''; };
   if(s) s.onclick=async()=>{
     const ok=importRows.filter(r=>!r._problems.length);
