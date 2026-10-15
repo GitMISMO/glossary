@@ -17,7 +17,7 @@
   --paper:#F1F6FA; --surface:#FFFFFF; --sunk:#E9F1F8;
   --ink:#0f314c; --ink-2:#456179; --ink-3:#546F88;
   --line:#E5EEF5; --line-2:#D5E2ED; --line-3:#ADC4D6;
-  --accent:#14486E; --accent-soft:#dcedf8;
+  --accent:#14486E; --accent-soft:#dcedf8; /* Import (15 Oct 2026) */ --ground:var(--paper); --surface-2:#F6FAFD; --wash:#E4F2FB; --link:#14486E; --bad-line:#E9B5AE; --warn-line:#D7A54C; --warn-bg:#FFFBF2; --chg:#FFF6D9; --chg-line:#F0DFA6; --sel:#EAF3FB; --sel-line:#2C74A6; --mark-bad:#FADBD7; --mark-bad-ink:#8E1F14; --mark-good:#D9F1E5; --mark-good-ink:#0B5A3C; --note-ink:#14486E; --flash-bg:#E4F2FB; --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
   --bad:#B3372C; --bad-soft:#FBE9E7;
   --warn:#8A5F16; --warn-soft:#F7EFE0;
   --good:#0F7B5C; --good-soft:#E1F2EC;
@@ -32,7 +32,7 @@
   --paper:#0B1826; --surface:#112336; --sunk:#172D44;
   --ink:#EEF3F8; --ink-2:#B9C8D6; --ink-3:#8C9FB1;
   --line:#1A3048; --line-2:#243E5A; --line-3:#3A5A7C;
-  --accent:#50A4DB; --accent-soft:#173A57;
+  --accent:#50A4DB; --accent-soft:#173A57; /* Import (15 Oct 2026) */ --ground:var(--paper); --surface-2:#123143; --wash:#173A57; --link:#94C8E9; --bad-line:#7A3A33; --warn-line:#8A6A26; --warn-bg:#2B2410; --chg:#3A3216; --chg-line:#6B5A22; --sel:#16405A; --sel-line:#74BFEB; --mark-bad:#5A2420; --mark-bad-ink:#FFC9C2; --mark-good:#1B4A39; --mark-good-ink:#B8F0D6; --note-ink:#A9D8F3; --flash-bg:#1D4C69;
   --bad:#F08579; --bad-soft:#3D2220; --warn:#E0A83C; --warn-soft:#3A3020; --good:#72C08E; --good-soft:#1F3328;
   --btn:#50A4DB; --btn-ink:#0F314C; --go-ink:#06202f; --scrim:rgba(0,0,0,.65);
   --shadow:0 1px 2px rgba(0,0,0,.45), 0 10px 26px -18px rgba(0,0,0,.9);
@@ -42,7 +42,7 @@
   --paper:#0B1826; --surface:#112336; --sunk:#172D44;
   --ink:#EEF3F8; --ink-2:#B9C8D6; --ink-3:#8C9FB1;
   --line:#1A3048; --line-2:#243E5A; --line-3:#3A5A7C;
-  --accent:#50A4DB; --accent-soft:#173A57;
+  --accent:#50A4DB; --accent-soft:#173A57; /* Import (15 Oct 2026) */ --ground:var(--paper); --surface-2:#123143; --wash:#173A57; --link:#94C8E9; --bad-line:#7A3A33; --warn-line:#8A6A26; --warn-bg:#2B2410; --chg:#3A3216; --chg-line:#6B5A22; --sel:#16405A; --sel-line:#74BFEB; --mark-bad:#5A2420; --mark-bad-ink:#FFC9C2; --mark-good:#1B4A39; --mark-good-ink:#B8F0D6; --note-ink:#A9D8F3; --flash-bg:#1D4C69;
   --bad:#F08579; --bad-soft:#3D2220; --warn:#E0A83C; --warn-soft:#3A3020; --good:#72C08E; --good-soft:#1F3328;
   --btn:#50A4DB; --btn-ink:#0F314C; --go-ink:#06202f; --scrim:rgba(0,0,0,.65);
   --shadow:0 1px 2px rgba(0,0,0,.45), 0 10px 26px -18px rgba(0,0,0,.9);
@@ -117,6 +117,7 @@ main{min-width:0;min-height:0;display:flex;flex-direction:column}
 .btn:focus-visible,.chipw:focus-visible{outline:2px solid var(--sky);outline-offset:2px}
 .page{flex:1;min-height:0;overflow:auto;padding:22px 28px 40px}
 .pagein{max-width:1100px;display:flex;flex-direction:column;gap:16px}
+.pagein.imp-pagein{max-width:none;gap:0} #impHost{display:block}
 .mast{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:14px}
 .eyebrow{font-size:11px;letter-spacing:.11em;text-transform:uppercase;color:var(--ink-3);font-weight:600}
 .mast h2{margin:2px 0 0;font-size:clamp(22px,3vw,30px);line-height:1.05;letter-spacing:-.02em}
@@ -443,12 +444,13 @@ c57 -33 76 -84 76 -200 0 -116 -19 -167 -76 -200 -32 -19 -52 -20 -294 -20
     <button type="button" data-view="staging" title="Staging"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M3.5 12L12 16.5 20.5 12M3.5 16.5L12 21l8.5-4.5"/></svg><span>Staging</span><b class="dot" id="dStaging"></b></button>
     <button type="button" data-view="issues" title="Needs a Decision"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/></svg><span>Needs a Decision</span><b class="dot warn" id="dIssues"></b></button>
     <button type="button" data-view="publish" title="Draft &amp; Publish"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 8.5L12 4l5 4.5"/><path d="M4.5 15v3.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V15"/></svg><span>Draft &amp; Publish</span><b class="dot" id="dPublish"></b></button>
+    <button type="button" data-view="import" title="Import"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16v2.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V16"/></svg><span>Import</span></button>
   </nav>
   <div class="rgrp"><span class="glbl">Glossary</span>
     <nav>
       <button type="button" data-view="classes" title="Classifications"><svg class="i" viewBox="0 0 24 24"><path d="M3 12V4h8l9 9-8 8-9-9z"/><circle cx="7.5" cy="8.5" r="1.3"/></svg><span>Classifications</span></button>
       <button type="button" data-view="versions" title="Versions"><svg class="i" viewBox="0 0 24 24"><path d="M4 12a8 8 0 102.4-5.7L4 8.5"/><path d="M4 4v4.5h4.5M12 8v4l3 2"/></svg><span>Versions</span></button>
-      <button type="button" data-view="backups" title="Backups &amp; Import"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16v2.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V16"/></svg><span>Backups &amp; Import</span></button>
+      <button type="button" data-view="backups" title="Backups"><svg class="i" viewBox="0 0 24 24"><path d="M4 8h16v11.5a.5.5 0 01-.5.5h-15a.5.5 0 01-.5-.5V8z"/><path d="M3.5 4.5h17V8h-17z"/><path d="M10 12h4"/></svg><span>Backups</span></button>
     </nav>
   </div>
   <div class="rfoot"><nav>
@@ -2600,6 +2602,7 @@ function render(){
   else if(view==='classes') renderClasses(M,c);
   else if(view==='versions') renderVersions2(M,c);
   else if(view==='backups') renderBackups(M,c);
+  else if(view==='import') renderImport(M,c);
   wireActs(M);
 }
 /* No Publish button up here (Sept 29, 2026): publishing happens on Draft & Publish only. */
@@ -3196,16 +3199,20 @@ async function applyTerms(){
   if(stagedBlockers().length) return;
   const now=new Date().toISOString();
   const gone=new Set(list.filter(([,s])=>s.action==='remove').map(([k])=>k));
+  const NEWID=new Map(), nkey=v=>String(v||'').replace(/\s+/g,' ').trim().toLowerCase();   /* new terms' IDs by name, for links (15 Oct 2026) */
   /* A fix to a governed field corrects the list with it, as the classic Approve did. */
   list.forEach(([k,s])=>{ if(s.action==='update'&&Array.isArray(s.fix)) s.fix.forEach(f=>{
     if(String(s.data[f.field]??'')===String(f.after)){ syncVocabFix(f.field,f.before,f.after); } }); if(s.origin==='fix') fixCount++; });
   list.forEach(([key,s])=>{
-    if(s.action==='add'){ const id=crypto.randomUUID();
+    if(s.action==='add'){ const id=crypto.randomUUID(); NEWID.set(nkey(s.data.Term),id);
       master.push({...Object.fromEntries(MASTER_COLS.map(c=>[c,s.data[c]??''])),ID:id}); touched[id]=now; }
     else if(s.action==='update'){ const r=idMap().get(key);
       if(r){ MASTER_COLS.forEach(c=>{ if(c!=='ID'&&c in s.data) r[c]=s.data[c]??''; }); touched[key]=now; } }
     else if(s.action==='remove'){ const i=master.findIndex(m=>m.ID===key); if(i>-1){ master.splice(i,1); touched[key]=now; } }
   });
+  /* Links between terms new in the same import arrive as names, since they had no IDs yet: connected now (15 Oct 2026). */
+  if(NEWID.size){ const ids=new Set(master.map(r=>r.ID)); master.forEach(r=>{ if(touched[r.ID]!==now) return; ['AKA','Related'].forEach(f=>{ const v=splitMulti(r[f]);
+    if(v.some(x=>!ids.has(x)&&NEWID.has(nkey(x)))) r[f]=v.map(x=>ids.has(x)?x:(NEWID.get(nkey(x))||x)).join('|'); }); }); }
   /* A removed term leaves no link behind: other terms that listed it drop it. */
   if(gone.size) master.forEach(r=>['AKA','Related'].forEach(f=>{ const v=splitMulti(r[f]); if(!v.some(x=>gone.has(x))) return; r[f]=v.filter(x=>!gone.has(x)).join('|'); touched[r.ID]=now; }));
   staged={}; sortMaster(); await persist(); touch();
@@ -3689,10 +3696,17 @@ async function downloadReleaseCSV(rel,btn){
 }
 
 /* ===== Backups & Import ===== */
+/* Import (Perry, 15 Oct 2026): its own section. The import lives in one container (window.__impHost), made once and put
+   back in place here on every redraw, so what is open in it survives the console redrawing around it. */
+function renderImport(M,c){
+  M.innerHTML=topBar('Import',c,'')+`<div class="page"><div class="pagein imp-pagein">${statusBanner()}<div id="impSlot"></div></div></div>`;
+  const host=window.__impHost, slot=$('impSlot'); if(!host||!slot) return;
+  slot.replaceWith(host); if(window.GlossaryImport) window.GlossaryImport.show();
+}
 function renderBackups(M,c){
   const ok=repo&&repoState?.ok, vo=viewOnly();
-  M.innerHTML=topBar('Backups & Import',c,'')+`<div class="page"><div class="pagein">${statusBanner()}
-    <header class="mast"><div><div class="eyebrow">Glossary</div><h2>Backups &amp; Import</h2></div></header>
+  M.innerHTML=topBar('Backups',c,'')+`<div class="page"><div class="pagein">${statusBanner()}
+    <header class="mast"><div><div class="eyebrow">Glossary</div><h2>Backups</h2></div></header>
     <div class="grid2">
       <div class="card"><div class="ch"><h3>Online copy</h3></div><div class="cb">
         <p class="say">The draft is saved to the repository whenever changes are applied, and every hour while this page is open${vo?' (not for view-only accounts)':''}.</p>
@@ -3705,12 +3719,9 @@ function renderBackups(M,c){
         <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="bk">Download Backup</button><button class="btn" type="button" id="xl">Draft as Excel</button>
           <label class="btn">Restore from a backup…<input type="file" id="rsFile" accept=".csv,text/csv" hidden></label></div>
         <p class="say">Draft as Excel is the working draft on one sheet. The release workbook members download, with the cover, version history and change detail, is made from a published version on <button type="button" class="lnk" data-go="versions">Versions</button>.</p></div></div>
-      <div class="card span2"><div class="ch"><h3>Import a change-set</h3></div><div class="cb">
-        <p class="say">A CSV with an <b>Action</b> column (add, update or remove) and the glossary's columns, as the change-set export writes it. Rows are checked and staged; nothing is applied on import.</p>
-        <label class="btn" style="align-self:flex-start">Choose a file…<input type="file" id="impFile" accept=".csv,text/csv" hidden></label>
-        <div class="f"><label for="impText">Or paste it</label><textarea class="inp" id="impText" rows="5" placeholder="${esc(CHANGESET_COLS.join(','))}"></textarea></div>
-        <div><button class="btn p" type="button" id="impGo">Check these rows</button></div>
-        <div id="impMsg">${importRows?importSummaryHTML(importRows):''}</div></div></div>
+      <div class="card span2"><div class="ch"><h3>Importing terms</h3></div><div class="cb">
+        <p class="say">Import has its own section now: every row is shown as it will read, with its checks, before anything is staged.</p>
+        <div><button class="btn" type="button" data-go="import">Open Import</button></div></div></div>
     </div></div></div>`;
   wireGo(M);
   const on=(id,fn)=>{ const e=$(id); if(e) e.onclick=fn; };
@@ -3718,9 +3729,6 @@ function renderBackups(M,c){
   on('bk',async()=>{ await exportBackup(); touch(); render(); toast('Backup downloaded'); });
   on('xl',e=>downloadExcel(e.currentTarget));
   $('rsFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) restoreDialog(f); };
-  $('impFile').onchange=e=>{ const f=e.target.files[0]; e.target.value=''; if(f) readCSVFile(f).then(({text})=>{ $('impText').value=text; checkImport(text); }); };
-  on('impGo',()=>checkImport($('impText').value));
-  wireImport();
 }
 /* The classic importer's checks, unchanged. Links arrive as names and are resolved to IDs. */
 function checkImport(text){
@@ -3873,5 +3881,827 @@ async function boot(){
 })();
 
 </script>
+<!-- IMPORT START: built from initiative-hub-data/_dev/import-prototype by build_console.py; edit there, not here -->
+<script>
+const IMPORT_CSS = "/* Business Glossary Console: Import. The import's own styles, shared by the test page and the console; colours come\n   from tokens the host defines (page.css on the test page, the console's own colour blocks in the console). */\n:host{display:block;color:var(--ink);font:14px/1.45 var(--font)}\n/* Business Glossary Console: Import (test copy). The console's look and the MISMO brand, light and dark. */\n*{box-sizing:border-box}\nbutton{font:inherit;color:inherit} :focus-visible{outline:2px solid var(--sky);outline-offset:2px}\nh1,h2,h3{letter-spacing:-.012em;margin:0}\n/* page */\n.ph{background:var(--surface);border-bottom:1px solid var(--line-2);padding:12px 22px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}\n.ph h1{font-size:20px} .ph .meta{color:var(--ink-2);font-size:13.5px} .ph .r{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}\n.chip{border-radius:4px;padding:3px 9px;font-size:12px;font-weight:700} .chip.warn{background:var(--warn-soft);color:var(--warn)} .chip.bad{background:var(--bad-soft);color:var(--bad)} .chip.good{background:var(--good-soft);color:var(--good)}\n.btn{border:1px solid var(--line-2);background:var(--surface);color:var(--ink);border-radius:4px;padding:8px 13px;font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap}\n.btn:hover{border-color:var(--line-3)} .btn.p{background:var(--btn);border-color:var(--btn);color:var(--btn-ink)} .btn:disabled{opacity:.45;cursor:default}   /* exactly as the console */\n.btn.sm{padding:5px 10px;font-size:12px}\n.wrap{padding:16px 22px 40px;display:flex;flex-direction:column;gap:12px}\n.note{border-radius:4px;padding:9px 12px;font-size:13px;display:flex;gap:10px;align-items:flex-start;line-height:1.45} .note.info{background:var(--wash);color:var(--note-ink)} .note.warn{background:var(--warn-soft);color:var(--warn)}\n.note svg{flex:none;margin-top:1px}\n/* start */\n.start{max-width:860px;margin:28px auto;display:flex;flex-direction:column;gap:18px}\n.start h2{font-size:22px} .start p{margin:0;color:var(--ink-2);max-width:68ch}\n.drop{border:2px dashed var(--line-3);border-radius:10px;background:var(--surface);padding:30px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center}\n.drop.over{border-color:var(--sky);background:var(--sel)} .drop b{font-size:16px}\n.samples{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}\n.sample{border:1px solid var(--line-2);background:var(--surface);border-radius:8px;padding:14px 16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:4px}\n.sample:hover{border-color:var(--sky)} .sample b{font-size:14.5px} .sample span{color:var(--ink-2);font-size:13px}\n/* column check */\n.map{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;overflow:hidden}\n.map .mrow{display:grid;grid-template-columns:minmax(160px,260px) 28px minmax(180px,280px) 1fr;gap:12px;padding:9px 16px;border-top:1px solid var(--line);align-items:center}\n.map .mrow.hd{border-top:0;background:var(--sunk);font-size:11px;font-weight:700;color:var(--ink-3);padding-block:8px}\n.map code{font-family:var(--mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--line);border-radius:3px;padding:2px 6px}\n.map select{height:32px;border:1px solid var(--line-2);border-radius:4px;padding:0 8px;font:inherit;font-weight:600;background:var(--surface);color:var(--ink)}\n.map select.unused{border:1.5px dashed var(--warn-line);background:var(--warn-bg);color:var(--warn)}\n.ok{color:var(--good);font-weight:700;font-size:12.5px} .no{color:var(--warn);font-weight:700;font-size:12.5px} .err{color:var(--bad);font-weight:700;font-size:12.5px}\n.vals{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}\n.vbox{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:12px 16px} .vbox h3{font-size:14px;margin-bottom:6px}\n.vbox .l{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-top:1px solid var(--line);font-size:13px} .vbox .l:first-of-type{border-top:0} .vbox .l span:last-child{color:var(--ink-3);white-space:nowrap}\n/* review */\n.tabs{display:flex;gap:6px;align-items:center;flex-wrap:wrap}\n.tabs button{border:1px solid var(--line-2);background:var(--surface);border-radius:4px;padding:6px 12px;font-weight:600;font-size:12.5px;color:var(--ink-2);cursor:pointer}\n.tabs button[aria-pressed=\"true\"]{background:var(--navy);border-color:var(--navy);color:#fff} .tabs button small{opacity:.7;margin-left:4px}\n.tabs .search{margin-left:auto;width:min(340px,100%);height:36px;border:1px solid var(--line-2);border-radius:4px;background:var(--surface);color:var(--ink);padding:0 12px;font:inherit;font-size:13px}\n.bar{border-radius:6px;padding:8px 10px 8px 14px;display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap}\n.bar.rows{background:var(--navy);color:#fff} .bar.rows .b{display:inline-flex;gap:6px;align-items:center;background:var(--navy-mid);border:1px solid #2c5e86;border-radius:4px;padding:6px 10px;font-weight:600;color:#fff;cursor:pointer}\n.bar.rows .x{margin-left:auto;color:var(--sky-soft);font-weight:600;background:none;border:0;cursor:pointer}\n.bar.cells{background:var(--sel);border:1px solid var(--line-3);color:var(--ink)} .bar.cells .x{margin-left:auto}\n#selbar{min-height:44px} #selbar .bar{min-height:44px} .bar.tip{color:var(--ink-3);border:1px dashed var(--line-2)} .bar.tip .x{margin-left:auto}\nkbd{font-family:inherit;font-size:11px;font-weight:700;background:var(--surface);border:1px solid var(--line-3);border-radius:3px;padding:1px 5px;color:var(--ink-2)}\n.gridwrap{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;overflow:auto;max-height:calc(100vh - 230px);position:relative;user-select:none;-webkit-user-select:none}\n.grid{display:grid;min-width:0}\n.row{display:contents}\n.cell{border-bottom:1px solid var(--line);padding:7px 10px;min-height:46px;display:flex;align-items:center;background:var(--surface);position:relative;min-width:0}\n.row.hd .cell{position:sticky;top:0;z-index:6;background:var(--sunk);min-height:44px;font-size:13.5px;font-weight:700;color:var(--ink);border-bottom:1px solid var(--line-2);gap:6px;justify-content:space-between}\n.fbtn{flex:none;width:26px;height:26px;border-radius:4px;border:1px solid transparent;background:none;color:var(--ink-3);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}\n.fbtn:hover{border-color:var(--line-3);background:var(--surface)} .hdc.fon .fbtn{background:var(--sky);border-color:var(--sky);color:var(--navy-deep)} .hdc.fon span{color:var(--link)}\n.fchip{display:inline-flex;gap:8px;align-items:center;font-size:12.5px;color:var(--ink-2);background:var(--wash);border-radius:4px;padding:5px 10px}\n.pop.fpop{width:300px} .pop.fpop .o small{margin-left:auto;color:var(--ink-3)}\n.cell.frz0{position:sticky;left:0;z-index:4} .cell.frz1{position:sticky;left:40px;z-index:4;box-shadow:6px 0 8px -7px rgba(15,49,76,.35)}\n.row.hd .cell.frz0,.row.hd .cell.frz1{z-index:8}\n.row.rsel .cell{background:var(--sel)}\n.row.rm .cell{color:var(--ink-3)} .row.rm .cell .tmname{text-decoration:none;opacity:.7}\n.cb{width:16px;height:16px;border:1.5px solid var(--line-3);border-radius:3px;display:inline-flex;align-items:center;justify-content:center;background:var(--surface);cursor:pointer;padding:0;flex:none}\n.cb[aria-checked=\"true\"],.cb[aria-checked=\"mixed\"]{background:var(--navy);border-color:var(--navy);color:#fff}\n.rn{font-size:10.5px;color:var(--ink-3);margin-left:6px;font-family:var(--mono)}\n.tm{display:flex;flex-direction:column;gap:2px;min-width:0} .tmname{font-weight:700;font-size:14px;overflow-wrap:anywhere}\n.tag{display:inline-block;font-size:9.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:3px;padding:1px 5px;margin-right:6px;vertical-align:2px}\n.tag.add{background:var(--good-soft);color:var(--good)} .tag.update{background:var(--warn-soft);color:var(--warn)} .tag.remove{background:var(--bad-soft);color:var(--bad)}\n.df{color:var(--ink-2);min-width:0} .df.one{white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .df.full{color:var(--ink)}\n.was{display:block;font-size:11px;color:var(--warn);font-weight:500}\n.cell.chg{background:var(--chg)}\n.vcell{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;min-height:32px;border-radius:4px;padding:2px 6px;cursor:pointer}\n.vcell:hover{outline:1px solid var(--line-2)}\n.vcell .v{display:flex;flex-wrap:wrap;gap:3px 6px;min-width:0}\n.vcell svg{flex:none;color:var(--ink-3)}\n.empty{display:flex;align-items:center;justify-content:space-between;gap:6px;width:100%;height:32px;border:1.5px dashed var(--warn-line);background:var(--warn-bg);border-radius:4px;padding:0 9px;color:var(--warn);font-weight:600;font-size:12.5px;cursor:pointer}\n.empty.keep{border:1px dashed var(--line-2);background:transparent;color:var(--ink-3);font-weight:500}\n.fa{font-weight:700;color:var(--link)} .src{color:var(--link)}\n.offv{display:inline-flex;align-items:center;gap:4px;background:var(--bad-soft);border:1px solid var(--bad-line);color:var(--bad);border-radius:4px;padding:1px 6px;font-weight:700;font-size:12.5px}\n.offacts{display:flex;gap:10px;margin-top:4px;font-size:11.5px} .ln{color:var(--link);font-weight:700;background:none;border:0;padding:0;border-bottom:1px solid currentColor;cursor:pointer;font-size:11.5px}\n.ln.bad{color:var(--bad)}\n.chipt{display:inline-flex;align-items:center;gap:4px;background:var(--sunk);border:1px solid var(--line-2);border-radius:4px;padding:1px 6px;font-size:12px;font-weight:600;color:var(--link);max-width:100%}\n.chipt.bad{background:var(--bad-soft);border-color:var(--bad-line);color:var(--bad)} .chipt i{font-style:normal;font-weight:500;opacity:.8}\n.cell.csel{background:var(--sel);box-shadow:inset 2px 0 0 var(--sel-line),inset -2px 0 0 var(--sel-line)}\n.cell.csel.ctop{box-shadow:inset 2px 0 0 var(--sel-line),inset -2px 0 0 var(--sel-line),inset 0 2px 0 var(--sel-line)}\n.cell.csel.cbot{box-shadow:inset 2px 0 0 var(--sel-line),inset -2px 0 0 var(--sel-line),inset 0 -2px 0 var(--sel-line)}\n.cell.csel.ctop.cbot{box-shadow:inset 0 0 0 2px var(--sel-line)}\n.cell.cfill{background:var(--sel);box-shadow:inset 0 0 0 1px var(--sel-line);opacity:.85}\n.fh{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;background:var(--sel-line);border:2px solid var(--surface);cursor:ns-resize;z-index:3}\n.st{font-size:12px;font-weight:700;border-radius:4px;padding:3px 8px;line-height:1.3;display:inline-block}\n.st.ok{background:var(--good-soft);color:var(--good)} .st.need{background:var(--warn-soft);color:var(--warn)} .st.bad{background:var(--bad-soft);color:var(--bad)} .st.rm{background:var(--sunk);color:var(--ink-3)}\n.sts{display:flex;flex-direction:column;gap:4px;align-items:flex-start}\nmark.bad{background:var(--mark-bad);color:var(--mark-bad-ink);border-radius:2px;padding:0 1px;box-shadow:inset 0 -1px 0 var(--bad-line)}\nmark.good{background:var(--mark-good);color:var(--mark-good-ink);border-radius:2px;padding:0 1px}\n.chk{display:flex;flex-wrap:wrap;gap:2px 8px;align-items:center;margin-top:3px;font-size:11.5px;font-weight:700;color:var(--bad)}\n.chk .ttl{background:none;border:0;padding:0;color:inherit;font:inherit;cursor:pointer;text-align:left}\n.editbox{width:100%;min-height:64px;resize:vertical;font:inherit;font-size:13.5px;line-height:1.45;color:var(--ink);background:var(--surface);border:2px solid var(--sel-line);border-radius:4px;padding:6px 8px;box-shadow:0 0 0 3px var(--wash);user-select:text;-webkit-user-select:text}\n.edittip{font-size:11px;color:var(--ink-3);margin-top:4px} .edittip .live{color:var(--bad);font-weight:700}\n/* menus */\n.pop{position:fixed;z-index:60;background:var(--surface);border:1px solid var(--line-3);border-radius:6px;box-shadow:0 16px 36px rgba(6,32,47,.28);padding:8px;width:290px;max-height:min(460px,70vh);display:flex;flex-direction:column}\n.pop .ttl{font-size:12.5px;font-weight:700;margin:2px 4px 6px} .pop .ttl span{color:var(--ink-3);font-weight:500}\n.pop input.q{height:32px;border:1.5px solid var(--sel-line);border-radius:4px;padding:0 9px;font:inherit;font-size:12.5px;background:var(--surface);color:var(--ink);margin-bottom:6px;width:100%}\n.pop .ask{font-size:12px;color:var(--warn);background:var(--warn-soft);border-radius:4px;padding:6px 8px;margin-bottom:6px;line-height:1.4}\n.pop .seg{display:flex;border:1px solid var(--line-3);border-radius:4px;overflow:hidden;margin-bottom:8px} .pop .seg button{flex:1;border:0;background:var(--surface);padding:6px 4px;font-size:12px;font-weight:700;color:var(--ink-2);cursor:pointer} .pop .seg button[aria-pressed=\"true\"]{background:var(--navy);color:#fff}\n.pop .list{overflow:auto;min-height:0;flex:1}\n.pop .o{display:flex;gap:9px;align-items:center;width:100%;padding:6px;border:0;border-radius:4px;background:none;text-align:left;font-size:13px;color:var(--ink);cursor:pointer}\n.pop .o:hover,.pop .o.hl{background:var(--sunk)} .pop .o small{display:block;font-size:11px;color:var(--ink-3)} .pop .o .nm{flex:1;min-width:0}\n.pop .radio{width:15px;height:15px;border:1.5px solid var(--line-3);border-radius:50%;flex:none} .pop .radio.on{border:5px solid var(--navy)}\n.pop .ft{display:flex;justify-content:space-between;align-items:center;gap:8px;border-top:1px solid var(--line);margin-top:6px;padding-top:8px;font-size:12px;color:var(--ink-2)}\n.pop .empty-res{font-size:12px;color:var(--ink-3);padding:8px 6px}\n.pop.chkpop.wide{width:min(640px,calc(100vw - 24px));overflow:auto}\n.rvh{font-size:13px;margin:0 2px 6px} .rvh span{color:var(--ink-3)} .rvt{font-size:13.5px;line-height:1.6;color:var(--ink);background:var(--surface-2);border:1px solid var(--line);border-radius:4px;padding:8px 10px;user-select:text}\n.rvt.fix{margin-top:6px;background:var(--surface)} .rvc{border-top:1px solid var(--line);margin-top:10px;padding-top:9px} .rvct{display:flex;gap:6px;align-items:center;color:var(--bad);font-size:12.5px}\n.pop.chkpop{width:420px;border-left:3px solid var(--bad);font-size:12.5px;line-height:1.5} .pop.chkpop .k{display:inline-block;font-size:10px;font-weight:800;letter-spacing:.06em;color:var(--mark-good-ink);background:var(--mark-good);border-radius:3px;padding:0 5px;margin-right:4px}\n.pop.chkpop .d{color:var(--ink-3);font-size:11.5px;margin-top:6px} .pop.chkpop .a{display:flex;gap:6px;justify-content:flex-end;margin-top:10px}\n.scrim{position:fixed;inset:0;background:rgba(6,32,47,.55);z-index:70;display:flex;align-items:center;justify-content:center;padding:16px}\n.dlg{background:var(--surface);color:var(--ink);border-radius:8px;box-shadow:var(--shadow);width:min(760px,100%);max-height:calc(100% - 32px);display:flex;flex-direction:column}\n.dlg h2{font-size:17px;padding:16px 20px 4px} .dlg .db{padding:8px 20px;overflow:auto;display:flex;flex-direction:column;gap:10px;font-size:13.5px} .dlg .df2{padding:12px 20px 16px;display:flex;justify-content:flex-end;gap:8px}\n.dlg textarea{width:100%;height:220px;font-family:var(--mono);font-size:12px;border:1px solid var(--line-2);border-radius:4px;padding:8px;background:var(--surface-2);color:var(--ink);user-select:text}\n.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--navy);color:#fff;border-radius:6px;padding:9px 14px;font-size:13px;z-index:80;box-shadow:var(--shadow)}\n.foot{display:flex;justify-content:space-between;gap:12px;color:var(--ink-3);font-size:12.5px;flex-wrap:wrap}\n.loading{padding:60px;text-align:center;color:var(--ink-3)}\n/* a changed cell glows briefly */\n@keyframes glow{0%{background:var(--flash-bg);box-shadow:inset 0 0 0 2px var(--sky)}100%{box-shadow:inset 0 0 0 2px transparent}}\n.cell.flash{animation:glow 1.6s ease-out}\n@media (prefers-reduced-motion:reduce){*{transition:none!important}.cell.flash{animation:none;box-shadow:inset 0 0 0 2px var(--sky)}}\n";
+/* The import's adapter in the Business Glossary Console (Perry, 15 Oct 2026): the live draft and lists, the console's
+   own Needs a Decision rules, and real Staging. The import runs in its own isolated container (a shadow root), made
+   once and moved back into place on every redraw, so its styles and the console's never meet and nothing in it is
+   lost when the console redraws. */
+window.IMPORT_ENV = (function () {
+  const host = document.createElement('div'); host.id = 'impHost';
+  const root = host.attachShadow({ mode: 'open' });
+  root.innerHTML = '<style>' + IMPORT_CSS + '</style><div id="imain"></div>';
+  window.__impHost = host;
+  const split = s => String(s || '').split('|').map(x => x.trim()).filter(Boolean);
+  const page = () => document.querySelector('.page');
+  const nameOf = id => { const t = idMap().get(id); return t ? String(t.Term || '') : id; };
+  const nk = s => String(s).replace(/\s+/g, ' ').trim().toLowerCase();
+  const idOfName = nm => { const t = master.find(r => nk(r.Term || '') === nk(nm)); return t ? t.ID : String(nm).trim(); };   /* a new term's name stays until Apply gives it an ID */
+  const BASE = { 'dupe:term': 'dupe', 'near:term': 'near-dupe', 'spell:term': 'spelling', 'samedef:def': 'same-def' };
+  return {
+    root, layer: root, noTitle: true,   /* the console's top bar already says Import */
+    active: () => view === 'import' && host.isConnected,
+    readOnly: () => viewOnly(),
+    toast: m => toast(m),
+    glossaryVersion: () => rev + ':' + master.length,
+    glossary: async () => master.map(r => ({ id: r.ID, term: String(r.Term || ''), def: String(r.Definition || ''), tt: split(r.TermType), fa: split(r.FocusArea), src: split(r.Source), aka: split(r.AKA).map(nameOf), rel: split(r.Related).map(nameOf) })),
+    vocab: f => effectiveVocab(f),
+    rules: () => ISSUE_RULES,
+    isStaged: id => !!staged[id],
+    scrollEl: page, scrollPos: () => (page() || {}).scrollTop || 0, keepScroll: y => { const p = page(); if (p) p.scrollTop = y; }, toTop: () => { const p = page(); if (p) p.scrollTop = 0; },
+    /* Stage: new values first, as classification changes with their descriptions (as Classifications adds them), then
+       each row under its ID, links as IDs, and its Keep as is decisions recorded as the console records them. */
+    commit: async ({ rows, newVals }) => {
+      if (viewOnly()) { toast('Importing needs Edit access to the glossary'); return; }
+      for (const x of newVals) { if (!effectiveVocab(x.f).includes(x.v)) stageVocab('add', x.f, null, x.v); if (x.d) await setDescription(x.f, x.v, x.d); }
+      const sess = window.ResourcesSession && window.ResourcesSession.current && window.ResourcesSession.current(), by = (sess && sess.name) || editor || '', at = new Date().toISOString();
+      rows.forEach(r => {
+        const data = { ...r.data, AKA: r.data.AKA.map(idOfName).join('|'), Related: r.data.Related.map(idOfName).join('|'), Action: r.a };
+        const keep = {}; r.keep.forEach(k => { const [t, f] = k.key.split(':'); keep[BASE[k.key] || t + ':' + (f === 'term' ? 'Term' : 'Definition')] = { value: k.value, reason: k.reason || 'Kept as is when imported', by, at }; });
+        const entry = { action: r.a, data, origin: 'import' }; if (Object.keys(keep).length) entry.keep = keep;
+        if (r.a === 'add') staged['new:' + (newCounter++)] = entry; else staged[r.id] = entry;
+      });
+      await persist(); touch();
+      toast(`${rows.length} ${rows.length === 1 ? 'row' : 'rows'} staged${newVals.length ? `, with ${newVals.length} new ${newVals.length === 1 ? 'classification' : 'classifications'}` : ''}`);
+    },
+    afterCommit: () => go('staging')
+  };
+})();
+
+/* Business Glossary Console: Import (test copy), Perry, 15 Oct 2026.
+   A file is read in whatever encoding it was saved in, its columns and values are matched to the public glossary's
+   own names, and every row is shown as it will read in the Terms list, with the Needs a Decision checks highlighted
+   where they are. Classifications are chosen in the grid, Excel-style. Nothing here changes the glossary. */
+(function (ENV) {
+'use strict';
+/* Where it runs is the adapter's business (ENV): the test page or the console. ROOT is where its elements live (the
+   page, or the console's isolated container) and LAYER where its pop-ups and dialogs go. */
+const ROOT = ENV.root, LAYER = ENV.layer || ENV.root;
+const $ = s => ROOT.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const CHEV = '<svg width="11" height="11" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const WARN = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.3 3.9L1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg>';
+const INFO = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M12 8v5M12 16h.01M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18"/></svg>';
+const TICK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l4 4 10-10"/></svg>';
+const n = x => Number(x || 0).toLocaleString('en-US');
+const plural = (k, one, many) => k === 1 ? one : (many || one + 's');
+const toast = ENV.toast || (msg => { const t = document.createElement('div'); t.className = 'toast'; t.setAttribute('role', 'status'); t.textContent = msg; LAYER.appendChild(t); setTimeout(() => t.remove(), 2600); });
+
+/* ---------------------------------------------------------------- the glossary */
+let GL = [], BYID = new Map(), BYLOW = new Map();
+const NEAR = new Map(), VARK = new Map(), DEFK = new Map();
+const ADDED = { TermType: [], FocusArea: [], Source: [] }, DESC = { TermType: {}, FocusArea: {}, Source: {} };   /* values added in this import, and their descriptions */
+const splitPipe = s => String(s || '').split('|').map(x => x.trim()).filter(Boolean);
+const nearKey = v => String(v || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]/g, '');
+const VARIANTS = [['acknowledgement', 'acknowledgment'], ['judgement', 'judgment'], ['cancelled', 'canceled'], ['modelling', 'modeling'], ['labelled', 'labeled'], ['catalogue', 'catalog'], ['organisation', 'organization'], ['licence', 'license']];
+const varKey = v => { let x = String(v || '').toLowerCase(); VARIANTS.forEach(([a, b]) => { x = x.split(a).join(b); }); return nearKey(x); };
+const defKey = v => { const x = String(v || '').toLowerCase().replace(/\s+/g, ' ').trim(); return x.length >= 25 ? x : ''; };
+const push = (m, k, v) => { if (!k) return; const a = m.get(k); a ? a.push(v) : m.set(k, [v]); };
+let GLV = null;   /* the glossary's version last indexed */
+async function loadGlossary() {
+  const v = ENV.glossaryVersion ? ENV.glossaryVersion() : 1; if (GLV === v && GL.length) return; GLV = v;
+  GL = await ENV.glossary(); BYID.clear(); BYLOW.clear(); NEAR.clear(); VARK.clear(); DEFK.clear();
+  GL.forEach(t => { BYID.set(t.id, t); BYLOW.set(t.term.trim().toLowerCase(), t); push(NEAR, nearKey(t.term), t); push(VARK, varKey(t.term), t); push(DEFK, defKey(t.def), t); });
+}
+
+/* ---------------------------------------------------------------- reading a file */
+function readBytes(buf) {   /* UTF-16 if it says so, UTF-8 if it is valid UTF-8, otherwise Windows (Excel's plain CSV) */
+  if (buf[0] === 0xFF && buf[1] === 0xFE) return { text: new TextDecoder('utf-16le').decode(buf.subarray(2)), enc: 'UTF-16 (Unicode Text)' };
+  if (buf[0] === 0xFE && buf[1] === 0xFF) return { text: new TextDecoder('utf-16be').decode(buf.subarray(2)), enc: 'UTF-16 (Unicode Text)' };
+  try { return { text: new TextDecoder('utf-8', { fatal: true }).decode(buf), enc: 'UTF-8' }; }
+  catch (e) { return { text: new TextDecoder('windows-1252').decode(buf), enc: 'an Excel CSV (Windows)' }; }
+}
+function parseCSV(text) {
+  if (text.charCodeAt(0) === 0xFEFF) text = text.slice(1);
+  const rows = []; let row = [], f = '', q = false;
+  for (let i = 0; i < text.length; i++) { const c = text[i];
+    if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true; else if (c === ',') { row.push(f); f = ''; } else if (c === '\r') {} else if (c === '\n') { row.push(f); rows.push(row); row = []; f = ''; } else f += c; }
+  if (f.length || row.length) { row.push(f); rows.push(row); }
+  return rows.filter(r => r.some(v => v && v.trim()));
+}
+/* Column names: capitals, spaces, underscores, hyphens, #, brackets and a final s don't matter (Perry, 15 Oct 2026). */
+const FIELD_LABEL = { term: 'Term', def: 'Definition', tt: 'Term types', fa: 'Focus areas', src: 'Sources', aka: 'Also known as', rel: 'Related terms', id: 'ID', action: 'Action' };
+const HEADER_NAMES = { term: ['term', 'termname', 'name'], def: ['definition', 'description'], tt: ['termtype', 'type'], fa: ['focusarea', 'hashtag'], src: ['source'],
+  aka: ['alsoknownas', 'alsoknownasaka', 'aka', 'alias', 'aliase'], rel: ['relatedterm', 'related'], id: ['id', 'termid'], action: ['action', 'change'] };
+const hkey = h => String(h || '').toLowerCase().replace(/[#\s_\-().\/:]+/g, '').replace(/s$/, '');
+const matchHeader = h => Object.keys(HEADER_NAMES).find(f => HEADER_NAMES[f].includes(hkey(h))) || null;
+/* Actions, in any capitals; a blank one is inferred from the ID, and a removal is never inferred. */
+const ACTIONS = { add: ['add', 'added', 'new', 'include', 'included', 'create', 'created', 'insert', 'addition'],
+  update: ['update', 'updated', 'change', 'changed', 'edit', 'edited', 'modify', 'modified', 'revise', 'revised', 'amend'],
+  remove: ['remove', 'removed', 'delete', 'deleted', 'retire', 'retired', 'drop', 'removal'] };
+const ACTION_NAME = { add: 'Addition', update: 'Change', remove: 'Removal' };
+const normAction = v => { const k = String(v || '').trim().toLowerCase(); return Object.keys(ACTIONS).find(a => ACTIONS[a].includes(k)) || null; };
+/* Values: matched to the glossary's own spelling, ignoring capitals, spaces, punctuation, # and a final s. */
+const vkey = v => String(v || '').toLowerCase().replace(/&/g, ' and ').replace(/[^a-z0-9]/g, '').replace(/s$/, '');
+const VOCAB_OF = { tt: 'TermType', fa: 'FocusArea', src: 'Source' };
+const vocabList = f => [...ENV.vocab(f), ...ADDED[f]];
+const canon = (f, v) => vocabList(f).find(x => vkey(x) === vkey(v)) || null;
+const inList = (f, v) => vocabList(f).includes(v);
+const splitVals = s => String(s || '').split(/[|;\n]/).map(x => x.trim()).filter(Boolean);
+const importNames = () => new Set(S.rows.filter(r => r.a !== 'remove').map(r => r.term.trim().toLowerCase()));
+const knownName = (nm, names) => BYLOW.has(String(nm).trim().toLowerCase()) || (names || importNames()).has(String(nm).trim().toLowerCase());
+
+/* ---------------------------------------------------------------- state */
+const S = { view: 'start', file: null, map: [], rows: [], stats: null, tab: 'all', q: '', showLinks: false, edit: null, undo: [], filters: {} };
+const sel = { kind: null, rows: new Set(), col: null, cells: new Set(), anchor: null };
+const COLS = [{ k: 'term', label: 'Term' }, { k: 'def', label: 'Definition' }, { k: 'tt', label: 'Term types', vocab: 'TermType', single: true, one: 'term type' },
+  { k: 'fa', label: 'Focus areas', vocab: 'FocusArea', one: 'focus area' }, { k: 'src', label: 'Sources', vocab: 'Source', single: true, one: 'source' },
+  { k: 'aka', label: 'Also known as', link: true, one: 'name' }, { k: 'rel', label: 'Related terms', link: true, one: 'related term' }];
+const COL = Object.fromEntries(COLS.map(c => [c.k, c]));
+const CELLCOLS = new Set(['tt', 'fa', 'src', 'aka', 'rel']);
+
+function openFile(name, bytes) {
+  const { text, enc } = readBytes(bytes); const rows = parseCSV(text);
+  if (rows.length < 2) { toast('That file has no rows to import.'); return; }
+  const head = rows[0].map(h => h.trim()), taken = new Set();
+  S.file = { name, enc, head, body: rows.slice(1), lost: text.includes('\uFFFD') };
+  S.map = head.map(h => { const f = matchHeader(h); if (!f || taken.has(f)) return { f: null, auto: f, clash: !!f }; taken.add(f); return { f, auto: f }; });
+  /* the column step only appears when a column isn't recognised (Perry, 15 Oct 2026); it then lists just those */
+  S.attn = S.map.map((m, i) => m.f ? -1 : i).filter(i => i >= 0);
+  S.colMode = 'attention'; S.view = S.attn.length ? 'columns' : 'review'; buildRows(); render();
+}
+/* IDs are read without being shown, matched ignoring capitals, braces, quotes and spaces, and carried over exactly as the
+   glossary stores them (lowercase). Perry, 15 Oct 2026. */
+const normId = v => String(v || '').trim().replace(/^[\s{("'\[]+|[\s})"'\]]+$/g, '').toLowerCase();
+function buildRows() {
+  const col = f => S.map.findIndex(m => m.f === f);
+  const ix = Object.fromEntries(Object.keys(FIELD_LABEL).map(f => [f, col(f)]));
+  const st = { actions: new Map(), inferred: { add: 0, update: 0 }, values: new Map(), off: { tt: 0, fa: 0, src: 0 } };
+  S.rows = S.file.body.map((raw, i) => {
+    const get = f => ix[f] < 0 ? undefined : (raw[ix[f]] ?? '');
+    const id = normId(get('id')), orig = id ? BYID.get(id) || null : null, aRaw = String(get('action') || '').trim();
+    let a = aRaw ? normAction(aRaw) : (id ? 'update' : 'add');
+    if (aRaw) { const k = aRaw.toLowerCase() + '\u2192' + (a || '?'); st.actions.set(k, (st.actions.get(k) || 0) + 1); } else st.inferred[a]++;
+    const r = { n: i + 2, a, aRaw, aBad: !!aRaw && !a, id, idBad: a !== 'add' && (!id || !orig), orig, keep: {}, raw };
+    const keepOld = (f, v) => a === 'update' && orig && (v === undefined || !String(v).trim());   /* a blank in a change keeps the term's value */
+    const t = get('term'), d = get('def');
+    r.term = keepOld('term', t) ? orig.term : String(t ?? '');
+    r.def = keepOld('def', d) ? orig.def : String(d ?? '');
+    for (const k of ['tt', 'fa', 'src']) {
+      const v = get(k), f = VOCAB_OF[k];
+      if (keepOld(k, v)) { r[k] = orig[k].slice(); continue; }
+      r[k] = splitVals(v).map(x => { const c = canon(f, x); if (c && c !== x) { const key = k + '|' + x + '\u2192' + c; st.values.set(key, (st.values.get(key) || 0) + 1); } if (!c) st.off[k]++; return c || x; });
+      r[k] = [...new Set(r[k])];
+    }
+    for (const k of ['aka', 'rel']) r[k] = keepOld(k, get(k)) ? (orig[k] || []).slice() : splitVals(get(k)).map(x => (BYID.get(normId(x)) || {}).term || x);
+    return r;
+  });
+  S.stats = st; S.showLinks = ix.aka >= 0 || ix.rel >= 0; S.undo = []; S.filters = {}; clearSel();
+}
+
+/* ---------------------------------------------------------------- the checks (the console's Needs a Decision rules) */
+const ENT = { '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'", '&apos;': "'", '&nbsp;': ' ' };
+const decodeEntities = s => String(s).replace(/&(?:amp|lt|gt|quot|#39|apos|nbsp);/g, m => ENT[m] ?? m);
+const MOJIBAKE = { '\u00e2\u20ac\u2122': '\u2019', '\u00e2\u20ac\u02dc': '\u2018', '\u00e2\u20ac\u009c': '\u201c', '\u00e2\u20ac\u009d': '\u201d', '\u00e2\u20ac\u201c': '\u2013', '\u00e2\u20ac\u201d': '\u2014', '\u00e2\u20ac\u00a6': '\u2026', '\u00c2\u00a0': ' ' };
+const MOJI_SRC = Object.keys(MOJIBAKE).join('|');
+const fixMojibake = s => String(s).replace(new RegExp(MOJI_SRC, 'g'), m => MOJIBAKE[m] ?? m);
+const FFFD = '\uFFFD', FFFD2 = '\u00ef\u00bf\u00bd';
+const hasFFFD = s => String(s).includes(FFFD) || String(s).includes(FFFD2);
+function fixReplacementChar(s) {
+  let o = String(s).split(FFFD2).join(FFFD); o = fixMojibake(o);
+  o = o.replace(new RegExp('(?<=\\s)' + FFFD + '+(?=\\s)', 'g'), '\u2014');
+  o = o.split('MERS' + FFFD).join('MERS\u00ae');
+  o = o.replace(new RegExp(FFFD + '{1,3}([^' + FFFD + ']{1,400}?)' + FFFD + '{1,3}', 'g'), '\u201c$1\u201d');
+  o = o.replace(new RegExp('(?<=\\w)' + FFFD + '{1,3}(?=s\\b)', 'g'), '\u2019');
+  o = o.replace(new RegExp('(?<=s)' + FFFD + '{1,3}(?=\\s)', 'g'), '\u2019');
+  return o;
+}
+const INVIS_RE = /[\u00a0\u200b-\u200f\u2028\u2029\ufeff\x00-\x08\x0b\x0c\x0e-\x1f]/, INVIS_STRIP = /[\u200b-\u200f\u2028\u2029\ufeff\x00-\x08\x0b\x0c\x0e-\x1f]/g;
+const STRAY_QUOTE = /["\u201c\u201d]'["\u201c\u201d]/;
+const DEF_LINK = /\[\[([^\]|]+?)(?:\|([^\]]+?))?\]\]/g;
+const linkTargets = t => { const out = []; DEF_LINK.lastIndex = 0; let m; while ((m = DEF_LINK.exec(String(t || ''))) !== null) out.push(m[1].trim()); return out; };
+const LOCAL_RULES = [
+  { t: 'entity', title: 'HTML entity in stored text', fields: ['term', 'def'], detect: v => /&(?:amp|lt|gt|quot|#39|apos|nbsp);/.test(v), fix: decodeEntities, desc: 'An encoded entity where the character itself was meant.' },
+  { t: 'mojibake', title: 'Character encoding corruption', fields: ['term', 'def'], detect: v => new RegExp(MOJI_SRC).test(v), fix: fixMojibake, desc: 'Punctuation garbled by an encoding mix-up upstream. Reversible.' },
+  { t: 'replacement', title: 'Lost character (U+FFFD)', fields: ['term', 'def'], detect: v => hasFFFD(v) && !hasFFFD(fixReplacementChar(v)), fix: fixReplacementChar, desc: 'A character the source couldn\u2019t decode. The fix is inferred from context, not recovered: read it before approving.' },
+  { t: 'replacement-manual', title: 'Lost character, no clear reading', fields: ['term', 'def'], detect: v => hasFFFD(v) && hasFFFD(fixReplacementChar(v)), fix: null, desc: 'A lost character with no safe guess. Edit the text to put the right character back.' },
+  { t: 'newline', title: 'Line break inside a field', fields: ['term', 'def'], detect: v => /[\r\n]/.test(v), fix: v => v.replace(/\s*[\r\n]+\s*/g, ' ').trim(), desc: 'Terms and definitions are one line.' },
+  { t: 'whitespace', title: 'Leading or trailing whitespace', fields: ['term', 'def'], detect: v => v !== v.trim() && v.trim() !== '', fix: v => v.trim(), desc: 'Spaces at the start or end.' },
+  { t: 'doublespace', title: 'Repeated internal spaces', fields: ['term', 'def'], detect: v => /\S {2,}\S/.test(v), fix: v => v.replace(/ {2,}/g, ' '), desc: 'Two or more spaces in a row.' },
+  { t: 'invisible', title: 'Invisible character', fields: ['term', 'def'], detect: v => INVIS_RE.test(v), fix: v => v.replace(/\u00a0/g, ' ').replace(INVIS_STRIP, ''), desc: 'A character that can\u2019t be seen, such as a non-breaking or zero-width space.' },
+  { t: 'stray-quote', title: 'Stray quote marks in a name', fields: ['term'], detect: v => STRAY_QUOTE.test(v), fix: v => v.replace(new RegExp(STRAY_QUOTE.source, 'g'), '\u2019'), desc: 'Quote marks around an apostrophe.' },
+  { t: 'apostrophe', title: 'Straight apostrophe in a name', fields: ['term'], detect: v => v.includes("'"), fix: v => v.replace(/(\w)'(?=\w)/g, '$1\u2019').replace(/(s)'(?=\s|$)/g, '$1\u2019'), desc: 'Names use the curly apostrophe.' },
+  { t: 'dead-link', title: 'Link to a term that does not exist', fields: ['def'], detect: (v, names) => linkTargets(v).some(nm => !knownName(nm, names)), fix: null, desc: 'Correct the name, or remove the link.' }];
+/* In the console, its own Needs a Decision rules are used (fields Term and Definition); the link check stays here,
+   because it also knows the terms new in this file. */
+const RULE_TYPES = new Set(['entity', 'mojibake', 'replacement', 'replacement-manual', 'newline', 'whitespace', 'doublespace', 'invisible', 'stray-quote', 'apostrophe']);
+const RULES = ENV.rules ? [...ENV.rules().filter(x => RULE_TYPES.has(x.type)).map(x => ({ t: x.type, title: x.title, desc: x.desc,
+    fields: (x.fields || []).filter(f => f === 'Term' || f === 'Definition').map(f => f === 'Term' ? 'term' : 'def'), detect: v => x.detect(v, {}, ''), fix: x.fix })).filter(x => x.fields.length),
+  ...LOCAL_RULES.filter(x => x.t === 'dead-link')] : LOCAL_RULES;
+function checksOf(r, names) {
+  if (r.a === 'remove' || !r.a) return [];
+  const out = [];
+  for (const rule of RULES) for (const f of rule.fields) {
+    const v = String(r[f] ?? ''); let hit = false; try { hit = rule.detect(v, names); } catch (e) {}
+    if (!hit) continue; const after = rule.fix ? rule.fix(v) : null; if (rule.fix && after === v) continue;
+    out.push({ key: rule.t + ':' + f, t: rule.t, f, title: rule.title, desc: rule.desc, before: v, after });
+  }
+  /* against the rest of the glossary, and the rest of this file */
+  const self = r.orig && r.orig.id, nm = r.term.trim().toLowerCase(), others = arr => (arr || []).filter(t => t.id !== self);
+  const exact = others([BYLOW.get(nm)].filter(Boolean));
+  if (exact.length) out.push({ key: 'dupe:term', t: 'dupe', f: 'term', title: 'A term with this name is already in the glossary', desc: 'Change the existing term instead, or rename this one.', before: r.term, after: null, note: exact[0].term });
+  else { const near = others(NEAR.get(nearKey(r.term))); const vari = others(VARK.get(varKey(r.term)));
+    if (near.length) out.push({ key: 'near:term', t: 'near-dupe', f: 'term', title: 'Near-duplicate names', desc: 'Matches ' + near[0].term + ' once case, spaces and punctuation are ignored.', before: r.term, after: null, note: near[0].term });
+    else if (vari.length) out.push({ key: 'spell:term', t: 'spelling', f: 'term', title: 'Spelling variants', desc: 'Differs from ' + vari[0].term + ' only by spelling.', before: r.term, after: null, note: vari[0].term }); }
+  const sd = others(DEFK.get(defKey(r.def)));
+  if (sd.length) out.push({ key: 'samedef:def', t: 'same-def', f: 'def', title: 'Same definition on two terms', desc: 'Word for word the definition of ' + sd[0].term + '. Correct it, or link them as also known as.', before: r.def, after: null, note: sd[0].term });
+  const twin = S.rows.find(o => o !== r && o.a !== 'remove' && nearKey(o.term) && nearKey(o.term) === nearKey(r.term));
+  if (twin) out.push({ key: 'twin:term', t: 'twin', f: 'term', title: 'Also in this file', desc: 'Row ' + twin.n + ' has the same name.', before: r.term, after: null, note: 'row ' + twin.n });
+  return out.filter(c => r.keep[c.key] !== c.before);
+}
+function stateOf(r, names) {
+  const items = []; let k = 'ok';
+  if (r.aBad) items.push(['bad', 'Action \u201c' + r.aRaw + '\u201d not recognised']);
+  if (r.a && r.a !== 'add' && r.idBad) items.push(['bad', r.id ? 'ID not in the glossary' : 'No ID: needed for a ' + (r.a === 'remove' ? 'removal' : 'change')]);
+  const twin = r.a !== 'add' && r.id && S.rows.find(o => o !== r && o.a !== 'add' && o.id === r.id);
+  if (twin) items.push(['bad', 'Same ID as row ' + twin.n]);   /* staged by ID, the later would silently replace the earlier */
+  if (r.a === 'add' && r.orig) items.push(['bad', 'This ID is already \u201c' + r.orig.term + '\u201d']);   /* it would make a second copy */
+  if (r.a !== 'add' && r.orig && ENV.isStaged && ENV.isStaged(r.id)) items.push(['bad', 'Already has a change in Staging']);   /* staging this would replace it */
+  if (r.a === 'remove') { if (!items.length) items.push(['rm', 'Will be removed']); return { k: items[0][0] === 'bad' ? 'bad' : 'rm', items, checks: [] }; }
+  const off = ['tt', 'fa', 'src'].reduce((s, c) => s + r[c].filter(v => !inList(VOCAB_OF[c], v)).length, 0);
+  if (off) items.push(['bad', off + ' ' + plural(off, 'value') + ' not in the list']);
+  const badLinks = ['aka', 'rel'].reduce((s, c) => s + r[c].filter(x => !knownName(x, names)).length, 0);
+  if (badLinks) items.push(['bad', badLinks + ' ' + plural(badLinks, 'link') + ' to no term']);
+  if (['tt', 'src'].some(c => r[c].length > 1)) items.push(['bad', 'One ' + (r.tt.length > 1 ? 'term type' : 'source') + ' only']);
+  const checks = checksOf(r, names); if (checks.length) items.push(['chk', checks.length + ' ' + plural(checks.length, 'check')]);
+  const miss = [['term', 'term'], ['def', 'definition'], ['tt', 'type'], ['fa', 'focus area'], ['src', 'source']].filter(([c]) => Array.isArray(r[c]) ? !r[c].length : !String(r[c]).trim()).map(x => x[1]);
+  if (miss.length) items.push(['need', 'Needs ' + (miss.length > 2 ? miss.slice(0, -1).join(', ') + ' and ' + miss.slice(-1) : miss.join(' and '))]);
+  if (items.some(i => i[0] === 'bad')) k = 'bad'; else if (checks.length) k = 'chk'; else if (miss.length) k = 'need';
+  if (!items.length) items.push(['ok', 'Ready']);
+  return { k, items, checks };
+}
+
+/* ---------------------------------------------------------------- highlighting (as Needs a Decision) */
+const HL_TOK = /&#?[A-Za-z0-9]+;|\s+|[A-Za-z0-9]+|[^\sA-Za-z0-9]/g;
+function hlDiff(a, b) {
+  const x = String(a).match(HL_TOK) || [], y = String(b).match(HL_TOK) || [];
+  let p = 0; while (p < x.length && p < y.length && x[p] === y[p]) p++;
+  let q = 0; while (q < x.length - p && q < y.length - p && x[x.length - 1 - q] === y[y.length - 1 - q]) q++;
+  const xm = x.slice(p, x.length - q), ym = y.slice(p, y.length - q), N = xm.length, M = ym.length, kx = new Array(N).fill(false), ky = new Array(M).fill(false);
+  if (N && M && N * M <= 250000) { const L = Array.from({ length: N + 1 }, () => new Uint16Array(M + 1));
+    for (let i = N - 1; i >= 0; i--) for (let j = M - 1; j >= 0; j--) L[i][j] = xm[i] === ym[j] ? L[i + 1][j + 1] + 1 : Math.max(L[i + 1][j], L[i][j + 1]);
+    let i = 0, j = 0; while (i < N && j < M) { if (xm[i] === ym[j]) { kx[i] = ky[j] = true; i++; j++; } else if (L[i + 1][j] >= L[i][j + 1]) i++; else j++; } }
+  const tag = (all, keep) => all.map((t, k) => [t, k >= p && k < all.length - q && !keep[k - p]]);
+  return { a: tag(x, kx), b: tag(y, ky) };
+}
+const hlVis = t => esc(t).replace(/ /g, '\u00b7').replace(/\r?\n/g, '\u21b5').replace(/\t/g, '\u2192').replace(/\u00a0/g, '\u2423');
+function tokHTML(toks, cls) { let out = '', open = false;
+  for (const [t, f] of toks) { if (f && !open) { out += `<mark class="${cls}">`; open = true; } if (!f && open) { out += '</mark>'; open = false; } out += f === true ? hlVis(t) : esc(t); }   /* dots only where spacing is the problem */
+  return out + (open ? '</mark>' : ''); }
+function windowHTML(toks, cls, room) {   /* the stretch around the first marked piece, for a one-line cell */
+  const first = toks.findIndex(t => t[1]); if (first < 0) return tokHTML(toks, cls);
+  let from = first, c = 0; while (from > 0 && c < room) { c += toks[from - 1][0].length; from--; }
+  return (from > 0 ? '\u2026' : '') + tokHTML(toks.slice(from), cls);
+}
+function markToks(text, checks) { const tmp = document.createElement('div'); tmp.innerHTML = ''; return markText(text, checks, true); }
+function markText(text, checks, raw) {   /* the field's text with every check's problem marked in red */
+  const toks = (String(text).match(HL_TOK) || []).map(t => [t, false]);
+  for (const c of checks) {
+    if (c.after != null) { hlDiff(text, c.after).a.forEach((t, i) => { if (t[1] && toks[i]) toks[i][1] = true; }); continue; }
+    if (c.t === 'replacement-manual') toks.forEach(t => { if (t[0] === FFFD) t[1] = true; });
+    if (c.t === 'dead-link') { const names = importNames(); let pos = 0; const spans = []; DEF_LINK.lastIndex = 0; let m;
+      while ((m = DEF_LINK.exec(text)) !== null) if (!knownName(m[1], names)) spans.push([m.index, m.index + m[0].length]);
+      toks.forEach(t => { const s0 = pos, s1 = pos + t[0].length; pos = s1; if (spans.some(([a, b]) => s0 < b && s1 > a) && t[1] !== true) t[1] = 'link'; }); }
+  }
+  return raw ? toks : tokHTML(toks, 'bad');
+}
+
+/* ---------------------------------------------------------------- rendering */
+/* A redraw keeps the grid where it was (Perry, 15 Oct 2026: it jumped back to the left), and the cells just changed
+   glow briefly. */
+let FLASH = null;
+const flash = (idx, col) => { FLASH = { idx: new Set(idx), col }; };
+function render() {
+  const m = $('#imain'), gw = $('#gw'), at = gw ? { l: gw.scrollLeft, t: gw.scrollTop } : null, wy = ENV.scrollPos ? ENV.scrollPos() : 0; closeMenu();
+  if (S.view === 'start') m.innerHTML = startHTML();
+  else if (S.view === 'columns') m.innerHTML = columnsHTML();
+  else { m.innerHTML = reviewHTML(); paintSel();
+    const g2 = $('#gw'); if (g2 && at) { g2.scrollLeft = at.l; g2.scrollTop = at.t; } if (at && ENV.keepScroll) ENV.keepScroll(wy);
+    fitGrid();
+    if (FLASH) { FLASH.idx.forEach(i => { const e = ROOT.querySelector(`.cell[data-r="${i}"][data-c="${FLASH.col}"]`); if (e) e.classList.add('flash'); }); } }
+  FLASH = null; wire();
+}
+function startHTML() {
+  if (ENV.readOnly && ENV.readOnly()) return `<div class="ph">${ENV.noTitle ? '' : '<h1>Import</h1>'}<span class="meta">Bring terms into the glossary from a spreadsheet</span></div><div class="wrap"><div class="note info">${INFO}<span>Importing needs <b>Edit</b> access to the glossary. Ask a facilitator or an administrator if you need it.</span></div></div>`;
+  return `<div class="ph">${ENV.noTitle ? '' : '<h1>Import</h1>'}<span class="meta">Bring terms into the glossary from a spreadsheet</span></div>
+  <div class="wrap"><div class="start">
+    <div><h2>Choose a CSV file</h2><p>Any spreadsheet saved as CSV works, including Excel\u2019s plain \u201cCSV (Comma delimited)\u201d. Columns are matched by name, so <b>Name</b>, <b>Term Types</b> or <b>#FocusArea</b> are all understood. You review every row before anything is staged.</p></div>
+    <label class="drop" id="drop"><b>Drop a CSV here, or choose one</b><span class="meta">Nothing leaves this page; the glossary isn\u2019t changed.</span><input type="file" id="file" accept=".csv,text/csv" hidden><span class="btn p">Choose a file\u2026</span></label>
+  </div></div>`;
+}
+function columnsHTML() {
+  const F = S.file, st = S.stats, opt = cur => ['', ...Object.keys(FIELD_LABEL)].map(f => `<option value="${f}"${f === (cur || '') ? ' selected' : ''}>${f ? esc(FIELD_LABEL[f]) : 'Not used'}</option>`).join('');
+  const used = S.map.map(m => m.f), dup = f => f && used.filter(x => x === f).length > 1;
+  const all = S.colMode === 'all';
+  const rows = F.head.map((h, i) => { if (!all && !S.attn.includes(i)) return ''; const m = S.map[i];
+    /* only a column that isn't recognised is flagged (Perry, 15 Oct 2026) */
+    const msg = dup(m.f) ? '<span class="err">Two columns are read as ' + esc(FIELD_LABEL[m.f]) + ': choose one</span>' : m.f ? '<span></span>'
+      : m.clash ? '<span class="no">Also looks like ' + esc(FIELD_LABEL[m.auto]) + ', which another column has: left unused</span>' : '<span class="no">Not one of the glossary\u2019s columns: choose one, or leave it unused</span>';
+    return `<div class="mrow"><span><code>${esc(h || '(blank)')}</code></span><span aria-hidden="true" style="color:var(--ink-3)">\u2192</span>
+      <select data-map="${i}" aria-label="Read ${esc(h)} as" class="${m.f ? '' : 'unused'}">${opt(m.f)}</select>${msg}</div>`; }).join('');
+  const lines = arr => arr.length ? arr.map(([a, b]) => `<div class="l"><span>${a}</span><span>${b}</span></div>`).join('') : '<div class="l"><span class="meta">Nothing to change</span><span></span></div>';
+  const acts = [...st.actions].map(([k, c]) => { const [raw, to] = k.split('\u2192'); return [to === '?' ? `<b>${esc(raw)}</b> \u2192 <span class="err">not an action</span>` : `<b>${esc(raw)}</b> \u2192 ${ACTION_NAME[to]}`, n(c) + ' ' + plural(c, 'row')]; });
+  if (st.inferred.add) acts.push(['No action, no ID \u2192 Addition', n(st.inferred.add) + ' ' + plural(st.inferred.add, 'row')]);
+  if (st.inferred.update) acts.push(['No action, with an ID \u2192 Change', n(st.inferred.update) + ' ' + plural(st.inferred.update, 'row')]);
+  const vals = [...st.values].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, c]) => { const [, rest] = k.split('|'); const [raw, to] = rest.split('\u2192'); return [`<b>${esc(raw)}</b> \u2192 ${esc(to)}`, n(c) + ' ' + plural(c, 'row')]; });
+  ['tt', 'fa', 'src'].forEach(k => { if (st.off[k]) vals.push([`<span class="err">${n(st.off[k])} ${esc(COL[k].label.toLowerCase())} ${plural(st.off[k], 'value')} not in the list</span>`, 'shown in the rows']); });
+  const hasTerm = used.includes('term') || used.includes('id'), clashes = used.some(dup);
+  const k = S.attn.length, heading = all ? 'How this file was read' : (k === 1 ? 'One column isn\u2019t recognised' : n(k) + ' columns aren\u2019t recognised');
+  return `<div class="ph">${ENV.noTitle ? '' : '<h1>Import</h1>'}<span class="meta">${esc(F.name)} \u00b7 ${n(F.body.length)} ${plural(F.body.length, 'row')} \u00b7 read as ${esc(F.enc)}</span>
+    <span class="r"><button type="button" class="btn" data-go="start">Choose another file</button><button type="button" class="btn p" data-go="review"${hasTerm && !clashes ? '' : ' disabled'}>${all ? 'Back to the rows' : 'Review the rows'}</button></span></div>
+  <div class="wrap">
+    <h2 style="font-size:17px">${heading}</h2>${all ? '' : '<p style="margin:0;color:var(--ink-2)">Choose what ' + (k === 1 ? 'it is' : 'each is') + ', or leave ' + (k === 1 ? 'it' : 'them') + ' unused. Every other column was matched.</p>'}
+    ${F.lost ? '<div class="note warn">' + WARN + '<span>Some characters were already lost before this file was saved (shown as \uFFFD). They\u2019re flagged in the rows with a suggested fix.</span></div>' : ''}
+    <div class="map" role="table" aria-label="Columns"><div class="mrow hd" role="row"><span>Column in the file</span><span></span><span>Read as</span><span></span></div>${rows}</div>
+    ${all ? `<div class="vals"><div class="vbox"><h3>Actions</h3>${lines(acts)}</div><div class="vbox"><h3>Values put in the glossary\u2019s own words</h3>${lines(vals)}</div></div>` : ''}
+    ${hasTerm ? '' : '<div class="note warn">' + WARN + '<span>No column is read as <b>Term</b> or <b>ID</b>, so there is nothing to import yet.</span></div>'}
+  </div>`;
+}
+/* Column filters, Excel-style but cleaner (Perry, 15 Oct 2026). Term and Definition filter by what they contain, as
+   you type; the other columns list their values (with counts and (Empty)), narrowed as you type, ticked to choose. */
+const FUNNEL = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18l-7 8.5V19l-4 2v-7.5z"/></svg>';
+const TEXTCOLS = new Set(['term', 'def']), EMPTY = '(Empty)';
+const STATUS_NAME = { ok: 'Ready', need: 'Needs information', chk: 'Has a check', bad: 'Has a problem', rm: 'Will be removed' };
+function valuesOf(r, col, st) {
+  if (col === 'status') { const v = [STATUS_NAME[st.k]]; if (st.checks.length && st.k !== 'chk') v.push(STATUS_NAME.chk); return v; }
+  const v = r[col]; return Array.isArray(v) ? (v.length ? v : [EMPTY]) : [String(v || '').trim() || EMPTY];
+}
+const filterOn = col => { const f = S.filters[col]; return !!f && (TEXTCOLS.has(col) ? !!f.q.trim() : (f.sel != null || !!f.q.trim())); };
+function passFilters(r, st) {
+  for (const [col, f] of Object.entries(S.filters)) { if (!filterOn(col)) continue;
+    if (TEXTCOLS.has(col)) { if (!String(r[col]).toLowerCase().includes(f.q.trim().toLowerCase())) return false; continue; }
+    const q = f.q.trim().toLowerCase(), vals = valuesOf(r, col, st);
+    if (!vals.some(v => (f.sel == null || f.sel.has(v)) && (!q || v.toLowerCase().includes(q)))) return false; }
+  return true;
+}
+function visibleRows() {
+  const names = importNames(), q = S.q.trim().toLowerCase();
+  return S.rows.map((r, i) => ({ r, i, st: stateOf(r, names) })).filter(({ r, st }) => {
+    if (q && !(r.term + ' ' + r.def).toLowerCase().includes(q)) return false;
+    if (!passFilters(r, st)) return false;
+    return S.tab === 'all' || (S.tab === 'need' && st.k === 'need') || (S.tab === 'chk' && st.checks.length) || (S.tab === 'bad' && st.k === 'bad') || (S.tab === 'ok' && st.k === 'ok') || (S.tab === 'rm' && st.k === 'rm');
+  });
+}
+let VIS = [];
+/* The grid fits the window, so its last row and the footer are on screen without scrolling the page as well. */
+function fitGrid() { const g = $('#gw'); if (!g) return; const top = g.getBoundingClientRect().top + scrollY; g.style.maxHeight = Math.max(280, innerHeight - top - 48) + 'px'; }
+function refreshGrid() {
+  const g = $('#grid'); if (!g) return; const wrap = document.createElement('div'); wrap.innerHTML = reviewHTML();
+  const ng = wrap.querySelector('#grid'); g.innerHTML = ng.innerHTML; g.style.gridTemplateColumns = ng.style.gridTemplateColumns;
+  const tabs = ROOT.querySelector('.tabs'), nt = wrap.querySelector('.tabs'); if (tabs && nt) { const q = $('#q'), v = q && q.value; [...tabs.children].filter(c => c.id !== 'q').forEach(c => c.remove()); [...nt.children].filter(c => c.id !== 'q').forEach(c => tabs.insertBefore(c, $('#q'))); }
+  const ft = ROOT.querySelector('.foot:last-child'), nf = [...wrap.querySelectorAll('.foot')].pop(); if (ft && nf) ft.innerHTML = nf.innerHTML;
+  paintSel();
+}
+function gridCols() { return S.showLinks ? '40px 240px minmax(200px,520px) 140px 170px 180px 160px 160px minmax(140px,1fr)'   /* tighter, so all nine fit */
+  : '40px 270px minmax(220px,520px) 150px 186px 196px minmax(170px,1fr)'; }
+function reviewHTML() {
+  const names = importNames(), all = S.rows.map(r => stateOf(r, names));
+  const cnt = k => all.filter(s => s.k === k).length, chk = all.filter(s => s.checks.length).length, ready = cnt('ok');
+  VIS = visibleRows();
+  const tabs = [['all', 'All', S.rows.length], ['need', 'Needs information', cnt('need')], ['chk', 'Checks', chk], ['bad', 'Problems', cnt('bad')], ['ok', 'Ready', ready], ['rm', 'Removals', cnt('rm')]]
+    .filter(([k, , c]) => k === 'all' || c).map(([k, l, c]) => `<button type="button" data-tab="${k}" aria-pressed="${S.tab === k}">${l} <small>${n(c)}</small></button>`).join('');
+  const hcols = [['term', 'Term'], ['def', 'Definition'], ['tt', 'Term types'], ['fa', 'Focus areas'], ['src', 'Sources'], ...(S.showLinks ? [['aka', 'Also known as'], ['rel', 'Related terms']] : []), ['status', 'Status']];
+  const allBox = '<span class="cb" role="checkbox" tabindex="0" data-allrows aria-label="Select all rows" aria-checked="' + (sel.kind === 'rows' && sel.rows.size && sel.rows.size >= VIS.length ? 'true' : sel.kind === 'rows' && sel.rows.size ? 'mixed' : 'false') + '">' + (sel.kind === 'rows' && sel.rows.size ? TICK : '') + '</span>';
+  const head = '<div class="row hd" role="row">' + `<div class="cell frz0" role="columnheader">${allBox}</div>`
+    + hcols.map(([k, l], i) => `<div class="cell hdc${i === 0 ? ' frz1' : ''}${filterOn(k) ? ' fon' : ''}" role="columnheader" data-hcol="${k}"><span>${esc(l)}</span><button type="button" class="fbtn" data-filter="${k}" aria-pressed="${filterOn(k)}" aria-label="Filter ${esc(l)}" title="Filter ${esc(l)}">${FUNNEL}</button></div>`).join('') + '</div>';
+  const body = VIS.map(({ r, i, st }) => rowHTML(r, i, st)).join('') || `<div style="grid-column:1/-1;padding:28px;text-align:center;color:var(--ink-3)">${S.q ? 'No row matches \u201c' + esc(S.q) + '\u201d.' : 'Nothing in this view.'}</div>`;
+  const adds = all.filter(s => s.k === 'ok').length;
+  return `<div class="ph">${ENV.noTitle ? '' : '<h1>Import</h1>'}<span class="meta">${esc(S.file.name)} \u00b7 ${n(S.rows.length)} ${plural(S.rows.length, 'row')}</span>
+    ${cnt('bad') ? `<span class="chip bad">${n(cnt('bad'))} with a problem</span>` : ''}${cnt('need') ? `<span class="chip warn">${n(cnt('need'))} need information</span>` : ''}${chk ? `<span class="chip bad">${n(chk)} with a check</span>` : ''}
+    <span class="r"><button type="button" class="btn" data-cols>Columns read</button><button type="button" class="btn" data-links>${S.showLinks ? 'Hide' : 'Show'} also known as and related</button>
+      <button type="button" class="btn" data-go="start">Choose another file</button><button type="button" class="btn p" data-stage${adds ? '' : ' disabled'}>Stage ${n(adds)} ready ${plural(adds, 'row')}</button></span></div>
+  <div class="wrap">
+    <div class="tabs" role="group" aria-label="Which rows">${tabs}${Object.keys(S.filters).some(filterOn) ? `<span class="fchip">Filtered by ${Object.keys(S.filters).filter(filterOn).map(k => esc(({ term: 'Term', def: 'Definition', status: 'Status' })[k] || COL[k].label)).join(', ')} <button type="button" class="ln" data-clearfilters>Clear filters</button></span>` : ''}<input class="search" type="search" id="q" placeholder="Search term or definition" value="${esc(S.q)}" aria-label="Search term or definition"></div>
+    <div id="selbar"></div>
+    <div class="gridwrap" id="gw"><div class="grid" id="grid" role="grid" style="grid-template-columns:${gridCols()}">${head}${body}</div></div>
+    <div class="foot"><span>Changed values are tinted, with what they were. Nothing is staged until a row is ready.</span><span>${n(VIS.length)} of ${n(S.rows.length)} shown</span></div>
+  </div>`;
+}
+function rowHTML(r, i, st) {
+  const cls = 'row' + (r.a === 'remove' ? ' rm' : '');
+  const byF = f => st.checks.filter(c => c.f === f);
+  const chkLines = cs => cs.map(c => `<span class="chk">${WARN}<button type="button" class="ttl" data-chk="${i}|${c.key}" title="${esc(c.desc)}">${esc(c.title)}</button>${c.after != null ? `<button type="button" class="ln" data-fix="${i}|${c.key}">Fix</button>` : `<button type="button" class="ln" data-editf="${i}|${c.f}">Edit</button>`}<button type="button" class="ln" data-keep="${i}|${c.key}">Keep as is</button></span>`).join('');
+  const isEdit = f => S.edit && S.edit.i === i && S.edit.f === f;
+  const editor = f => `<div style="width:100%"><textarea class="editbox" id="editbox" data-edit="${i}|${f}" aria-label="Edit ${f === 'term' ? 'term' : 'definition'}">${esc(r[f])}</textarea><div class="edittip">Enter to save \u00b7 Esc to cancel <span class="live" id="live"></span></div></div>`;
+  const tagName = { add: 'Add', update: 'Change', remove: 'Remove' }[r.a] || 'Unknown';
+  const renamed = r.a === 'update' && r.orig && r.orig.term !== r.term;
+  const tcs = byF('term'), dcs = byF('def');
+  const termIn = isEdit('term') ? editor('term') : `<div class="tm"><span><span class="tag ${r.a || 'remove'}">${tagName}</span><span class="tmname">${tcs.length ? markText(r.term, tcs) : esc(r.term) || '<span style="color:var(--warn)">(no term)</span>'}</span></span>${renamed ? `<span class="was">was ${esc(r.orig.term)}</span>` : ''}${chkLines(tcs)}</div>`;
+  const defChanged = r.a === 'update' && r.orig && r.orig.def.trim() !== r.def.trim();
+  const defIn = isEdit('def') ? editor('def') : (dcs.length ? `<div style="min-width:0;width:100%"><div class="df one full" title="${esc(r.def)}">${windowHTML(markToks(r.def, dcs), 'bad', 6)}</div>${chkLines(dcs)}</div>`
+    : `<div class="df one" title="${esc(r.def)}">${esc(r.def) || '<span style="color:var(--warn)">(no definition)</span>'}${defChanged ? '<span class="was">Definition changed</span>' : ''}</div>`);
+  const cells = [`<div class="cell frz0" data-r="${i}" data-c="cb"><span class="cb" role="checkbox" tabindex="0" data-rowcb="${i}" aria-label="Select row ${r.n}" aria-checked="${sel.kind === 'rows' && sel.rows.has(i)}">${sel.kind === 'rows' && sel.rows.has(i) ? TICK : ''}</span><span class="rn">${r.n}</span></div>`,
+    `<div class="cell frz1" data-r="${i}" data-c="term">${termIn}</div>`, `<div class="cell${defChanged && !dcs.length ? ' chg' : ''}" data-r="${i}" data-c="def">${defIn}</div>`,
+    ...['tt', 'fa', 'src'].map(c => vocabCell(r, i, c)), ...(S.showLinks ? ['aka', 'rel'].map(c => linkCell(r, i, c)) : []),
+    `<div class="cell" data-r="${i}" data-c="status"><div class="sts">${st.items.map(([k, l]) => `<span class="st ${k === 'chk' ? 'bad' : k}">${esc(l)}</span>`).join('')}${r.a === 'add' && r.orig ? `<button type="button" class="ln" data-mkchg="${i}">Make it a change</button>` : ''}</div></div>`];
+  return `<div class="${cls}" data-row="${i}" role="row">${cells.join('')}</div>`;
+}
+function vocabCell(r, i, c) {
+  const F = VOCAB_OF[c], vals = r[c], was = r.a === 'update' && r.orig ? r.orig[c] : null, changed = was && was.join('|') !== vals.join('|');
+  let inner;
+  if (r.a === 'remove') inner = `<span class="v">${vals.map(v => esc(v)).join(' ')}</span>`;
+  else if (!vals.length) inner = `<span class="empty">Choose\u2026${CHEV}</span>`;
+  else { const off = vals.filter(v => !inList(F, v));
+    inner = `<div style="width:100%"><span class="vcell"><span class="v">${vals.map(v => inList(F, v) ? `<span class="${c === 'fa' ? 'fa' : c === 'src' ? 'src' : ''}">${esc(v)}</span>` : `<span class="offv">${esc(v)}</span>`).join('')}</span>${CHEV}</span>`
+      + (off.length ? `<div class="offacts">${off.length === 1 ? `<button type="button" class="ln" data-addv="${i}|${c}|${esc(off[0])}">Add \u201c${esc(off[0])}\u201d to the list</button>` : ''}<button type="button" class="ln" data-choose="${i}|${c}">Choose another</button></div>` : '')
+      + (changed ? `<span class="was">was ${esc(was.join(', ') || 'empty')}</span>` : '') + '</div>'; }
+  return `<div class="cell${changed && !vals.some(v => !inList(F, v)) ? ' chg' : ''}" data-r="${i}" data-c="${c}">${inner}</div>`;
+}
+function linkCell(r, i, c) {
+  const names = importNames(), vals = r[c];
+  const inner = r.a === 'remove' ? '' : vals.length ? `<span class="vcell"><span class="v">${vals.map(v => knownName(v, names) ? `<span class="chipt">${esc(v)}</span>` : `<span class="chipt bad" title="Not a term in the glossary or this file">${esc(v)} <i>not a term</i></span>`).join('')}</span>${CHEV}</span>`
+    : `<span class="empty keep">Add\u2026${CHEV}</span>`;
+  return `<div class="cell" data-r="${i}" data-c="${c}">${inner}</div>`;
+}
+
+/* ---------------------------------------------------------------- selection, Excel-style */
+function clearSel() { sel.kind = null; sel.rows.clear(); sel.cells.clear(); sel.col = null; sel.anchor = null; }
+const posOf = i => VIS.findIndex(v => v.i === i);
+const between = (a, b) => { const pa = posOf(a), pb = posOf(b); const lo = Math.min(pa, pb), hi = Math.max(pa, pb); return VIS.slice(lo, hi + 1).map(v => v.i); };
+function paintSel() {
+  const g = $('#grid'); if (!g) return;
+  g.querySelectorAll('.row.rsel').forEach(e => e.classList.remove('rsel'));
+  g.querySelectorAll('.cell.csel,.cell.cfill').forEach(e => e.classList.remove('csel', 'ctop', 'cbot', 'cfill'));
+  g.querySelectorAll('.fh').forEach(e => e.remove());
+  g.querySelectorAll('[data-rowcb]').forEach(e => { const on = sel.kind === 'rows' && sel.rows.has(+e.dataset.rowcb); e.setAttribute('aria-checked', on); e.innerHTML = on ? TICK : ''; });
+  const all = g.querySelector('[data-allrows]'); if (all) { const k = sel.kind === 'rows' ? sel.rows.size : 0; all.setAttribute('aria-checked', k && k >= VIS.length ? 'true' : k ? 'mixed' : 'false'); all.innerHTML = k ? TICK : ''; }
+  if (sel.kind === 'rows') sel.rows.forEach(i => { const e = g.querySelector(`[data-row="${i}"]`); if (e) e.classList.add('rsel'); });
+  if (sel.kind === 'cells') {
+    const order = VIS.map(v => v.i).filter(i => sel.cells.has(i));
+    order.forEach((i, k) => { const e = g.querySelector(`.cell[data-r="${i}"][data-c="${sel.col}"]`); if (!e) return; e.classList.add('csel');
+      const prev = posOf(order[k - 1]), me = posOf(i), next = posOf(order[k + 1]);
+      if (k === 0 || prev !== me - 1) e.classList.add('ctop'); if (k === order.length - 1 || next !== me + 1) e.classList.add('cbot'); });
+    const last = order[order.length - 1], le = last != null && g.querySelector(`.cell[data-r="${last}"][data-c="${sel.col}"]`);
+    if (le && COL[sel.col] && !COL[sel.col].link) le.insertAdjacentHTML('beforeend', '<span class="fh" title="Drag to fill down" aria-hidden="true"></span>');
+    if (drag && drag.mode === 'fill') between(drag.from, drag.cur).filter(i => !sel.cells.has(i)).forEach(i => { const e = g.querySelector(`.cell[data-r="${i}"][data-c="${sel.col}"]`); if (e) e.classList.add('cfill'); });
+  }
+  selBar();
+}
+function selBar() {
+  const b = $('#selbar'); if (!b) return;
+  if (sel.kind === 'rows' && sel.rows.size) b.innerHTML = `<div class="bar rows"><b>${n(sel.rows.size)} ${plural(sel.rows.size, 'row')} selected</b>${['tt', 'fa', 'src'].map(c => `<button type="button" class="b" data-bulk="${c}">Set ${esc(COL[c].label.toLowerCase())} ${CHEV}</button>`).join('')}${S.showLinks ? ['aka', 'rel'].map(c => `<button type="button" class="b" data-bulk="${c}">Set ${esc(COL[c].label.toLowerCase())} ${CHEV}</button>`).join('') : ''}<button type="button" class="b" data-drop>Leave out of this import</button><button type="button" class="x" data-clearsel>Clear selection</button></div>`;
+  else if (sel.kind === 'cells' && sel.cells.size) b.innerHTML = `<div class="bar cells"><b>${n(sel.cells.size)} ${plural(sel.cells.size, 'cell')} selected in ${esc(COL[sel.col].label)}</b><span>${COL[sel.col].link ? '' : 'Drag the corner to fill down \u00b7 '}<kbd>Ctrl</kbd>+<kbd>C</kbd> / <kbd>Ctrl</kbd>+<kbd>V</kbd> to copy and paste \u00b7 <kbd>Delete</kbd> to clear \u00b7 <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo</span><button type="button" class="btn sm x" data-clearsel>Clear selection</button></div>`;
+  else b.innerHTML = `<div class="bar tip"><span>Drag down <b>Term types</b>, <b>Focus areas</b> or <b>Sources</b> to set several at once; drag anywhere else to select rows. Double-click a term or definition to edit it.</span>${S.undo.length ? '<button type="button" class="ln x" data-undo>Undo the last change</button>' : ''}</div>`;   /* the bar's space is always kept, so nothing moves under a drag */
+}
+let drag = null, endedDrag = 0;   /* the click that ends a drag never closes the menu that drag opened */
+function cellAt(x, y) { const el = (ROOT.elementFromPoint ? ROOT : document).elementFromPoint(x, y); return el && el.closest('.cell[data-r]'); }
+function onDown(e) {
+  if (e.button !== 0 || S.view !== 'review') return;
+  if (e.target.closest('.fh')) { drag = { mode: 'fill', from: VIS.map(v => v.i).filter(i => sel.cells.has(i)).pop(), cur: null }; drag.cur = drag.from; e.preventDefault(); return; }
+  if (e.target.closest('button,textarea,input,select,a,.cb')) return;
+  const cell = e.target.closest('.cell[data-r]'); if (!cell) return;
+  const i = +cell.dataset.r, c = cell.dataset.c; closeMenu();
+  if (S.edit) commitEdit();
+  if (CELLCOLS.has(c)) {
+    if (S.rows[i].a === 'remove') return;
+    if (e.shiftKey && sel.kind === 'cells' && sel.col === c && sel.anchor != null) sel.cells = new Set(between(sel.anchor, i));
+    else if ((e.ctrlKey || e.metaKey) && sel.kind === 'cells' && sel.col === c) { sel.cells.has(i) ? sel.cells.delete(i) : sel.cells.add(i); sel.anchor = i; }
+    else { clearSel(); sel.kind = 'cells'; sel.col = c; sel.cells = new Set([i]); sel.anchor = i; }
+    drag = { mode: 'cells', start: sel.anchor, base: new Set(sel.cells), moved: false };
+  } else {
+    if (e.shiftKey && sel.kind === 'rows' && sel.anchor != null) between(sel.anchor, i).forEach(x => sel.rows.add(x));
+    else if (e.ctrlKey || e.metaKey) { if (sel.kind !== 'rows') { clearSel(); sel.kind = 'rows'; } sel.rows.has(i) ? sel.rows.delete(i) : sel.rows.add(i); sel.anchor = i; }
+    else { clearSel(); sel.kind = 'rows'; sel.rows = new Set([i]); sel.anchor = i; }
+    drag = { mode: 'rows', start: sel.anchor, base: new Set(sel.rows), moved: false };
+  }
+  paintSel(); e.preventDefault();
+}
+function onMove(e) {
+  if (!drag) return;
+  const gw = $('#gw'); if (gw) { const b = gw.getBoundingClientRect(); if (e.clientY > b.bottom - 30) gw.scrollTop += 18; else if (e.clientY < b.top + 40) gw.scrollTop -= 18; }
+  const cell = cellAt(e.clientX, e.clientY); if (!cell) return; const i = +cell.dataset.r;
+  if (drag.mode === 'fill') { if (posOf(i) >= posOf(drag.from) && i !== drag.cur) { drag.cur = i; paintSel(); } return; }
+  drag.moved = drag.moved || i !== drag.start;
+  const range = between(drag.start, i).filter(x => drag.mode !== 'cells' || S.rows[x].a !== 'remove');
+  if (drag.mode === 'cells') sel.cells = new Set([...drag.base, ...range]); else sel.rows = new Set([...drag.base, ...range]);
+  paintSel();
+}
+function onUp(e) {
+  if (!drag) return; const d = drag; drag = null; endedDrag = Date.now();
+  if (d.mode === 'fill') { fillDown(d.from, d.cur); return; }
+  if (d.mode === 'cells' && sel.cells.size) openCellMenu(sel.col, [...sel.cells]);
+}
+function rowsInOrder(set) { return VIS.map(v => v.i).filter(i => set.has(i)); }
+function snapshot(idx) { S.undo.push(idx.map(i => [i, JSON.parse(JSON.stringify({ term: S.rows[i].term, def: S.rows[i].def, tt: S.rows[i].tt, fa: S.rows[i].fa, src: S.rows[i].src, aka: S.rows[i].aka, rel: S.rows[i].rel, keep: S.rows[i].keep }))])); if (S.undo.length > 50) S.undo.shift(); }
+function undo() { const s = S.undo.pop(); if (!s) return; if (s.dropped) { S.rows.splice(0, S.rows.length, ...s.dropped); clearSel(); render(); toast('Rows put back'); return; }
+  s.forEach(([i, v]) => Object.assign(S.rows[i], v)); if (sel.kind === 'cells') flash(s.map(x => x[0]), sel.col); render(); toast('Undone'); }
+function fillDown(from, to) {
+  const src = rowsInOrder(sel.cells), targets = between(from, to).filter(i => !sel.cells.has(i) && S.rows[i].a !== 'remove'); if (!targets.length) { paintSel(); return; }
+  snapshot(targets); targets.forEach((i, k) => { S.rows[i][sel.col] = S.rows[src[k % src.length]][sel.col].slice(); });
+  targets.forEach(i => sel.cells.add(i)); flash(targets, sel.col); render(); toast(`Filled ${n(targets.length)} ${plural(targets.length, 'cell')} in ${COL[sel.col].label}`);
+}
+function clearCells() { const idx = rowsInOrder(sel.cells); snapshot(idx); idx.forEach(i => { S.rows[i][sel.col] = []; }); flash(idx, sel.col); render(); toast(`Cleared ${n(idx.length)} ${plural(idx.length, 'cell')}`); }
+let CLIP = null;
+function copyCells() { const idx = rowsInOrder(sel.cells); CLIP = { col: sel.col, vals: idx.map(i => S.rows[i][sel.col].slice()) };
+  const text = CLIP.vals.map(v => v.join(' | ')).join('\n'); try { navigator.clipboard && navigator.clipboard.writeText(text).catch(() => {}); } catch (e) {} CLIP.text = text;
+  toast(`Copied ${n(idx.length)} ${plural(idx.length, 'cell')}`); }
+function pasteInto(text) {
+  if (sel.kind !== 'cells' || !sel.cells.size) return;
+  const c = sel.col, F = VOCAB_OF[c];
+  let vals = CLIP && CLIP.text === text ? CLIP.vals : String(text).replace(/\r/g, '').split('\n').filter((l, k, a) => l.trim() || k < a.length - 1).map(l => splitVals(l).map(x => F ? (canon(F, x) || x) : x));
+  if (!vals.length) return;
+  let idx = rowsInOrder(sel.cells);
+  if (vals.length > 1 && idx.length === 1) { const p = posOf(idx[0]); idx = VIS.slice(p, p + vals.length).map(v => v.i).filter(i => S.rows[i].a !== 'remove'); }
+  snapshot(idx); idx.forEach((i, k) => { S.rows[i][c] = [...new Set(vals.length === 1 ? vals[0] : (vals[k] || []))]; });
+  idx.forEach(i => sel.cells.add(i)); flash(idx, c); render(); toast(`Pasted into ${n(idx.length)} ${plural(idx.length, 'cell')}`);
+}
+
+/* ---------------------------------------------------------------- menus */
+let MENU = null;
+function closeMenu() { const m = $('#pop'); if (m) m.remove(); MENU = null; }
+function place(el, anchor, top) {   /* below the selection; if there isn't room, above its first cell, so the selection stays in view */
+  const a = anchor.getBoundingClientRect(), t = top ? top.getBoundingClientRect() : a, w = el.offsetWidth, h = el.offsetHeight;
+  let x = Math.min(a.left, innerWidth - w - 10), y = a.bottom + 4;
+  if (y + h > innerHeight - 10) { y = t.top - h - 4; if (y < 10) { y = 10; x = Math.min(a.right + 6, innerWidth - w - 10); } }
+  el.style.left = Math.max(10, x) + 'px'; el.style.top = y + 'px';
+}
+function anchorFor(col, idx) { const last = idx[idx.length - 1]; return ROOT.querySelector(`.cell[data-r="${last}"][data-c="${col}"]`) || $('#selbar'); }
+const firstCell = (col, idx) => ROOT.querySelector(`.cell[data-r="${idx[0]}"][data-c="${col}"]`);
+/* A cell's list opens beside the selection, level with its first cell, so the column below stays free to drag
+   (Perry, 15 Oct 2026); on the left of the column if there isn't room on the right. */
+function placeBeside(el, first) {
+  const a = first.getBoundingClientRect(), w = el.offsetWidth, h = el.offsetHeight;
+  let x = a.right + 8; if (x + w > innerWidth - 10) x = Math.max(10, a.left - w - 8);
+  el.style.left = x + 'px'; el.style.top = Math.max(10, Math.min(a.top, innerHeight - h - 10)) + 'px';
+}
+const placeFor = (pop, anchor, col, idx) => { const f = firstCell(col, idx); if (anchor && anchor.classList && anchor.classList.contains('cell') && f) placeBeside(pop, f); else place(pop, anchor, f); };
+function openCellMenu(col, idx, anchor) { idx = idx.filter(i => S.rows[i].a !== 'remove'); if (!idx.length) return; idx = VIS.map(v => v.i).filter(i => idx.includes(i)).concat(idx.filter(i => posOf(i) < 0));
+  (COL[col].link ? linkMenu : vocabMenu)(col, idx, anchor || anchorFor(col, idx)); }
+function vocabMenu(col, idx, anchor) {
+  const C = COL[col], F = C.vocab, rows = idx.map(i => S.rows[i]), filled = rows.filter(r => r[col].length).length;
+  const inAll = v => rows.every(r => r[col].includes(v)), inSome = v => rows.some(r => r[col].includes(v));
+  const m = { col, idx, q: '', mode: !C.single && filled ? 'add' : 'set', chosen: new Set(vocabList(F).filter(inAll)), untouched: new Set(vocabList(F).filter(v => inSome(v) && !inAll(v))) };
+  MENU = m;
+  const draw = () => {
+    const opts = vocabList(F).filter(v => !m.q || v.toLowerCase().includes(m.q.toLowerCase()));
+    const exact = m.q.trim() && vocabList(F).some(v => vkey(v) === vkey(m.q));
+    const many = idx.length > 1, cellWord = many ? `the ${n(idx.length)} selected cells` : 'this cell';
+    const ask = C.single ? (filled && many ? `<div class="ask"><b>${n(filled)} of these ${n(idx.length)}</b> already ${plural(filled, 'has', 'have')} a ${C.one}; choosing one replaces it. A term has one ${C.one}.</div>` : '')
+      : (filled ? `<div class="ask"><b>${n(filled)} of ${many ? 'these ' + n(idx.length) : 'this cell'}</b> already ${plural(filled, 'has', 'have')} ${C.label.toLowerCase()}.</div><div class="seg" role="group" aria-label="Add or replace"><button type="button" data-mode="add" aria-pressed="${m.mode === 'add'}">Add to them</button><button type="button" data-mode="replace" aria-pressed="${m.mode === 'replace'}">Replace them</button></div>` : '');
+    const box = C.single ? v => `<span class="radio${m.chosen.has(v) && m.chosen.size === 1 ? ' on' : ''}" aria-hidden="true"></span>`
+      : v => `<span class="cb" aria-hidden="true" aria-checked="${m.chosen.has(v) ? 'true' : m.untouched.has(v) ? 'mixed' : 'false'}">${m.chosen.has(v) ? TICK : m.untouched.has(v) ? '\u2013' : ''}</span>`;
+    const list = opts.map(v => `<button type="button" class="o" data-opt="${esc(v)}">${box(v)}<span class="nm">${esc(v)}${ADDED[F].includes(v) ? '<small>Added in this import</small>' : ''}</span>${m.untouched.has(v) ? `<small>on ${n(rows.filter(r => r[col].includes(v)).length)}</small>` : ''}</button>`).join('')
+      + (m.q.trim() && !exact ? `<button type="button" class="o" data-newv="${esc(m.q.trim())}"><span class="nm"><b>Add \u201c${esc(m.q.trim())}\u201d to the list</b><small>A new ${esc(C.one)}, staged with this import</small></span></button>` : '')
+      || '<div class="empty-res">Nothing matches.</div>';
+    const what = C.single ? `Choose one for ${cellWord}` : m.mode === 'replace' ? `Replaces what ${cellWord} have` : m.mode === 'add' ? `Adds to what ${cellWord} have` : `Sets ${cellWord}`;
+    pop.innerHTML = `<div class="ttl">${esc(C.label)} <span>\u00b7 ${n(idx.length)} ${plural(idx.length, 'cell')}</span></div>${ask}<input class="q" id="pq" placeholder="Find a ${esc(C.one)}\u2026" value="${esc(m.q)}" aria-label="Find a ${esc(C.one)}" autocomplete="off"><div class="list" role="listbox">${list}</div>
+      <div class="ft"><span>${what}</span>${C.single ? '<button type="button" class="btn sm" data-close>Cancel</button>' : '<span style="display:flex;gap:6px"><button type="button" class="btn sm" data-close>Cancel</button><button type="button" class="btn sm p" data-done>Done</button></span>'}</div>`;
+    const q = pop.querySelector('#pq'); q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length);
+  };
+  const pop = document.createElement('div'); pop.className = 'pop'; pop.id = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', C.label); LAYER.appendChild(pop);
+  m.draw = draw; draw(); placeFor(pop, anchor, col, idx);
+  m.apply = () => { snapshot(idx);
+    rows.forEach(r => { if (C.single) { r[col] = [...m.chosen]; return; }
+      if (m.mode === 'replace' || m.mode === 'set') r[col] = [...m.chosen];
+      else { const keep = r[col].filter(v => m.chosen.has(v) || m.untouched.has(v) || !inList(F, v)); r[col] = [...new Set([...keep, ...m.chosen])]; } });
+    closeMenu(); flash(idx, col); render(); toast(`${C.label}: ${n(idx.length)} ${plural(idx.length, 'cell')} set`); };
+  m.pick = v => { if (C.single) { m.chosen = new Set([v]); m.apply(); return; } m.untouched.delete(v); m.chosen.has(v) ? m.chosen.delete(v) : m.chosen.add(v); draw(); };
+}
+function linkMenu(col, idx, anchor) {
+  const C = COL[col], rows = idx.map(i => S.rows[i]), filled = rows.filter(r => r[col].length).length;
+  const inAll = v => rows.every(r => r[col].includes(v));
+  const m = { col, idx, q: '', mode: filled ? 'add' : 'set', chosen: new Set([...new Set(rows.flatMap(r => r[col]))].filter(inAll)), untouched: new Set([...new Set(rows.flatMap(r => r[col]))].filter(v => !inAll(v))) };
+  MENU = m;
+  const pop = document.createElement('div'); pop.className = 'pop'; pop.id = 'pop'; pop.style.width = '340px'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', C.label); LAYER.appendChild(pop);
+  const draw = () => {
+    const q = m.q.trim().toLowerCase(), names = S.rows.filter(r => r.a !== 'remove' && r.term.trim()).map(r => r.term.trim());
+    let res = [];
+    if (q.length >= 2) {
+      const inFile = names.filter(x => x.toLowerCase().includes(q)).map(x => [x, BYLOW.has(x.toLowerCase()) ? 'In the glossary, and in this import' : 'In this import']);
+      const inGl = []; for (const t of GL) { if (t.term.toLowerCase().includes(q) && !names.some(x => x.toLowerCase() === t.term.toLowerCase())) { inGl.push([t.term, 'In the glossary']); if (inGl.length > 60) break; } }
+      res = [...inFile, ...inGl].sort((a, b) => (a[0].toLowerCase().startsWith(q) ? 0 : 1) - (b[0].toLowerCase().startsWith(q) ? 0 : 1)).slice(0, 30);
+    }
+    const cur = [...new Set([...m.chosen, ...m.untouched])].filter(v => !res.some(x => x[0] === v)).map(v => [v, knownName(v) ? 'Linked now' : 'Not a term in the glossary or this file']);
+    const box = v => `<span class="cb" aria-hidden="true" aria-checked="${m.chosen.has(v) ? 'true' : m.untouched.has(v) ? 'mixed' : 'false'}">${m.chosen.has(v) ? TICK : m.untouched.has(v) ? '\u2013' : ''}</span>`;
+    const many = idx.length > 1;
+    pop.innerHTML = `<div class="ttl">${esc(C.label)} <span>\u00b7 ${n(idx.length)} ${plural(idx.length, 'cell')}</span></div>
+      ${filled ? `<div class="ask"><b>${n(filled)} of ${many ? 'these ' + n(idx.length) : 'this cell'}</b> already ${plural(filled, 'has', 'have')} links.</div><div class="seg" role="group" aria-label="Add or replace"><button type="button" data-mode="add" aria-pressed="${m.mode === 'add'}">Add to them</button><button type="button" data-mode="replace" aria-pressed="${m.mode === 'replace'}">Replace them</button></div>` : ''}
+      <input class="q" id="pq" placeholder="Search the glossary and this file\u2026" value="${esc(m.q)}" aria-label="Search terms" autocomplete="off">
+      <div class="list" role="listbox">${[...cur, ...res].map(([v, w]) => `<button type="button" class="o" data-opt="${esc(v)}">${box(v)}<span class="nm">${esc(v)}<small>${esc(w)}</small></span></button>`).join('') || `<div class="empty-res">${q.length < 2 ? 'Type two letters or more to find a term.' : 'No term matches.'}</div>`}</div>
+      <div class="ft"><span>${n(m.chosen.size)} chosen</span><span style="display:flex;gap:6px"><button type="button" class="btn sm" data-close>Cancel</button><button type="button" class="btn sm p" data-done>Done</button></span></div>`;
+    const qi = pop.querySelector('#pq'); qi.focus({ preventScroll: true }); qi.setSelectionRange(qi.value.length, qi.value.length);
+  };
+  m.draw = draw; draw(); placeFor(pop, anchor, col, idx);
+  m.apply = () => { snapshot(idx); rows.forEach(r => { r[col] = m.mode === 'add' ? [...new Set([...r[col].filter(v => m.chosen.has(v) || m.untouched.has(v)), ...m.chosen])] : [...m.chosen]; }); closeMenu(); flash(idx, col); render(); toast(`${C.label}: ${n(idx.length)} ${plural(idx.length, 'cell')} set`); };
+  m.pick = v => { m.untouched.delete(v); m.chosen.has(v) ? m.chosen.delete(v) : m.chosen.add(v); draw(); };
+}
+/* The field's checks seen in full (Perry, 15 Oct 2026): the whole text with each problem in red, and for each check the
+   whole corrected text with the change in green, decided there; Edit the text for anything else. */
+function fieldReview(i, f, anchor) {
+  const r = S.rows[i], cs = stateOf(r, importNames()).checks.filter(c => c.f === f); if (!cs.length) { startEdit(i, f); return; }
+  closeMenu(); clearSel(); paintSel(); const pop = document.createElement('div'); pop.className = 'pop chkpop wide'; pop.id = 'pop'; pop.setAttribute('role', 'dialog');
+  const what = f === 'term' ? 'Term' : 'Definition'; pop.setAttribute('aria-label', what + ' checks');
+  pop.innerHTML = `<div class="rvh"><b>${what}</b> <span>\u00b7 ${esc(r.term.trim() || '(no term)')} \u00b7 ${n(cs.length)} ${plural(cs.length, 'check')}</span></div>
+    <div class="rvt">${markText(r[f], cs)}</div>`
+    + cs.map(c => `<div class="rvc"><div class="rvct">${WARN}<b>${esc(c.title)}</b></div>${c.after != null ? `<div class="rvt fix"><span class="k">FIX</span>${tokHTML(hlDiff(c.before, c.after).b, 'good')}</div>` : (c.note ? `<div class="d">${esc(c.desc)}</div>` : `<div class="d">${esc(c.desc)}</div>`)}
+      <div class="a"><button type="button" class="btn sm" data-keep="${i}|${c.key}">Keep as is</button>${c.after != null ? `<button type="button" class="btn sm p" data-fix="${i}|${c.key}">Fix</button>` : ''}</div></div>`).join('')
+    + `<div class="ft"><span>Esc to close</span><button type="button" class="btn sm" data-editf="${i}|${f}">Edit the text</button></div>`;
+  LAYER.appendChild(pop); MENU = { chk: true, review: [i, f] }; place(pop, anchor);
+}
+function filterMenu(col, anchor) {
+  closeMenu(); const label = ({ term: 'Term', def: 'Definition', status: 'Status' })[col] || COL[col].label;
+  const f = S.filters[col] || (S.filters[col] = { q: '', sel: null }), text = TEXTCOLS.has(col);
+  const names = importNames(), counts = new Map();
+  if (!text) S.rows.forEach(r => { const st = stateOf(r, names); new Set(valuesOf(r, col, st)).forEach(v => counts.set(v, (counts.get(v) || 0) + 1)); });
+  const all = [...counts.keys()].sort((a, b) => a === EMPTY ? 1 : b === EMPTY ? -1 : a.localeCompare(b));
+  const pop = document.createElement('div'); pop.className = 'pop fpop'; pop.id = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', 'Filter ' + label); LAYER.appendChild(pop);
+  const m = { filter: col }; MENU = m;
+  const draw = () => {
+    const q = f.q.trim().toLowerCase(), shown = all.filter(v => !q || v.toLowerCase().includes(q)), on = v => f.sel == null || f.sel.has(v);
+    pop.innerHTML = `<div class="ttl">Filter ${esc(label)}</div><input class="q" id="fq" placeholder="${text ? 'Type to show rows containing\u2026' : 'Type to narrow the list\u2026'}" value="${esc(f.q)}" aria-label="Filter ${esc(label)}" autocomplete="off">`
+      + (text ? '' : `<div class="list">${shown.map(v => `<button type="button" class="o" data-fval="${esc(v)}"><span class="cb" aria-hidden="true" aria-checked="${on(v)}">${on(v) ? TICK : ''}</span><span class="nm">${esc(v)}</span><small>${n(counts.get(v))}</small></button>`).join('') || '<div class="empty-res">Nothing fits.</div>'}</div>`)
+      + `<div class="ft"><span>${n(VIS.length)} ${plural(VIS.length, 'row')} shown</span><span style="display:flex;gap:6px">${text ? '' : '<button type="button" class="btn sm" data-fall>Select all</button>'}<button type="button" class="btn sm" data-fclear>Clear</button></span></div>`;
+    const qi = pop.querySelector('#fq'); qi.focus({ preventScroll: true }); qi.setSelectionRange(qi.value.length, qi.value.length);
+  };
+  m.draw = draw; m.apply = () => {}; m.redraw = () => { refreshGrid(); draw(); };
+  m.toggle = v => { const base = f.sel == null ? new Set(all) : new Set(f.sel); base.has(v) ? base.delete(v) : base.add(v); f.sel = base.size === all.length ? null : base; m.redraw(); };
+  draw(); place(pop, anchor);
+}
+function checkPop(i, key, anchor) { const found = stateOf(S.rows[i], importNames()).checks.find(x => x.key === key); if (found) { fieldReview(i, found.f, anchor); return; }
+  const r = S.rows[i], c = stateOf(r, importNames()).checks.find(x => x.key === key); if (!c) return;
+  closeMenu(); const pop = document.createElement('div'); pop.className = 'pop chkpop'; pop.id = 'pop'; pop.setAttribute('role', 'dialog'); pop.setAttribute('aria-label', c.title);
+  let body = `<b>${esc(c.title)} \u00b7 ${c.f === 'term' ? 'Term' : 'Definition'}</b><div>${markText(c.before, [c])}</div>`;
+  if (c.after != null) body += `<div style="margin-top:4px"><span class="k">FIX</span>${tokHTML(hlDiff(c.before, c.after).b, 'good')}</div>`;
+  body += `<div class="d">${esc(c.desc)}</div><div class="a"><button type="button" class="btn sm" data-keep="${i}|${key}">Keep as is</button>${c.after != null ? `<button type="button" class="btn sm p" data-fix="${i}|${key}">Fix</button>` : `<button type="button" class="btn sm p" data-editf="${i}|${c.f}">Edit</button>`}</div>`;
+  pop.innerHTML = body; LAYER.appendChild(pop); MENU = { chk: true }; place(pop, anchor);
+}
+function applyFix(i, key) { const r = S.rows[i], c = stateOf(r, importNames()).checks.find(x => x.key === key); if (!c || c.after == null) return; snapshot([i]); r[c.f] = c.after; const again = MENU && MENU.review; closeMenu(); flash([i], c.f); render(); toast('Fixed: ' + c.title.toLowerCase()); reopenReview(again); }
+/* Keep as is asks why, as the console does (7 Oct 2026): recorded with the person's name, and it comes back if the value
+   changes. */
+function keepAsIs(i, key) { const r = S.rows[i], c = stateOf(r, importNames()).checks.find(x => x.key === key); if (!c) return;
+  const again = MENU && MENU.review; closeMenu();
+  const sc = document.createElement('div'); sc.className = 'scrim'; sc.id = 'scrim';
+  sc.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="Keep as is" style="width:min(520px,100%)"><h2>Keep as is?</h2><div class="db">
+    <p style="margin:0">${esc(c.title)}: <b>${esc(r.term.trim() || '(no term)')}</b></p>
+    <label for="keepWhy" style="font-weight:600">Why is it right as it is?</label>
+    <textarea id="keepWhy" rows="3" style="width:100%;font:inherit;font-size:14px;border:1px solid var(--line-2);border-radius:4px;padding:8px 10px;background:var(--surface);color:var(--ink);user-select:text"></textarea>
+    <p style="margin:0;color:var(--ink-3);font-size:12.5px">Recorded with your name. If the value changes later, this comes back for a decision.</p></div>
+    <div class="df2"><button type="button" class="btn" id="kwCancel">Cancel</button><button type="button" class="btn p" id="kwOk">Keep as is</button></div></div>`;
+  LAYER.appendChild(sc); const t = sc.querySelector('#keepWhy'); t.focus({ preventScroll: true });
+  sc.querySelector('#kwCancel').onclick = () => { sc.remove(); reopenReview(again); };
+  sc.querySelector('#kwOk').onclick = () => { const why = t.value.trim(); if (!why) { t.placeholder = 'Give a reason for keeping it as is'; t.focus(); return; }
+    snapshot([i]); r.keep[key] = c.before; r.keepWhy = Object.assign({}, r.keepWhy, { [key]: why }); sc.remove(); render(); toast('Kept as is'); reopenReview(again); };
+  t.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sc.querySelector('#kwOk').click(); };
+}
+function reopenReview(again) { if (!again) return; const [i, f] = again; const cell = ROOT.querySelector(`.cell[data-r="${i}"][data-c="${f}"]`);
+  if (cell && stateOf(S.rows[i], importNames()).checks.some(c => c.f === f)) fieldReview(i, f, cell); }
+
+/* ---------------------------------------------------------------- editing in place */
+function startEdit(i, f) { if (S.rows[i].a === 'remove') return; clearSel(); S.edit = { i, f }; render();
+  const t = $('#editbox'); if (t) { t.focus({ preventScroll: true }); t.setSelectionRange(t.value.length, t.value.length); t.style.height = Math.max(64, t.scrollHeight + 4) + 'px'; liveChecks(); } }
+function liveChecks() { const t = $('#editbox'), l = $('#live'); if (!t || !l) return; const [i, f] = t.dataset.edit.split('|');
+  const probe = Object.assign({}, S.rows[+i], { [f]: t.value, keep: {} }); const cs = checksOf(probe, importNames()).filter(c => c.f === f && !['dupe', 'near-dupe', 'spelling', 'twin', 'same-def'].includes(c.t));
+  l.textContent = cs.length ? '\u00b7 ' + cs.map(c => c.title).join(' \u00b7 ') : ''; }
+function saveEdit(cancel) { const t = $('#editbox'); if (!S.edit) return false; const { i, f } = S.edit; S.edit = null;
+  if (t && !cancel && t.value !== S.rows[i][f]) { snapshot([i]); S.rows[i][f] = t.value.replace(/\r?\n/g, ' '); flash([i], f); } return true; }
+function commitEdit(cancel) { if (saveEdit(cancel)) render(); }
+
+/* ---------------------------------------------------------------- adding a value to a list
+   As in Classifications (Perry, 15 Oct 2026): the value is staged as a classification change with this import, and
+   it asks what the value means, as it will read on the public glossary. */
+const FIELD_NOUN = { TermType: 'term type', FocusArea: 'focus area', Source: 'source' }, FIELD_LIST = { TermType: 'term types', FocusArea: 'focus areas', Source: 'sources' };
+function suggestDescription(field, value) {   /* the console's own wording */
+  const readable = String(value || '').replace(/^#/, '').replace(/([a-z0-9])([A-Z])/g, '$1 $2').replace(/\s+/g, ' ').trim();
+  if (field === 'FocusArea') return `A set of terms typically used in ${readable.toLowerCase()}.`;
+  if (field === 'Source') return `A set of terms sourced from ${readable}.`;
+  return `Represents ${readable.toLowerCase()}.`;
+}
+function addValueDialog(F, v, done) {
+  closeMenu(); const sc = document.createElement('div'); sc.className = 'scrim'; sc.id = 'scrim';
+  const uses = S.rows.filter(r => r[Object.keys(VOCAB_OF).find(k => VOCAB_OF[k] === F)].includes(v)).length;
+  sc.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="Add ${esc(v)} to ${FIELD_LIST[F]}" style="width:min(560px,100%)"><h2>Add \u201c${esc(v)}\u201d to ${FIELD_LIST[F]}</h2><div class="db">
+    <p style="margin:0;color:var(--ink-2)">It is staged as a new ${FIELD_NOUN[F]} with this import${uses ? `, for the ${n(uses)} ${plural(uses, 'row')} that use it` : ''}, as if added in Classifications.</p>
+    <label for="dsc" style="font-weight:600">What this ${FIELD_NOUN[F]} means, as it will read on the public site</label>
+    <textarea id="dsc" rows="4" style="width:100%;font:inherit;font-size:14px;border:1px solid var(--line-2);border-radius:4px;padding:8px 10px;background:var(--surface);color:var(--ink);user-select:text">${esc(DESC[F][v] || '')}</textarea>
+    <div><button type="button" class="btn sm" id="dscSug">Suggest wording</button></div>
+    <p style="margin:0;color:var(--ink-3);font-size:12.5px">Shown under this value on the public glossary once the next version is published.</p></div>
+    <div class="df2"><button type="button" class="btn" id="dscCancel">Cancel</button><button type="button" class="btn" id="dscLater">Add without a description for now</button><button type="button" class="btn p" id="dscAdd">Add to the list</button></div></div>`;
+  LAYER.appendChild(sc); const t = sc.querySelector('#dsc'); t.focus({ preventScroll: true });
+  const finish = desc => { if (!vocabList(F).includes(v)) ADDED[F].push(v); if (desc) DESC[F][v] = desc; else delete DESC[F][v]; sc.remove(); done(); };
+  sc.querySelector('#dscSug').onclick = () => { t.value = suggestDescription(F, v); t.focus(); };
+  sc.querySelector('#dscCancel').onclick = () => sc.remove();
+  sc.querySelector('#dscLater').onclick = () => finish('');
+  sc.querySelector('#dscAdd').onclick = () => { const d = t.value.trim(); if (!d) { t.focus(); t.placeholder = 'Describe it, or choose Add without a description for now'; return; } finish(d); };
+  t.onkeydown = e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) sc.querySelector('#dscAdd').click(); };
+}
+
+/* ---------------------------------------------------------------- staging */
+let PENDING = null;
+/* In the console, Stage commits: the adapter stages the rows and the new classifications; what was staged leaves the
+   import, and anything not yet ready stays. */
+async function commitStage() {
+  if (!PENDING || !ENV.commit) return; const { ready, newVals } = PENDING; PENDING = null;
+  const rows = ready.map(r => ({ a: r.a, id: r.id, orig: r.orig, keep: Object.entries(r.keep).map(([key, value]) => ({ key, value, reason: (r.keepWhy || {})[key] || '' })),
+    data: { ID: r.a === 'add' ? '' : r.id, Term: r.term.trim(), Definition: r.def.trim(), Source: r.src.join('|'), TermType: r.tt.join('|'), FocusArea: r.fa.join('|'), AKA: r.aka.slice(), Related: r.rel.slice() } }));
+  const sc = $('#scrim'); if (sc) sc.remove();
+  await ENV.commit({ rows, newVals: newVals.map(x => ({ f: x.f, v: x.v, d: x.d })) });
+  const gone = new Set(ready); S.rows = S.rows.filter(r => !gone.has(r)); newVals.forEach(x => { ADDED[x.f] = ADDED[x.f].filter(v => v !== x.v); delete DESC[x.f][x.v]; });
+  S.undo = []; clearSel(); if (!S.rows.length) { S.file = null; S.view = 'start'; }
+  if (ENV.afterCommit) ENV.afterCommit(); else render();
+}
+function stageDialog() {
+  const names = importNames(), ready = S.rows.filter(r => stateOf(r, names).k === 'ok' || (r.a === 'remove' && !r.idBad));
+  const k = a => ready.filter(r => r.a === a).length, added = Object.entries(ADDED).filter(([, v]) => v.length);
+  const colOf = f => Object.keys(VOCAB_OF).find(c => VOCAB_OF[c] === f);
+  const newVals = added.flatMap(([f, vs]) => vs.map(v => ({ f, v, d: DESC[f][v] || '', uses: ready.filter(r => r[colOf(f)].includes(v)).length, all: S.rows.filter(r => r.a !== 'remove' && r[colOf(f)].includes(v)).length })));
+  const cols = ['ID', 'Term', 'Definition', 'Source', 'TermType', 'FocusArea', 'Also Known As (AKA)', 'Related Terms', 'Action'];
+  const q = v => /[",\n]/.test(v) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+  const csv = [cols.join(','), ...ready.map(r => [r.a === 'add' ? '' : r.id, r.term.trim(), r.def.trim(), r.src.join('|'), r.tt.join('|'), r.fa.join('|'), r.aka.join('|'), r.rel.join('|'), r.a].map(q).join(','))].join('\r\n');
+  const left = S.rows.length - ready.length;
+  const sc = document.createElement('div'); sc.className = 'scrim'; sc.id = 'scrim';
+  sc.innerHTML = `<div class="dlg" role="dialog" aria-modal="true" aria-label="Stage ready rows"><h2>Stage ${n(ready.length)} ready ${plural(ready.length, 'row')}</h2><div class="db">
+    <p style="margin:0">${n(k('add'))} ${plural(k('add'), 'addition')}, ${n(k('update'))} ${plural(k('update'), 'change')} and ${n(k('remove'))} ${plural(k('remove'), 'removal')}${newVals.length ? `, with ${n(newVals.length)} new ${plural(newVals.length, 'classification')}` : ''}.${left ? ` <b>${n(left)} ${plural(left, 'row')}</b> still need something and stay in Import.` : ''}</p>
+    ${ENV.commit ? '' : `<div class="note info">${INFO}<span>In the console, <b>Stage</b> moves these into Staging, where they are applied as now. This test page changes nothing; below is exactly what would be staged, as a change-set.</span></div>`}
+    ${newVals.length ? `<h3 style="font-size:14px;margin-top:4px">New classifications, staged as classification changes</h3><div class="map" role="table" aria-label="New classifications"><div class="mrow hd" role="row" style="grid-template-columns:120px 170px 1fr 90px"><span>List</span><span>Value</span><span>Description</span><span>Rows staged</span></div>${newVals.map(x => `<div class="mrow" role="row" style="grid-template-columns:120px 170px 1fr 90px"><span>${esc(FIELD_LIST[x.f][0].toUpperCase() + FIELD_LIST[x.f].slice(1))}</span><b>${esc(x.v)}</b><span>${x.d ? esc(x.d) : '<span class="no">No description yet: add it in Classifications</span>'}</span><span title="Ready rows that use it, of all the rows that do">${x.uses === x.all ? n(x.uses) : n(x.uses) + ' of ' + n(x.all)}</span></div>`).join('')}</div>` : ''}
+    ${ENV.commit ? '<p style="margin:0;color:var(--ink-2)">They move into <b>Staging</b>, where they are applied as now. Nothing in the glossary changes until then.</p>' : `<h3 style="font-size:14px;margin-top:4px">Terms, as a change-set</h3><textarea readonly id="csvout" aria-label="What would be staged">${esc(csv)}</textarea>`}</div>
+    <div class="df2">${ENV.commit ? `<button type="button" class="btn" data-closedlg>Cancel</button><button type="button" class="btn p" data-commit>Stage ${n(ready.length)} ${plural(ready.length, 'row')}</button>` : '<button type="button" class="btn" data-selcsv>Select all</button><button type="button" class="btn p" data-closedlg>Close</button>'}</div></div>`;
+  PENDING = { ready, newVals };
+  LAYER.appendChild(sc); sc.querySelector('[data-closedlg]').focus({ preventScroll: true });
+}
+
+/* ---------------------------------------------------------------- wiring */
+function wire() {
+  const f = $('#file'); if (f) f.onchange = e => { const x = e.target.files[0]; if (x) x.arrayBuffer().then(b => openFile(x.name, new Uint8Array(b))); };
+  const d = $('#drop'); if (d) { d.ondragover = e => { e.preventDefault(); d.classList.add('over'); }; d.ondragleave = () => d.classList.remove('over');
+    d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); const x = e.dataTransfer.files[0]; if (x) x.arrayBuffer().then(b => openFile(x.name, new Uint8Array(b))); }; }
+  const q = $('#q'); if (q) q.oninput = () => { S.q = q.value; clearSel(); const pos = q.selectionStart; render(); const q2 = $('#q'); q2.focus(); q2.setSelectionRange(pos, pos); };
+  ROOT.querySelectorAll('select[data-map]').forEach(s => s.onchange = () => { S.map[+s.dataset.map] = { f: s.value || null, auto: S.map[+s.dataset.map].auto }; buildRows(); render(); });
+  const t = $('#editbox'); if (t) { t.oninput = () => { t.style.height = Math.max(64, t.scrollHeight + 4) + 'px'; liveChecks(); };
+    t.onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitEdit(); } else if (e.key === 'Escape') { e.preventDefault(); commitEdit(true); } }; t.onblur = () => { if (saveEdit()) setTimeout(() => { if ($('#editbox')) render(); }, 0); }; }   /* saved on the spot; drawn after, unless something else already redrew */
+}
+ROOT.addEventListener('click', e => { if (!ENV.active()) return;
+  const b = e.target.closest('[data-commit],[data-mkchg],[data-filter],[data-fval],[data-fall],[data-fclear],[data-clearfilters],[data-cols],[data-go],[data-tab],[data-links],[data-stage],[data-rowcb],[data-allrows],[data-bulk],[data-drop],[data-clearsel],[data-undo],[data-addv],[data-choose],[data-chk],[data-fix],[data-keep],[data-editf],[data-opt],[data-newv],[data-mode],[data-done],[data-close],[data-closedlg],[data-selcsv]');
+  if (MENU && Date.now() - endedDrag > 250 && !e.target.closest('#pop') && !(b && (b.dataset.bulk || b.dataset.chk || b.dataset.choose || b.dataset.filter))) { if (!e.target.closest('.cell[data-r]')) closeMenu(); }
+  if (!b) return; const ds = b.dataset;
+  if (ds.go) { if (ds.go === 'start') { S.file = null; S.rows = []; } S.view = ds.go; clearSel(); S.edit = null; render(); if (ENV.toTop) ENV.toTop(); return; }
+  if (ds.tab) { S.tab = ds.tab; clearSel(); render(); return; }
+  if (ds.links != null) { S.showLinks = !S.showLinks; render(); return; }
+  if (ds.commit != null) { commitStage(); return; }
+  if (ds.mkchg != null) { const r = S.rows[+ds.mkchg]; snapshot([+ds.mkchg]); r.a = 'update'; r.idBad = false;   /* a change: blank cells keep the term's values */
+    if (!r.term.trim()) r.term = r.orig.term; if (!r.def.trim()) r.def = r.orig.def; ['tt', 'fa', 'src'].forEach(k => { if (!r[k].length) r[k] = r.orig[k].slice(); });
+    flash([+ds.mkchg], 'term'); render(); toast('Now a change to \u201c' + r.orig.term + '\u201d'); return; }
+  if (ds.filter) { const h = b.closest('.cell'); if (MENU && MENU.filter === ds.filter) { closeMenu(); return; } clearSel(); paintSel(); filterMenu(ds.filter, h || b); return; }
+  if (MENU && MENU.filter && ds.fval != null) { MENU.toggle(ds.fval); return; }
+  if (MENU && MENU.filter && ds.fall != null) { S.filters[MENU.filter].sel = null; MENU.redraw(); return; }
+  if (MENU && MENU.filter && ds.fclear != null) { delete S.filters[MENU.filter]; S.filters[MENU.filter] = { q: '', sel: null }; MENU.redraw(); return; }
+  if (ds.clearfilters != null) { S.filters = {}; clearSel(); render(); return; }
+  if (ds.cols != null) { S.colMode = 'all'; S.view = 'columns'; clearSel(); render(); if (ENV.toTop) ENV.toTop(); return; }
+  if (ds.stage != null) { stageDialog(); return; }
+  if (ds.rowcb != null) { const i = +ds.rowcb; if (sel.kind !== 'rows') { clearSel(); sel.kind = 'rows'; }
+    if (e.shiftKey && sel.anchor != null) between(sel.anchor, i).forEach(x => sel.rows.add(x)); else sel.rows.has(i) ? sel.rows.delete(i) : sel.rows.add(i); sel.anchor = i; paintSel(); return; }
+  if (ds.allrows != null) { const all = sel.kind === 'rows' && sel.rows.size >= VIS.length; clearSel(); if (!all) { sel.kind = 'rows'; VIS.forEach(v => sel.rows.add(v.i)); } paintSel(); return; }
+  if (ds.bulk) { const idx = rowsInOrder(sel.rows); if (idx.length) openCellMenu(ds.bulk, idx, b); return; }
+  if (ds.drop != null) { const keep = S.rows.filter((r, i) => !sel.rows.has(i)), k = S.rows.length - keep.length; S.undo.push({ dropped: S.rows.slice() }); S.rows = keep; clearSel(); render(); toast(`${n(k)} ${plural(k, 'row')} left out of this import`); return; }
+  if (ds.clearsel != null) { clearSel(); paintSel(); return; }
+  if (ds.undo != null) { undo(); return; }
+  if (ds.addv) { const [i, c, v] = ds.addv.split('|'); const F = VOCAB_OF[c];
+    addValueDialog(F, v, () => { flash(S.rows.map((r, k) => r[c].includes(v) ? k : -1).filter(k => k >= 0), c); render(); toast(`\u201c${v}\u201d added to ${COL[c].label.toLowerCase()}, staged with this import`); }); return; }
+  if (ds.choose) { const [i, c] = ds.choose.split('|'); clearSel(); sel.kind = 'cells'; sel.col = c; sel.cells = new Set([+i]); sel.anchor = +i; paintSel(); openCellMenu(c, [+i]); return; }
+  if (ds.chk) { const [i, key] = ds.chk.split('|'); checkPop(+i, key, b); return; }
+  if (ds.fix) { const [i, key] = ds.fix.split('|'); applyFix(+i, key); return; }
+  if (ds.keep) { const [i, key] = ds.keep.split('|'); keepAsIs(+i, key); return; }
+  if (ds.editf) { const [i, f] = ds.editf.split('|'); closeMenu(); startEdit(+i, f); return; }
+  if (MENU && ds.opt != null) { MENU.pick(ds.opt); return; }
+  if (MENU && ds.newv) { const m = MENU, C = COL[m.col], F = C.vocab, v = ds.newv;
+    addValueDialog(F, v, () => { snapshot(m.idx); m.idx.forEach(i => { const r = S.rows[i]; r[m.col] = C.single || m.mode === 'replace' || m.mode === 'set' && !r[m.col].length ? [v] : [...new Set([...r[m.col], v])]; });
+      flash(m.idx, m.col); render(); toast(`\u201c${v}\u201d added to ${C.label.toLowerCase()} and set on ${n(m.idx.length)} ${plural(m.idx.length, 'cell')}`); }); return; }
+  if (MENU && ds.mode) { MENU.mode = ds.mode; MENU.draw(); return; }
+  if (MENU && ds.done != null) { MENU.apply(); return; }
+  if (ds.close != null) { closeMenu(); return; }
+  if (ds.closedlg != null) { const s = $('#scrim'); if (s) s.remove(); return; }
+  if (ds.selcsv != null) { const t = $('#csvout'); t.focus(); t.select(); return; }
+});
+ROOT.addEventListener('input', e => { if (e.target && e.target.id === 'pq' && MENU && MENU.draw) { MENU.q = e.target.value; MENU.draw(); }
+  if (e.target && e.target.id === 'fq' && MENU && MENU.filter) { S.filters[MENU.filter].q = e.target.value; clearSel(); MENU.redraw(); } });
+ROOT.addEventListener('dblclick', e => { if (S.view !== 'review') return; const cell = e.target.closest('.cell[data-r]'); if (!cell || e.target.closest('button')) return;
+  const i = +cell.dataset.r, c = cell.dataset.c; if (c !== 'term' && c !== 'def') return; closeMenu();
+  if (stateOf(S.rows[i], importNames()).checks.some(x => x.f === c)) fieldReview(i, c, cell); else startEdit(i, c); });
+ROOT.addEventListener('mousedown', onDown); document.addEventListener('mousemove', onMove); document.addEventListener('mouseup', onUp);
+document.addEventListener('keydown', e => {
+  if (!ENV.active()) return; const tgt = (e.composedPath && e.composedPath()[0]) || e.target;
+  if (e.key === 'Escape') { if ($('#scrim')) { $('#scrim').remove(); return; } if (MENU) { closeMenu(); return; } if (sel.kind) { clearSel(); paintSel(); } return; }
+  if (e.key === 'Enter' && MENU && MENU.apply && ROOT.activeElement && ROOT.activeElement.id === 'pq') { e.preventDefault(); const first = $('#pop .o[data-opt]'); if (COL[MENU.col] && COL[MENU.col].single && first) MENU.pick(first.dataset.opt); else MENU.apply(); return; }
+  const typing = tgt && /^(INPUT|TEXTAREA|SELECT)$/.test(tgt.tagName); if (typing || S.view !== 'review') return;
+  const mod = e.ctrlKey || e.metaKey;
+  if (mod && e.key.toLowerCase() === 'z') { e.preventDefault(); undo(); return; }
+  if (sel.kind === 'cells' && sel.cells.size) {
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); clearCells(); return; }
+    if (mod && e.key.toLowerCase() === 'c') { e.preventDefault(); copyCells(); return; }
+  }
+  if ((e.key === ' ' || e.key === 'Enter') && tgt.closest && tgt.closest('[data-rowcb],[data-allrows]')) { e.preventDefault(); tgt.click(); }
+});
+document.addEventListener('paste', e => { const tgt = (e.composedPath && e.composedPath()[0]) || e.target; if (!ENV.active() || S.view !== 'review' || sel.kind !== 'cells' || /^(INPUT|TEXTAREA)$/.test((tgt || {}).tagName || '')) return; e.preventDefault(); pasteInto((e.clipboardData || window.clipboardData).getData('text')); });
+addEventListener('resize', () => { if (ENV.active()) { closeMenu(); fitGrid(); } }); document.addEventListener('scroll', e => { if (MENU && ENV.active() && (!e.target.closest || (ENV.scrollEl && e.target === ENV.scrollEl()))) closeMenu(); }, true);
+
+/* ---------------------------------------------------------------- start */
+async function show() { closeMenu(); await loadGlossary(); render(); }
+window.GlossaryImport = { show, render, state: S, stateOf, importNames };
+if (ENV.expose) Object.assign(window, { S, stateOf, importNames, openCellMenu, closeMenu });   /* the test page's tests look inside */
+})(window.IMPORT_ENV);
+
+</script>
+<!-- IMPORT END -->
 </body>
 </html>
