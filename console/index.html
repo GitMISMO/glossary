@@ -238,6 +238,11 @@ select.sel,select.inp{-webkit-appearance:none;appearance:none;background-image:v
 .tile{border:1px solid var(--line-2);border-radius:6px;background:var(--paper);padding:12px 14px;display:flex;flex-direction:column;gap:2px}
 .tile b{font-size:26px;line-height:1.1;font-variant-numeric:tabular-nums}
 .tile span{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+/* a staged term's checks, decided on the term */
+.sissues{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+.sissue{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;border:1px solid var(--bad-soft,#F3D4D0);border-left:3px solid var(--bad,#B3372C);background:var(--surface);border-radius:4px;padding:9px 12px}
+.sissue .it{font-size:13px} .sissue .id{font-size:13px;margin-top:3px;line-height:1.45} .sissue .sd{font-size:12px;color:var(--ink-3);margin-top:3px}
+.sissue .r{display:flex;gap:6px;flex:0 0 auto;flex-wrap:wrap;justify-content:flex-end}
 /* Staging's tiles are filters too */
 .stiles button.tile{font:inherit;text-align:left;color:inherit;cursor:pointer;transition:border-color .12s,box-shadow .12s}
 .stiles button.tile:hover:not(:disabled){border-color:var(--btn)}
@@ -2448,7 +2453,7 @@ function termList(){
 
 /* ---------- chrome ---------- */
 function counts(){
-  const d=draftD(), iss=openIss().length, st=Object.keys(staged).length+vocabPending.length;
+  const d=draftD(), iss=openIss().filter(i=>i.scope!=='staged').length, st=Object.keys(staged).length+vocabPending.length;
   return {d,iss,st};
 }
 function paintCounts(){
@@ -3022,6 +3027,18 @@ function vocabRowHTML(p){
 /* stab: which staged changes the list shows, set by the Which changes buttons or the tiles above them (both, as on
    Draft & Publish: Perry and a colleague, 10 Oct 2026). Total staged and All show everything. */
 let spage=1, stab='all';
+/* A staged term's failing check, decided where the term is being fixed (Perry, 15 Oct 2026: it shouldn't also sit in
+   Needs a Decision): what's wrong, the proposed fix, and Approve fix, Add to list or Keep as is. */
+function stagedIssueHTML(i){
+  const f=vfield(i.field), vo=viewOnly(), m=issueMeta(i.type);
+  const what=i.fixable?`<del>${vis(String(i.before).slice(0,240))}</del> \u2192 <ins>${vis(String(i.after).slice(0,240))}</ins>`
+    :i.type==='dead-link'&&i.bad?.length?`Links to <b>${i.bad.map(x=>esc('[['+x+']]')).join(', ')}</b>, which ${i.bad.length===1?'is':'are'} not a term in the glossary.`
+    :f&&i.bad?.length?`<b>${i.bad.map(esc).join(', ')}</b> ${i.bad.length===1?'is':'are'} not in ${esc(f.label.toLowerCase())}`
+    :`${esc(String(i.before).slice(0,200))||'<em>(empty)</em>'}${i.note?` \u00b7 ${esc(i.note)}`:''}`;
+  return `<div class="sissue"><div style="min-width:0"><div class="it"><b>${esc(m.title)}</b> \u00b7 ${esc(LABEL[i.field]||fieldLabel(i.field)||i.field)}</div>
+      <div class="id">${what}</div>${m.desc?`<div class="sd">${esc(m.desc)}</div>`:''}</div>
+    <div class="r">${i.fixable&&!vo?`<button class="btn sm p" type="button" data-sfix="${esc(i.id)}">Approve fix</button>`:''}${f&&i.bad?.length===1&&!vo?`<button class="btn sm" type="button" data-saddv="${esc(i.field)}|${esc(i.bad[0])}" title="Stage adding this value to the list">Add to list</button>`:''}${vo?'':`<button class="btn sm" type="button" data-skeep="${esc(i.id)}">Keep as is</button>`}</div></div>`;
+}
 function stagingHTML(){
   const all=Object.entries(staged);
   /* Rows with problems first, so they are never on page 40 of a large tag. */
@@ -3044,9 +3061,9 @@ function stagingHTML(){
     const p=pk.get(k)||[], fl=blockersByKey().get(k)||0;
     return `<div class="srow"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
       <small>${({import:'from import',bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>
-      ${fl?`<button class="flag" type="button" data-decide="${esc(k)}" title="Open its items in Needs a Decision">Fails ${fl} check${fl===1?'':'s'} · see Needs a Decision</button>`:''}
+      ${fl?`<span class="flag" title="Decide each below before this term can be applied">Fails ${fl} check${fl===1?'':'s'}</span>`:''}
       <span class="r">${s.action!=='remove'?`<button class="btn sm" type="button" data-edit="${esc(k)}">Edit</button>`:''}<button class="btn sm danger" type="button" data-unstage="${esc(k)}">Remove</button></span></div>
-      ${body}${p.length?`<ul class="probs">${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}</div>`;
+      ${body}${p.length?`<ul class="probs">${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${fl?`<div class="sissues">${stagedBlockers().filter(i=>i.stageKey===k).map(stagedIssueHTML).join('')}</div>`:''}</div>`;
   }).join('');
   const vrows=vocabPending.map(vocabRowHTML).join('');
   const nT=all.length, nV=vocabPending.length, vo=viewOnly();
@@ -3055,7 +3072,7 @@ function stagingHTML(){
     <p class="say">Nothing here has changed the draft yet. Apply term edits and classification changes separately, or export the term edits as a change-set CSV. Applying moves them into <b>Draft &amp; Publish</b>${vo?'':' and saves the draft online'}.</p>
     <div class="tiles stiles" role="group" aria-label="Show">${[['add','add',cnt.add,'Additions'],['update','update',cnt.update,'Updates'],['remove','remove',cnt.remove,'Removals'],['imp','import',cnt.imp,'From import'],['','all',nT+nV,'Total staged']].map(([cls,k,c,l])=>
       `<button type="button" class="tile ${cls}" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''} title="${k==='all'?'Show everything staged':'Show just the '+l.toLowerCase()}"><b>${c}</b><span>${l}</span></button>`).join('')}</div>
-    ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each item is decided in <b>Needs a Decision</b>. Select the flag on the row.</span></div>`:''}
+    ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each is decided, on the term below: approve its fix, edit it, or keep it as is.</span></div>`:''}
     ${nT?(probs.length?`<div class="checks"><span class="pill bad">${probs.length} problem${probs.length===1?'':'s'}</span><span>Fix these before applying. Select Edit on the row.</span></div>`
       :`<div class="checks"><span class="pill ok">Passed</span><span><b>All checks passed.</b> ${nT} row${nT===1?'':'s'} ready.</span></div>`):''}
     ${nT?`<div class="vt" role="group" aria-label="Which changes">${TABS.map(([k,l,c])=>`<button type="button" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''}>${l} <small>${n(c)}</small></button>`).join('')}</div>`:''}
@@ -3073,6 +3090,11 @@ function stagingHTML(){
 }
 function wireStaging(root){
   root.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ stab=b.dataset.st; spage=1; render(); });
+  const sfind=id=>stagedIssues.find(i=>i.id===id);
+  root.querySelectorAll('[data-sfix]').forEach(b=>b.onclick=async()=>{ const r=approveStagedFix(sfind(b.dataset.sfix)); await persist(); touch(); toast(r===true?'Fix approved':r); render(); });
+  root.querySelectorAll('[data-skeep]').forEach(b=>b.onclick=()=>keepAsIs(sfind(b.dataset.skeep)));
+  root.querySelectorAll('[data-saddv]').forEach(b=>b.onclick=async()=>{ const [f,v]=b.dataset.saddv.split('|'); if(effectiveVocab(f).includes(v)) return;
+    stageVocab('add',f,null,v); await persist(); touch(); toast(`Adding "${v}" to ${CLS_LABEL[f].toLowerCase()} is staged`); render(); });
   root.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>select(b.dataset.edit));
   root.querySelectorAll('[data-decide]').forEach(b=>b.onclick=()=>{ ifocus=b.dataset.decide; showSkipped=false; itab='all'; ipage=1; go('issues'); });
   root.querySelectorAll('[data-unstage]').forEach(b=>b.onclick=async()=>{ delete staged[b.dataset.unstage]; await persist(); touch(); toast('Unstaged'); render(); });
@@ -3106,7 +3128,7 @@ function exportChangeSet(){
 function confirmApplyTerms(){
   const list=Object.entries(staged); if(!list.length) return;
   if(stagedProblems().length) return;
-  if(stagedBlockers().length){ toast('Decide every staged item in Needs a Decision first'); return; }   /* nothing moves past Staging without a decision */
+  if(stagedBlockers().length){ toast('Decide each flagged term in Staging first'); return; }   /* nothing moves past Staging without a decision */
   const c={add:0,update:0,remove:0}; list.forEach(([,s])=>c[s.action]++);
   dialog({title:`Apply ${n(list.length)} term change${list.length===1?'':'s'}?`,ok:'Apply',
     body:`<p style="margin:0">${[c.add?`${c.add} added`:'',c.update?`${c.update} updated`:'',c.remove?`${c.remove} removed`:''].filter(Boolean).join(' · ')}. They move into the draft${viewOnly()?'':' and the draft is saved online'}. Each can still be reverted from Draft &amp; Publish until it is published.</p>`,
@@ -3162,7 +3184,7 @@ async function applyVocab(){
 /* ===== Needs a decision ===== */
 let ifocus=null;   // a staged term whose items the Staging flag opened (7 Oct 2026)
 function renderIssuesPage(M,c){
-  let all=showSkipped?skippedIss():openIss();
+  let all=(showSkipped?skippedIss():openIss()).filter(i=>i.scope!=='staged');   /* staged terms are decided in Staging (15 Oct 2026) */
   if(ifocus&&!showSkipped){ const f=all.filter(i=>i.stageKey===ifocus); if(f.length) all=f; else ifocus=null; }
   const types={}; all.forEach(i=>{ types[i.type]=(types[i.type]||0)+1; });
   if(itab!=='all'&&!types[itab]) itab='all';
@@ -3192,7 +3214,7 @@ function renderIssuesPage(M,c){
   M.innerHTML=topBar('Needs a Decision',c,'')+
   `<div class="page"><div class="pagein">${statusBanner()}
     <header class="mast"><div><div class="eyebrow">Review</div><h2>${showSkipped?'Kept as is':'Needs a Decision'}</h2>
-      <div class="sub">Every check runs over the draft and over everything in Staging. Staged terms come first: one can't be applied until each of its items is decided, by approving the proposed fix, correcting the term, or keeping it as is with a reason. Items on terms already in the glossary block nothing.${fixCount?` ${n(fixCount)} corrected so far.`:''}</div></div>
+      <div class="sub">Every check runs over the glossary. Decide each item by approving the proposed fix, correcting the term, or keeping it as is with a reason; items here block nothing. Checks on staged terms are decided in <b>Staging</b>, on the term itself.${fixCount?` ${n(fixCount)} corrected so far.`:''}</div></div>
       ${sk||showSkipped?`<button class="btn sm" type="button" id="skTog">${showSkipped?'Back to open items':`Kept as is (${n(sk)})`}</button>`:''}</header>
     ${Object.keys(types).length>1?`<div class="vt" role="group" aria-label="Which kind"><button type="button" data-it="all" aria-pressed="${itab==='all'}">All <small>${n(all.length)}</small></button>${Object.entries(types).map(([t,k])=>`<button type="button" data-it="${esc(t)}" aria-pressed="${itab===t}">${esc(meta(t).title)} <small>${n(k)}</small></button>`).join('')}</div>`:''}
     ${ifocus&&!showSkipped?`<div class="checks"><span class="pill bad">Staged</span><span>Showing the checks for <b>${esc(staged[ifocus]?.data.Term||'this staged term')}</b>. <button class="btn sm" type="button" data-unfocus>Show everything</button></span></div>`:''}
