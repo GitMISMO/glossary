@@ -266,6 +266,11 @@ mark.warn{background:#FCEFD6;color:#7A5112;border-radius:2px;padding:0 1px}
 .srow .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .srow .top b{font-size:14px}
 .srow .top small{font-size:12px;color:var(--ink-3)}
+/* Staging: search, and four tiles (Perry, 16 Oct 2026) */
+.sfind{margin:0 0 14px;max-width:560px}
+.sfind .inp{width:100%}
+.stiles.tiles{grid-template-columns:repeat(4,minmax(0,1fr))}
+@media (max-width:1100px){ .stiles.tiles{grid-template-columns:repeat(2,minmax(0,1fr))} }
 .srow .top .r{margin-left:auto;display:flex;gap:6px}
 .diff{display:grid;grid-template-columns:120px minmax(0,1fr);gap:4px 14px;font-size:13px}
 .diff .k{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding-top:2px}
@@ -444,7 +449,7 @@ c57 -33 76 -84 76 -200 0 -116 -19 -167 -76 -200 -32 -19 -52 -20 -294 -20
     <button type="button" data-view="staging" title="Staging"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M3.5 12L12 16.5 20.5 12M3.5 16.5L12 21l8.5-4.5"/></svg><span>Staging</span><b class="dot" id="dStaging"></b></button>
     <button type="button" data-view="issues" title="Needs a Decision"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/></svg><span>Needs a Decision</span><b class="dot warn" id="dIssues"></b></button>
     <button type="button" data-view="publish" title="Draft &amp; Publish"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 8.5L12 4l5 4.5"/><path d="M4.5 15v3.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V15"/></svg><span>Draft &amp; Publish</span><b class="dot" id="dPublish"></b></button>
-    <button type="button" data-view="import" title="Import"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16v2.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V16"/></svg><span>Import</span></button>
+    <button type="button" data-view="import" title="Import"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16v2.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V16"/></svg><span>Import</span><b class="dot" id="dImport"></b></button>
   </nav>
   <div class="rgrp"><span class="glbl">Glossary</span>
     <nav>
@@ -3089,7 +3094,7 @@ function issueWhatHTML(i){
   if(i.type==='multi-value') return `<span class="hlv">${hlHTML(hlMatch(v,/^\|$/),'bad')}</span>`;
   return `<span class="hlv">${hlHTML(hlMatch(v,/(?!)/),'bad')}</span>${i.note?`<span class="hlnote">${esc(i.note)}</span>`:''}`;
 }
-let spage=1, stab='all';
+let spage=1, stab='all', sq='';   /* sq: Staging's search (Perry, 16 Oct 2026) */
 /* A staged term's failing check, decided where the term is being fixed (Perry, 15 Oct 2026: it shouldn't also sit in
    Needs a Decision): what's wrong, the proposed fix, and Approve fix, Add to list or Keep as is. */
 function stagedIssueHTML(i){
@@ -3104,13 +3109,16 @@ function stagingHTML(){
   /* Rows with problems first, so they are never on page 40 of a large tag. */
   const pk=problemsByKey();
   const ordered=all.slice().sort((a,b)=>(pk.has(b[0])?1:0)-(pk.has(a[0])?1:0));
-  const cnt={add:0,update:0,remove:0,imp:0}; all.forEach(([,s])=>{cnt[s.action]=(cnt[s.action]||0)+1; if(s.origin==='import')cnt.imp++;});
-  const inTab=([,s])=>stab==='all'||(stab==='import'?s.origin==='import':s.action===stab);
+  const cnt={add:0,update:0,remove:0}; all.forEach(([,s])=>{cnt[s.action]=(cnt[s.action]||0)+1;});
+  if(stab==='import') stab='all';   /* "From import" is gone (Perry, 16 Oct 2026): once staged, where a row came from no longer matters */
+  const inTab=([,s])=>stab==='all'||s.action===stab;
+  const qm=sq.trim().toLowerCase();   /* Staging's search: a term's name, definition or ID */
+  const hit=([k,s])=>!qm||[s.data.Term,s.data.Definition,s.data.ID,k,(idMap().get(k)||{}).Term].some(v=>String(v||'').toLowerCase().includes(qm));
   if(stab!=='all'&&!all.some(inTab)) stab='all';   /* nothing of that kind left: back to everything */
-  const list=ordered.filter(inTab);
+  const list=ordered.filter(inTab).filter(hit);
   const pages=Math.max(1,Math.ceil(list.length/PER)); if(spage>pages) spage=pages;
   const shown=list.slice((spage-1)*PER,spage*PER);
-  const TABS=[['all','All',all.length,'term changes'],['add','Additions',cnt.add,'additions'],['update','Updates',cnt.update,'updates'],['remove','Removals',cnt.remove,'removals'],['import','From import',cnt.imp,'from import']];
+  const TABS=[['all','All',all.length,'term changes'],['add','Additions',cnt.add,'additions'],['update','Updates',cnt.update,'updates'],['remove','Removals',cnt.remove,'removals']];
   const tabNoun=(TABS.find(t=>t[0]===stab)||TABS[0])[3];
   const probs=stagedProblems(), blk=stagedBlockers(), blkTerms=blockersByKey().size;
   const rows=shown.map(([k,s])=>{
@@ -3120,22 +3128,24 @@ function stagingHTML(){
       :`<div class="diff"><span class="k">Definition</span><span class="v"><del>${esc(s.data.Definition||orig?.Definition||'')}</del></span></div>`;
     const p=pk.get(k)||[], fl=blockersByKey().get(k)||0;
     return `<div class="srow"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
-      <small>${({import:'from import',bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>
+      ${s.origin==='import'?'':`<small>${({bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>`}
       ${fl?`<span class="flag" title="Decide each below before this term can be applied">Fails ${fl} check${fl===1?'':'s'}</span>`:''}
       <span class="r">${s.action!=='remove'?`<button class="btn sm" type="button" data-edit="${esc(k)}">Edit</button>`:''}<button class="btn sm danger" type="button" data-unstage="${esc(k)}">Remove</button></span></div>
       ${body}${p.length?`<ul class="probs">${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${fl?`<div class="sissues">${stagedBlockers().filter(i=>i.stageKey===k).map(stagedIssueHTML).join('')}</div>`:''}</div>`;
   }).join('');
-  const vrows=vocabPending.map(vocabRowHTML).join('');
+  const vshown=vocabPending.filter(p=>!qm||Object.values(p).some(v=>typeof v==='string'&&v.toLowerCase().includes(qm)));
+  const vrows=vshown.map(vocabRowHTML).join('');
   const nT=all.length, nV=vocabPending.length, vo=viewOnly();
   const extra=classificationEdits().filter(r=>!staged[r.ID]).length;
   return `<div class="card" id="stagingCard"><div class="ch"><h3>Staging</h3></div><div class="cb">
     <p class="say">Nothing here has changed the draft yet. Apply term edits and classification changes separately, or export the term edits as a change-set CSV. Applying moves them into <b>Draft &amp; Publish</b>${vo?'':' and saves the draft online'}.</p>
-    <div class="tiles stiles" role="group" aria-label="Show">${[['add','add',cnt.add,'Additions'],['update','update',cnt.update,'Updates'],['remove','remove',cnt.remove,'Removals'],['imp','import',cnt.imp,'From import'],['','all',nT+nV,'Total staged']].map(([cls,k,c,l])=>
+    <div class="tiles stiles" role="group" aria-label="Show">${[['add','add',cnt.add,'Additions'],['update','update',cnt.update,'Updates'],['remove','remove',cnt.remove,'Removals'],['','all',nT+nV,'Total staged']].map(([cls,k,c,l])=>
       `<button type="button" class="tile ${cls}" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''} title="${k==='all'?'Show everything staged':'Show just the '+l.toLowerCase()}"><b>${c}</b><span>${l}</span></button>`).join('')}</div>
     ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each is decided, on the term below: approve its fix, edit it, or keep it as is.</span></div>`:''}
     ${nT?(probs.length?`<div class="checks"><span class="pill bad">${probs.length} problem${probs.length===1?'':'s'}</span><span>Fix these before applying. Select Edit on the row.</span></div>`
       :`<div class="checks"><span class="pill ok">Passed</span><span><b>All checks passed.</b> ${nT} row${nT===1?'':'s'} ready.</span></div>`):''}
     ${nT?`<div class="vt" role="group" aria-label="Which changes">${TABS.map(([k,l,c])=>`<button type="button" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''}>${l} <small>${n(c)}</small></button>`).join('')}</div>`:''}
+    ${qm?`<div class="checks"><span>${list.length+(stab==='all'?vshown.length:0)?`<b>${n(list.length+(stab==='all'?vshown.length:0))}</b> staged ${list.length+(stab==='all'?vshown.length:0)===1?'change matches':'changes match'}`:'Nothing staged matches'} \u201c${esc(sq.trim())}\u201d.</span><button class="btn sm" type="button" id="sClear">Clear search</button></div>`:''}
     ${rows}
     ${pages>1?`<div class="pager" style="border:0;padding:0"><button class="btn sm" type="button" id="sPrev"${spage<=1?' disabled':''}>Previous</button><span>Page ${n(spage)} of ${n(pages)} · ${n(list.length)} ${tabNoun}</span><button class="btn sm" type="button" id="sNext"${spage>=pages?' disabled':''}>Next</button></div>`:''}
     ${stab==='all'?vrows:''}
@@ -3170,8 +3180,15 @@ function wireStaging(root){
       onOk:async()=>{ staged={}; vocabPending=[]; await persist(); touch(); toast('Staging is empty'); render(); }}); };
 }
 function renderStagingPage(M,c){
-  M.innerHTML=topBar('Staging',c,'')+`<div class="page"><div class="pagein">${statusBanner()}${stagingHTML()}</div></div>`;
+  const any=Object.keys(staged).length+vocabPending.length;
+  M.innerHTML=topBar('Staging',c,'')+`<div class="page"><div class="pagein">${statusBanner()}${any?`<div class="sfind"><label for="sq" class="vh">Search staging</label><input class="inp" id="sq" type="search" placeholder="Search staged terms by name, definition or ID" value="${esc(sq)}" autocomplete="off"></div>`:''}${stagingHTML()}</div></div>`;
   wireGo(M); wireStaging(M);
+  /* Typing redraws only the Staging card, so the search box keeps its focus and cursor. */
+  const qi=M.querySelector('#sq'); let t=null;
+  const redraw=()=>{ const card=$('stagingCard'); if(!card) return; card.outerHTML=stagingHTML(); const nc=$('stagingCard'); wireStaging(nc); wireSClear(nc); };
+  const wireSClear=r=>{ const b=r.querySelector('#sClear'); if(b) b.onclick=()=>{ sq=''; spage=1; if(qi){ qi.value=''; qi.focus(); } redraw(); }; };
+  if(qi) qi.addEventListener('input',()=>{ clearTimeout(t); t=setTimeout(()=>{ sq=qi.value; spage=1; redraw(); },140); });
+  wireSClear(M);
 }
 function exportChangeSet(){
   const go2=()=>{
@@ -3925,7 +3942,9 @@ window.IMPORT_ENV = (function () {
       await persist(); touch();
       toast(`${rows.length} ${rows.length === 1 ? 'row' : 'rows'} staged${newVals.length ? `, with ${newVals.length} new ${newVals.length === 1 ? 'classification' : 'classifications'}` : ''}`);
     },
-    afterCommit: () => go('staging')
+    afterCommit: () => go('staging'),
+    /* The rail's count beside Import: rows still waiting there, so a few left behind don't go unnoticed (Perry, 16 Oct 2026). */
+    rowsLeft: k => { const d = document.getElementById('dImport'); if (d) d.textContent = k ? n(k) : ''; }
   };
 })();
 
@@ -4173,6 +4192,8 @@ function markText(text, checks, raw) {   /* the field's text with every check's 
    glow briefly. */
 let FLASH = null;
 const flash = (idx, col) => { FLASH = { idx: new Set(idx), col }; };
+/* How many rows are still here, for the host to show (the console's rail count beside Import; Perry, 16 Oct 2026). */
+const rowsLeft = () => { if (ENV.rowsLeft) ENV.rowsLeft(S.view === 'start' ? 0 : S.rows.length); };
 function render() {
   const m = $('#imain'), gw = $('#gw'), at = gw ? { l: gw.scrollLeft, t: gw.scrollTop } : null, wy = ENV.scrollPos ? ENV.scrollPos() : 0; closeMenu();
   if (S.view === 'start') m.innerHTML = startHTML();
@@ -4181,7 +4202,7 @@ function render() {
     const g2 = $('#gw'); if (g2 && at) { g2.scrollLeft = at.l; g2.scrollTop = at.t; } if (at && ENV.keepScroll) ENV.keepScroll(wy);
     fitGrid();
     if (FLASH) { FLASH.idx.forEach(i => { const e = ROOT.querySelector(`.cell[data-r="${i}"][data-c="${FLASH.col}"]`); if (e) e.classList.add('flash'); }); } }
-  FLASH = null; wire();
+  FLASH = null; wire(); rowsLeft();
 }
 function startHTML() {
   if (ENV.readOnly && ENV.readOnly()) return `<div class="ph">${ENV.noTitle ? '' : '<h1>Import</h1>'}<span class="meta">Bring terms into the glossary from a spreadsheet</span></div><div class="wrap"><div class="note info">${INFO}<span>Importing needs <b>Edit</b> access to the glossary. Ask a facilitator or an administrator if you need it.</span></div></div>`;
@@ -4599,6 +4620,7 @@ async function commitStage() {
   await ENV.commit({ rows, newVals: newVals.map(x => ({ f: x.f, v: x.v, d: x.d })) });
   const gone = new Set(ready); S.rows = S.rows.filter(r => !gone.has(r)); newVals.forEach(x => { ADDED[x.f] = ADDED[x.f].filter(v => v !== x.v); delete DESC[x.f][x.v]; });
   S.undo = []; clearSel(); if (!S.rows.length) { S.file = null; S.view = 'start'; }
+  rowsLeft();
   if (ENV.afterCommit) ENV.afterCommit(); else render();
 }
 function stageDialog() {
