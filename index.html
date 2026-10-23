@@ -5,9 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Business Glossary · MISMO</title>
 <meta name="description" content="Standard definitions for the terms used across the mortgage industry.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,400;0,500;1,400&family=Roboto:wght@400;500&display=swap">
 <style>
 /* Layout: three directions for the public glossary, one shown at a time; the Summit HQ
    family (navy masthead, white logo plate, sky rule, Plex Sans) opened up for readers. */
@@ -471,6 +468,148 @@ a.sh-card:hover .tile{background:rgba(116,191,235,.28);color:#fff}
   .sh-hin{grid-template-columns:minmax(0,1fr);gap:36px} .sh-sky{opacity:.5} .sh-fin{grid-template-columns:1fr 1fr} }
 @media (max-width:720px){ .sh-in{padding:0 18px} .sh-hin,.sh-sin,.A-az .in,.A-body,.sh-fin{padding-left:18px;padding-right:18px} .sh-hin{padding-top:44px;padding-bottom:44px}
   .sh-hero h1{font-size:40px} .sh-lead{font-size:17px} .sh-sec h2{font-size:26px} .sh-sky{display:none} .sh-fin{grid-template-columns:1fr} .A-az .in{flex-wrap:nowrap;overflow-x:auto} }
+
+/* ===================================================================================== the MISMO website template
+   (Jonna, 21 Oct 2026; MISMO-Page-Template.html and MISMO-Website-Style-Guide.md, measured from the live Home page).
+   Everything below wins over the older styles above it. */
+:root{
+  --mm-font:"IBM Plex Sans","Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+  --mm-ink:#0d314c;        /* headings, body ink */
+  --mm-hero:#071d2e;       /* header bar and hero background */
+  --mm-pill:#0f314c;       /* Log in button */
+  --mm-blue:#1a8fe3;       /* primary buttons, links, focus */
+  --mm-blue-top:#2e9dee;   /* primary button gradient top */
+  --mm-sky:#74bfeb;        /* eyebrow, second line of hero title */
+  --mm-sky-2:#56b4f2;      /* hero side list */
+  --mm-sub:#a9d8f3;        /* hero sub text */
+  --mm-text:#44607a;       /* body copy on white */
+  --mm-line:#cfdeeb;       /* input borders, dividers */
+  --mm-tag-bg:#e3f1fc;     /* tag background */
+  --mm-tag-ink:#1a74b8;    /* tag text */
+  --mm-page:#ffffff;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--mm-font);color:var(--mm-ink);background:var(--mm-page);font-size:16px;line-height:1.6}
+
+/* ---------- Header bar (70px, dark navy, logo left, nav, Log in pill right) ---------- */
+.mm-header{position:relative;z-index:5;height:70px;background:var(--mm-hero);box-shadow:0 2px 4px 0 rgba(0,0,0,.1),0 0 2px 0 rgba(153,153,153,.25);display:flex;align-items:center;padding:0 50px;gap:56px}
+.mm-logo img{display:block;width:194px;height:36px;max-width:100%;object-fit:contain;object-position:left center} /* the logo file is 684x108; "contain" keeps its shape, as the live site does (it shows about 194x31). Never let it stretch to fill 194x36. */
+.mm-logo{flex:0 1 194px;min-width:0}
+.mm-nav{display:flex;align-items:stretch;height:70px;margin:0;padding:0;list-style:none;flex:1 1 auto}
+.mm-nav>li{position:relative;display:flex;align-items:center;list-style:none}
+.mm-nav-link{display:inline-flex;align-items:center;gap:8px;padding:8px 16px;font-family:var(--mm-font);font-size:15px;font-weight:500;line-height:21px;color:#ffffff;text-decoration:none;white-space:nowrap}
+.mm-nav>li:hover>.mm-nav-link,.mm-nav-link:focus-visible{color:var(--mm-sky)}
+.mm-chev{width:11px;height:8px}
+/* Dropdown menus: measured from the live site (opens on hover or keyboard focus) */
+.mm-dd{display:none;position:absolute;left:0;top:100%;z-index:20;min-width:250px;margin:0;padding:8px 0;list-style:none;background:#0b2740;border-top:2px solid var(--mm-blue);border-radius:0 0 8px 8px;box-shadow:0 18px 40px -14px rgba(0,0,0,.6)}
+.mm-nav>li:hover>.mm-dd,.mm-nav>li:focus-within>.mm-dd{display:block}
+.mm-dd a{display:block;padding:10px 18px 10px 16px;border-left:2px solid transparent;font-family:var(--mm-font);font-size:15px;font-weight:500;line-height:19.5px;color:#e6eef5;text-decoration:none;white-space:nowrap;transition:background .15s,color .15s,border-color .15s}
+.mm-dd a:hover,.mm-dd a:focus-visible{outline:none;background:rgba(116,191,235,.1);border-left-color:var(--mm-sky);color:var(--mm-sky)}
+.mm-login{margin-left:auto;display:inline-block;padding:10px 20px;border-radius:50px;background:var(--mm-pill);color:#ffffff;font-family:var(--mm-font);font-size:16px;font-weight:600;line-height:16px;text-decoration:none;white-space:nowrap;min-width:max-content}
+.mm-burger{display:none;width:40px;height:40px;margin-left:12px;padding:9px 8px;border:0;border-radius:6px;background:transparent;cursor:pointer}
+.mm-burger span{display:block;height:2px;margin:4px 0;border-radius:2px;background:#ffffff;transition:transform .2s,opacity .2s}
+/* Phones and tablets: hamburger shows the same menu as a panel under the bar, sub-pages listed under each heading */
+@media (max-width:1100px){
+  .mm-header{padding:0 20px;gap:12px}
+  .mm-burger{display:block}
+  .mm-nav{display:none}
+  .mm-header.is-open .mm-nav{display:block;position:absolute;top:70px;left:0;right:0;height:auto;max-height:calc(100vh - 70px);overflow-y:auto;padding:8px 0 16px;background:#0b2740;border-top:2px solid var(--mm-blue);box-shadow:0 18px 40px -14px rgba(0,0,0,.6)}
+  .mm-header.is-open .mm-nav>li{display:block}
+  .mm-header.is-open .mm-nav-link{display:flex;padding:12px 20px 6px;font-weight:600}
+  .mm-header.is-open .mm-chev{display:none}
+  .mm-header.is-open .mm-dd{display:block;position:static;min-width:0;padding:0 0 6px;background:transparent;border:0;border-radius:0;box-shadow:none}
+  .mm-header.is-open .mm-dd a{padding:9px 20px 9px 34px;white-space:normal}
+  .mm-header.is-open .mm-burger span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+  .mm-header.is-open .mm-burger span:nth-child(2){opacity:0}
+  .mm-header.is-open .mm-burger span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+}
+
+/* ---------- Page sections ---------- */
+.mm-section{max-width:1120px;margin:0 auto;padding:56px clamp(20px,5vw,48px)}
+.mm-eyebrow{margin:0 0 10px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.14em;color:var(--mm-blue)}
+.mm-h2{margin:0 0 12px;font-size:38px;font-weight:700;line-height:1.2;color:var(--mm-ink)}
+.mm-lede{margin:0 0 28px;font-size:16px;line-height:1.6;color:var(--mm-text);max-width:62ch}
+
+/* ---------- Form ---------- */
+.mm-form{max-width:720px;background:#ffffff;border:1px solid var(--mm-line);border-radius:12px;padding:28px;box-shadow:0 14px 34px -22px rgba(7,29,46,.35)}
+.mm-field{margin:0 0 18px}
+.mm-label{display:block;margin:0 0 6px;font-size:14px;font-weight:600;color:var(--mm-ink)}
+.mm-hint{display:block;margin:4px 0 0;font-size:13px;color:var(--mm-text)}
+.mm-input,.mm-select,.mm-textarea{width:100%;height:44px;padding:0 14px;font-family:var(--mm-font);font-size:15px;color:var(--mm-ink);background:#ffffff;border:1px solid var(--mm-line);border-radius:8px;outline:none}
+.mm-textarea{height:auto;min-height:120px;padding:12px 14px;line-height:1.5;resize:vertical}
+.mm-input:focus,.mm-select:focus,.mm-textarea:focus{border-color:var(--mm-blue);box-shadow:0 0 0 3px rgba(26,143,227,.18)}
+.mm-row{display:flex;flex-wrap:wrap;gap:16px}.mm-row>.mm-field{flex:1 1 240px}
+.mm-check{display:flex;gap:10px;align-items:flex-start;font-size:14.5px;color:var(--mm-text)}
+.mm-check input{margin-top:4px;accent-color:var(--mm-blue)}
+.mm-tag{display:inline-block;padding:3px 8px;border-radius:4px;background:var(--mm-tag-bg);color:var(--mm-tag-ink);font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+
+/* ---------- Buttons (never wrap) ---------- */
+.mm-actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:24px}
+.mm-btn{display:inline-block;box-sizing:border-box;min-width:max-content;white-space:nowrap;text-align:center;padding:14px 22px;border-radius:8px;font-family:var(--mm-font);font-size:15px;font-weight:600;line-height:1.2;text-decoration:none;cursor:pointer}
+.mm-btn-primary{background:linear-gradient(180deg,var(--mm-blue-top) 0%,var(--mm-blue) 100%);box-shadow:0 5px 16px -4px rgba(26,143,227,.55);color:#ffffff;border:1.5px solid var(--mm-blue)}
+.mm-btn-secondary{background:#ffffff;color:var(--mm-blue);border:1.5px solid var(--mm-blue)}
+
+/* ---------- Footer (simple) ---------- */
+.mm-footer{background:var(--mm-hero);color:rgba(255,255,255,.85);font-size:14px}
+.mm-footer-in{max-width:1120px;margin:0 auto;padding:28px clamp(20px,5vw,48px);display:flex;flex-wrap:wrap;gap:16px 40px;align-items:center;justify-content:space-between}
+.mm-footer a{color:#ffffff}
+
+/* Desktop rules the live site applies to every hero (from the shared stylesheet):
+   the hero is 502px tall with 40px top and bottom padding, and hero buttons are only as wide as their text. */
+div[style*="min-height: clamp(380px"]{min-height:502px !important;padding-top:40px !important;padding-bottom:40px !important}
+div[style*="max-width: 560px"] > a{flex:0 0 auto !important}
+/* Phone rules the live site applies to every hero (from the shared stylesheet) */
+@media (max-width:600px){
+  div[style*="min-height: clamp(380px"]{min-height:0 !important;padding:30px 20px !important}
+  div[style*="flex: 0 1 200px"]{display:flex !important;flex-wrap:wrap;gap:4px 16px;border-left:0 !important;padding-left:0 !important;min-width:0 !important}
+  div[style*="flex: 0 1 200px"] > div:nth-child(n+5){display:none !important}
+  div[style*="max-width: 560px"] > a{flex:0 0 100% !important}
+}
+@media (max-width:600px){.mm-h2{font-size:30px}.mm-form{padding:20px}.mm-btn{flex:1 1 100%}}
+body,button,input,select,textarea{font-family:var(--mm-font)}
+:focus-visible{outline:2px solid var(--mm-blue);outline-offset:2px}
+.mm-header{padding-top:env(safe-area-inset-top,0px);height:calc(70px + env(safe-area-inset-top,0px))}
+.mm-nav-link:focus-visible,.mm-login:focus-visible{outline:2px solid var(--mm-sky);outline-offset:2px;border-radius:6px}
+.mm-btn:focus-visible,[style*="gradient(180deg,#2e9dee"]:focus-visible,[style*="rgba(255,255,255,.12)"]:focus-visible{outline:2px solid #ffffff;outline-offset:3px}
+.mm-footer{padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (max-width:1100px){ .mm-header.is-open .mm-nav{top:100%} }
+div[style*="max-width: 560px"] > button{flex:0 0 auto !important}
+@media (max-width:600px){ div[style*="max-width: 560px"] > button{flex:0 0 100% !important} }
+@media (max-width:600px){ .mm-logo img{width:156px;height:auto} .mm-login{padding:9px 16px;font-size:15px} }
+
+:root{--sans:var(--mm-font);--serif:var(--mm-font);--ink:#0d314c;--ink-2:#44607a;--ink-3:#44607a;--line:#cfdeeb;--line-2:#cfdeeb;--line-3:#cfdeeb;--accent:#1a74b8;--sky:#1a8fe3;--sunk:#eef5fb}
+body{background:#ffffff;color:var(--mm-ink);font-size:16px;line-height:1.6}
+a{color:var(--mm-blue)}
+.gl-sec{max-width:calc(1120px + 2 * clamp(20px,5vw,48px));margin:0 auto;padding:56px clamp(20px,5vw,48px) 0}
+.gl-head{display:flex;flex-wrap:wrap;gap:16px 32px;align-items:flex-end;justify-content:space-between}
+.gl-head .mm-h2{margin-bottom:8px} .gl-head .mm-lede{margin:0}
+.gl-sec .search{position:relative;display:block;margin-top:24px}
+.gl-sec .search input{width:100%;height:44px;padding:0 52px 0 42px;font-size:15px;color:var(--mm-ink);background:#fff;border:1px solid var(--mm-line);border-radius:8px;outline:none;box-shadow:none}
+.gl-sec .search input:focus{border-color:var(--mm-blue);box-shadow:0 0 0 3px rgba(26,143,227,.18)}
+.gl-sec .search>svg{position:absolute;left:14px;top:50%;width:18px;height:18px;margin-top:-9px;color:var(--mm-blue)}
+.gl-sec .qx{right:6px}
+.A-az{background:#fff;border:0} .A-az .in{max-width:calc(1120px + 2 * clamp(20px,5vw,48px));margin:0 auto;padding:14px clamp(20px,5vw,48px) 10px;gap:6px;flex-wrap:wrap;overflow:visible}
+.A-az button{min-width:32px;height:32px;border:1px solid var(--mm-line);border-radius:4px;background:#fff;color:var(--mm-ink);font-size:14px;font-weight:600;padding:0 7px}
+.A-az button:hover{background:var(--mm-tag-bg);border-color:var(--mm-blue)} .A-az button[aria-pressed="true"]{background:var(--mm-blue);border-color:var(--mm-blue);color:#fff}
+.A-az button:disabled{color:#a9bccd;border-color:#e6eef5;background:#fff}
+.A-body{max-width:calc(1120px + 2 * clamp(20px,5vw,48px));margin:0 auto;padding:12px clamp(20px,5vw,48px) 64px}
+.A-main,.A-side{border-color:var(--mm-line)!important;border-radius:12px!important}
+.pill{border-radius:4px;font-size:11.5px;letter-spacing:.02em}
+.gl-suggest{display:flex;gap:12px;align-items:center}
+.gl-suggest .mm-tag{white-space:nowrap}
+.gl-suggest .mm-btn[aria-disabled="true"]{opacity:.55;cursor:default;box-shadow:none}
+@media (max-width:600px){ .gl-head .mm-h2{font-size:30px} .gl-suggest{width:100%} .gl-suggest .mm-btn{flex:1 1 auto} .A-az .in{flex-wrap:nowrap;overflow-x:auto} }
+
+.gl-cards{flex:0 1 380px;min-width:280px;display:flex;flex-direction:column;gap:14px}
+.gl-card{display:block;text-decoration:none;color:#ffffff;background:rgba(7,29,46,.78);border:1px solid rgba(116,191,235,.35);border-radius:12px;padding:18px 20px}
+a.gl-card:hover,a.gl-card:focus-visible{border-color:rgba(116,191,235,.7)}
+.gl-card b{display:block;font-size:17px;font-weight:600} .gl-card span{display:block;margin-top:4px;font-size:14px;line-height:1.5;color:#a9d8f3}
+.gl-card .f{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.14)}
+.gl-card .who{font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#74bfeb}
+.gl-card .go{white-space:nowrap;font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;background:linear-gradient(180deg,#2e9dee 0%,#1a8fe3 100%);border:1.5px solid #1a8fe3}
+.gl-card .go.soon{background:rgba(255,255,255,.12);border:1.5px dashed rgba(255,255,255,.6)}
+@media (max-width:600px){ .gl-cards{flex:1 1 100%} }
 </style>
 </head>
 <body>
@@ -529,7 +668,7 @@ G.terms.sort((a,b)=>flat(a.term).toLowerCase().localeCompare(flat(b.term).toLowe
 D.terms=G.terms.map(x=>[x.term,x.definition||'',ix(D.types,x.termType),ix(D.areas,x.focusArea),ix(D.sources,x.source),x.id,x.aka||[],x.related||[]]);
 const V={fa:D.areas,tt:D.types,src:D.sources};
 const DESC={fa:D.ref.focusAreas||{},tt:D.ref.termTypes||{},src:D.ref.sources||{}};
-const KIND={fa:{label:'Focus areas',one:'Focus area'},tt:{label:'Term types',one:'Term type'},src:{label:'Sources',one:'Source'}};
+const KIND={fa:{label:'Focus Areas',one:'Focus Area'},tt:{label:'Term Types',one:'Term Type'},src:{label:'Sources',one:'Source'}};
 const desc=(k,v)=>{ const d=DESC[k][v]; return d&&d!=='__UNDOCUMENTED__'?d:''; };
 const slug=s=>flat(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const readable=v=>String(v).replace(/^#/,'').replace(/(?<=[a-z]{2})(?=[A-Z])/g,' ').replace(/([A-Z]+)([A-Z][a-z])/g,'$1 $2');
@@ -601,14 +740,50 @@ const LOGO_REV=LOGO.replace('fill="#0f314c"','fill="#ffffff"').replace('fill="#5
 const CHV='<svg class="chv" viewBox="0 0 12 12" aria-hidden="true"><path d="M2.5 4.5L6 8l3.5-3.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const SVGI=(d,w=20)=>`<svg width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
 const DL_URL='https://collaborate.mismo.org/viewdocument/business-glossary';
-const masthead=`<header class="sh"><div class="sh-in"><a class="sh-logo" href="https://www.mismo.org/" data-mismo-home aria-label="MISMO, www.mismo.org" title="MISMO, www.mismo.org">${LOGO_REV}</a>
-  <button type="button" class="sh-burger" id="shBurger" aria-expanded="false" aria-controls="shNav" aria-label="Menu">${SVGI('M4 7h16M4 12h16M4 17h16',22)}</button>
-  <nav class="sh-nav" id="shNav" aria-label="MISMO">${NAV.map(([t,h,sub])=>`<div class="sh-item"><a href="${SITE}/${h}">${esc(t)}${CHV}</a><div class="sh-menu">${sub.map(([st,sh])=>`<a href="${SITE}/${sh}">${esc(st)}</a>`).join('')}</div></div>`).join('')}</nav>
-  <button type="button" class="sh-srch" id="shSearch" aria-label="Search the glossary" title="Search the glossary">${SVGI('M10.5 4a6.5 6.5 0 1 0 0 13a6.5 6.5 0 1 0 0-13 M20 20l-4.6-4.6',20)}</button></div></header>`;
-const footer=`<footer class="sh-foot"><div class="sh-fin"><div class="sh-fl"><span class="sh-flogo">${LOGO_REV}</span><p>1919 M Street NW, 5th Floor<br>Washington, DC 20036</p><p><a href="mailto:info@mismo.org">info@mismo.org</a></p></div>
-  <div class="sh-fc"><b>Business Glossary</b><span id="fStatus"></span><span>${n(T.length)} terms</span><a href="${DL_URL}" target="_blank" rel="noopener">Download the glossary (members)</a></div>
-  <div class="sh-fc"><b>Legal</b><a href="${SITE}/privacy-policy">Privacy Policy</a><a href="${SITE}/terms-of-use">Terms of Use</a></div>
-  <div class="sh-fc"><b>Follow MISMO</b><a href="https://www.linkedin.com/company/mismo-mortgage-industry-standards-maintenance-organization" target="_blank" rel="noopener">LinkedIn</a><a href="https://www.youtube.com/channel/UCuKIkeqACTIU7j0eL_igPHA" target="_blank" rel="noopener">YouTube</a></div></div></footer>`;
+const masthead=`<header class="mm-header">
+  <a class="mm-logo" href="https://collaborate.mismo.org/mismowebsite/home"><img src="https://higherlogicdownload.s3.amazonaws.com/MISMO/LogoImages/6e07790a-6fc9-43dc-b9d6-9178e00c3342_mismo-reverse-nav-logo.png" alt="MISMO logo. This will take you to the homepage"></a>
+  <nav aria-label="Main">
+  <ul class="mm-nav" id="mm-nav">
+    <li><a class="mm-nav-link" href="https://collaborate.mismo.org/mismowebsite/membership" aria-haspopup="true">Membership <svg class="mm-chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <ul class="mm-dd">
+        <li><a href="https://collaborate.mismo.org/mismowebsite/membership/member-directory">MISMO Members</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/membership/lender-champions">Our Lender Champions</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/membership/industry-champions">Our Industry Champions</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/membership/iif">Innovation Investment Fund</a></li>
+      </ul>
+    </li>
+    <li><a class="mm-nav-link" href="https://collaborate.mismo.org/mismowebsite/standards-resources" aria-haspopup="true">Standards &amp; Resources <svg class="mm-chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <ul class="mm-dd">
+        <li><a href="https://collaborate.mismo.org/mismowebsite/standards-resources/business-glossary">Business Glossary</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/standards-resources/certification">Certifications</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/standards-resources/mismo-link">MISMO Link</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/standards-resources/digital-mortgage-resource-center">Digital Mortgage Resource Center</a></li>
+      </ul>
+    </li>
+    <li><a class="mm-nav-link" href="https://collaborate.mismo.org/mismowebsite/get-involved" aria-haspopup="true">Get Involved <svg class="mm-chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <ul class="mm-dd">
+        <li><a href="https://collaborate.mismo.org/mismowebsite/get-involved/workgroups">Communities &amp; Workgroups</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/get-involved/communities">Collaborate (Members Only)</a></li>
+      </ul>
+    </li>
+    <li><a class="mm-nav-link" href="https://collaborate.mismo.org/mismowebsite/events" aria-haspopup="true">Events <svg class="mm-chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <ul class="mm-dd">
+        <li><a href="https://collaborate.mismo.org/mismowebsite/events/summit">MISMO Summit</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/events/education">Education</a></li>
+      </ul>
+    </li>
+    <li><a class="mm-nav-link" href="https://collaborate.mismo.org/mismowebsite/about-mismo" aria-haspopup="true">About MISMO <svg class="mm-chev" viewBox="0 0 12 8" aria-hidden="true"><path d="M1 1.5l5 5 5-5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <ul class="mm-dd">
+        <li><a href="https://collaborate.mismo.org/mismowebsite/about-mismo/news">News</a></li>
+        <li><a href="https://collaborate.mismo.org/mismowebsite/about-mismo/contributor-awards">Contributor Awards</a></li>
+      </ul>
+    </li>
+  </ul>
+  </nav>
+  <a class="mm-login" href="https://identity.mba.org/connect/authorize?client_id=Mba.HigherLogic.MismoMigration&amp;scope=openid+profile+email+id&amp;response_type=code&amp;redirect_uri=https%3A%2F%2Fcollaborate.mismo.org&amp;state=https%3a%2f%2fcollaborate.mismo.org%2fmismowebsite%2fhome">Log In</a>
+  <button type="button" class="mm-burger" aria-label="Open menu" aria-expanded="false" aria-controls="mm-nav"><span></span><span></span><span></span></button>
+</header>`;
+const footer=`<footer class="mm-footer"><div class="mm-footer-in"><span>MISMO &middot; 1919 M Street NW, 5th Floor, Washington, DC 20036 &middot; <a href="mailto:info@mismo.org">info@mismo.org</a></span><span>&copy; 2026 MISMO. All rights reserved.</span></div></footer>`;
 /* The hero's skyline, as on the site: drawn, so nothing loads from elsewhere. */
 const SKY=(()=>{ let x=30,seed=4,out=''; const r=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; }; const W=700,H=430;
   while(x<W){ const bw=[70,84,96,110,124][Math.floor(r()*5)], bh=150+Math.floor(r()*(H-170)), f=['#082237','#09243B','#0A2740'][Math.floor(r()*3)];
@@ -634,25 +809,27 @@ function blankLabel(k){
 
 function build(){
   const R=$('page');
-  R.innerHTML=masthead+`<section class="sh-hero">${SKY}<div class="sh-hin"><div class="sh-hl"><div class="sh-eye">Standards &amp; Resources</div>
-      <h1>Business Glossary<span>Shared Definitions</span></h1>
-      <p class="sh-lead">Standard definitions for ${n(Math.floor(T.length/1000)*1000)}+ terms used across the mortgage industry, maintained by MISMO\u2019s communities and workgroups.</p>
-      <p class="sh-ver" id="aVer"></p></div>
-      <div class="sh-cards"><a class="sh-card" href="${DL_URL}" target="_blank" rel="noopener" title="Opens MISMO Connect. Signing in is required.">
-          <span class="t"><span class="tile">${SVGI('M12 4v11M7.5 10.5L12 15l4.5-4.5M5 19h14')}</span><b>Download the Glossary</b></span>
-          <span class="d">The full release workbook, version ${esc(D.meta.label||'')} ${D.meta.stage==='final'?'Final':D.meta.stage==='comment-period'?'(30-Day Comment Period)':''}, with every term and its classifications.</span>
-          <span class="f"><span class="who">${SVGI('M7 11V8a5 5 0 0 1 10 0v3 M5.5 11h13v9h-13z',13)}Members only</span><span class="go p">Download \u2192</span></span></a>
-        <${SUGGEST_LIVE?'button type="button" data-suggest':'div aria-disabled="true"'} class="sh-card${SUGGEST_LIVE?'':' soon'}">
-          <span class="t"><span class="tile">${SVGI('M12 5v14M5 12h14')}</span><b>Suggest a Term</b></span>
-          <span class="d">Missing a term, or one that could be clearer? Tell the glossary team.</span>
-          <span class="f"><span class="who">Open to everyone</span><span class="go s">${SUGGEST_LIVE?'Suggest \u2192':'Coming soon'}</span></span></${SUGGEST_LIVE?'button':'div'}></div></div></section>
-    <section class="sh-sec"><div class="sh-sin"><h2>Search the Glossary</h2><p class="sh-sub">Type a term, a phrase or an acronym, or browse by letter. <span id="aStats"></span></p>
+  R.innerHTML=masthead+`<div style="position: relative; overflow: hidden; background: #071d2e; min-height: clamp(380px,37vw,520px); display: flex; align-items: center; padding: clamp(34px,3.8vw,50px) clamp(20px,5vw,48px);"><!-- built-in Pathway artwork (shows until a photo is added) --> <svg viewBox="0 0 1200 560" preserveAspectRatio="xMidYMid slice" aria-hidden="true" style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; width: 100%; height: 100%;"> <defs> <linearGradient id="skyhm" x1="0" y1="0" x2="0" y2="1"> <stop offset="0%" stop-color="#0d314c" stop-opacity="0"></stop> </linearGradient> <linearGradient id="gndhm" x1="0" y1="0" x2="0" y2="1"> <stop offset="0%" stop-color="#0e3a5c"></stop><stop offset="100%" stop-color="#071d2e"></stop> </linearGradient> <radialGradient id="glowhm" cx="50%" cy="50%" r="50%"> <stop offset="0%" stop-color="#74bfeb" stop-opacity=".42"></stop> <stop offset="100%" stop-color="#74bfeb" stop-opacity="0"></stop> </radialGradient> <linearGradient id="trailhm" x1="0" y1="0" x2="1" y2="0"> <stop offset="0%" stop-color="#74bfeb" stop-opacity="0"></stop> <stop offset="45%" stop-color="#9ad4f4" stop-opacity=".95"></stop> <stop offset="100%" stop-color="#ffffff" stop-opacity=".55"></stop> </linearGradient> </defs> <rect x="0" y="0" width="1200" height="560" fill="url(#gndhm)"></rect> <ellipse cx="930" cy="360" rx="420" ry="250" fill="url(#glowhm)"></ellipse> <g fill="#0a2740" opacity="1"> <rect x="640" y="300" width="52" height="260"></rect><rect x="698" y="236" width="40" height="324"></rect> <rect x="744" y="318" width="60" height="242"></rect><rect x="810" y="186" width="48" height="374"></rect> <rect x="864" y="268" width="68" height="292"></rect><rect x="938" y="214" width="42" height="346"></rect> <rect x="986" y="296" width="56" height="264"></rect><rect x="1048" y="238" width="50" height="322"></rect> <rect x="1104" y="310" width="64" height="250"></rect><rect x="1174" y="258" width="44" height="302"></rect> </g> <rect x="560" y="548" width="660" height="12" fill="#0a2740"></rect> <g fill="#74bfeb" opacity=".30"> <rect x="684" y="222" width="5" height="7"></rect><rect x="696" y="246" width="5" height="7"></rect> <rect x="800" y="184" width="5" height="7"></rect><rect x="814" y="216" width="5" height="7"></rect> <rect x="860" y="258" width="5" height="7"></rect><rect x="884" y="290" width="5" height="7"></rect> <rect x="932" y="214" width="5" height="7"></rect><rect x="988" y="292" width="5" height="7"></rect> <rect x="1050" y="240" width="5" height="7"></rect><rect x="1108" y="312" width="5" height="7"></rect> </g> <g fill="none" stroke="url(#trailhm)" stroke-linecap="round"> <path d="M470,620 C690,540 880,470 1250,398" stroke-width="13" opacity=".15"></path> <path d="M470,620 C690,540 880,470 1250,398" stroke-width="3"></path> <path d="M450,654 C680,572 890,500 1258,428" stroke-width="1.4" opacity=".7"></path> <path d="M520,684 C740,604 940,534 1264,464" stroke-width="7" opacity=".2"></path> <path d="M520,684 C740,604 940,534 1264,464" stroke-width="2" opacity=".85"></path> <path d="M580,712 C800,636 990,570 1272,500" stroke-width="1.2" opacity=".55"></path> </g> </svg> <!-- PHOTO LAYER -->
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background-image: none; background-size: cover; background-position: center right; background-repeat: no-repeat;"></div>
+<!-- scrim: keeps the copy readable over any photo -->
+<div style="position: absolute; top: 0; right: 0; bottom: 0; left: 0; background: linear-gradient(90deg,#071d2e 0%,rgba(7,29,46,.96) 30%,rgba(7,29,46,.80) 50%,rgba(7,29,46,.42) 72%,rgba(7,29,46,.22) 100%);"></div>
+<div style="position: relative; z-index: 2; width: 100%; max-width: 1120px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 30px; align-items: center;">
+<div style="flex: 1 1 440px; min-width: 0; max-width: 620px; margin-right: auto;">
+<p style="margin: 0 0 14px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .14em; color: #74bfeb; font-family: inherit; line-height: 1.5;">Standards &amp; Resources</p>
+<h1 style="margin: 0 0 18px; font-family: inherit; font-size: clamp(33px,5.3vw,53px); font-weight: bold; line-height: 1.04; letter-spacing: -.027em; color: #ffffff; text-shadow: 0 2px 18px rgba(7,29,46,.6);">Business Glossary<span style="display: block; color: #74bfeb;">Shared Definitions</span></h1>
+<p style="margin: 0 0 12px; font-family: inherit; font-size: clamp(16.5px,1.8vw,19px); font-weight: 500; line-height: 1.5; color: #ffffff; max-width: 40ch;">Standard definitions for ${n(Math.floor(T.length/1000)*1000)}+ terms used across the mortgage industry, maintained by MISMO’s communities and workgroups.</p>
+<p id="aVer" style="margin: 0; font-family: inherit; font-size: 15px; line-height: 1.6; color: #a9d8f3; max-width: 52ch;">Latest version</p>
+</div>
+<div class="gl-cards"><a class="gl-card" href="${DL_URL}" target="_blank" rel="noopener" title="Opens MISMO Connect. Signing in is required."><b>Download the Glossary</b><span>The full release workbook, version ${esc(D.meta.label||'')} ${D.meta.stage==='final'?'Final':D.meta.stage==='comment-period'?'(30-Day Comment Period)':''}, with every term and its classifications.</span><span class="f"><span class="who">Members Only</span><span class="go">Download&nbsp;&rarr;</span></span></a><${SUGGEST_LIVE?'button type="button" data-suggest':'div aria-disabled="true"'} class="gl-card"><b>Suggest a Term</b><span>Missing a term, or one that could be clearer? Tell the glossary team.</span><span class="f"><span class="who">Open to Everyone</span><span class="go${SUGGEST_LIVE?'':' soon'}">${SUGGEST_LIVE?'Suggest&nbsp;&rarr;':'Coming Soon'}</span></span></${SUGGEST_LIVE?'button':'div'}></div>
+</div>
+</div>
+    <section class="gl-sec"><div class="gl-head"><div><p class="mm-eyebrow">${n(T.length)} Terms</p><h2 class="mm-h2">Search the Glossary</h2><p class="mm-lede">Type a term, a phrase or an acronym, or browse by letter. <span id="aStats"></span></p></div></div>
       <label class="search"><span class="vh">Search the glossary</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"><button type="button" class="qx" id="aQx" aria-label="Clear the search" tabindex="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></label></div></section>
+        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"><button type="button" class="qx" id="aQx" aria-label="Clear the search" tabindex="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></label></section>
     <nav class="A-az" aria-label="Jump to a letter"><div class="in" id="aAz"></div></nav>
     <div class="A-body"><section class="A-main" id="aMain" aria-live="polite"></section><aside class="A-side" id="aSide" aria-label="Classifications"></aside></div>`+footer;
-  $('shSearch').addEventListener('click',()=>{ const q=$('aQ'); q.scrollIntoView({behavior:'smooth',block:'center'}); q.focus({preventScroll:true}); });
-  $('shBurger').addEventListener('click',()=>{ const h=document.querySelector('.sh'), o=!h.classList.contains('open'); h.classList.toggle('open',o); $('shBurger').setAttribute('aria-expanded',String(o)); });
+  /* Phone and tablet menu: the hamburger opens the same menu as a panel under the header bar. */
+(function(){var h=document.querySelector(".mm-header"),b=h.querySelector(".mm-burger");b.addEventListener("click",function(){var o=h.classList.toggle("is-open");b.setAttribute("aria-expanded",o?"true":"false");b.setAttribute("aria-label",o?"Close menu":"Open menu");});document.addEventListener("keydown",function(e){if(e.key==="Escape"&&h.classList.contains("is-open")){h.classList.remove("is-open");b.setAttribute("aria-expanded","false");b.focus();}});})();
   const syncQx=()=>$('aQx').classList.toggle('on',!!$('aQ').value);
   const clearQ=()=>{ $('aQ').value=''; syncQx(); A.st.q=''; A.shown=40; A.open=null; paint(); setHash(null); $('aQ').focus(); };
   $('aQx').addEventListener('click',e=>{ e.preventDefault(); clearQ(); });
@@ -744,12 +921,10 @@ function paintSide(){
   const S=$('aSide');
   S.classList.toggle('stick',!A.pop);
   S.classList.toggle('after',A.v==='2');
-  if(matchMedia('(max-width:980px)').matches&&!A.sideOpen&&A.v!=='2'){ const k=picked();
-    S.innerHTML=`<button type="button" class="S-fold" data-fold aria-expanded="false"><span>Narrow the list</span><small>${k?esc(['tt','fa','src'].filter(x=>A.st.sel[x].size).map(pickLabel).join(' · ')):'By type, focus area or source'}</small><i>Show</i></button>`; return; }
-  const hide=matchMedia('(max-width:980px)').matches?' <button type="button" class="S-clear" data-fold style="float:right">Hide</button>':'';
-  if(A.v==='1') S.innerHTML=`<div class="S"><div class="S-h"><h2>Narrow the list${hide}</h2><p>Every term has a type, one or more focus areas, and a source.</p></div>${['tt','fa','src'].map(sectionHTML).join('')}${modeRow()}</div>`;
+  const hide='';
+  if(A.v==='1') S.innerHTML=`<div class="S"><div class="S-h"><h2>Narrow the List${hide}</h2><p>Every term has a type, one or more focus areas, and a source.</p></div>${['tt','fa','src'].map(sectionHTML).join('')}${modeRow()}</div>`;
   if(A.v==='2') S.innerHTML=`<div class="S"><div class="S-h"><h2>Classifications</h2><p>Every term has a type, one or more focus areas, and a source.</p></div>${aboutHTML()}${guideLists()}${noteHTML}</div>`;
-  if(A.v==='3') S.innerHTML=`<div class="S"><div class="S-h"><h2>Narrow the list${hide}</h2><p>Select a highlighted part to fill it in.</p></div><div class="Q Q3">${sentence()}</div>${A.tray?trayHTML(A.tray):''}${aboutHTML()}${noteHTML}</div>`;
+  if(A.v==='3') S.innerHTML=`<div class="S"><div class="S-h"><h2>Narrow the List${hide}</h2><p>Select a highlighted part to fill it in.</p></div><div class="Q Q3">${sentence()}</div>${A.tray?trayHTML(A.tray):''}${aboutHTML()}${noteHTML}</div>`;
 }
 /* Version 2 keeps the sentence with the list; this side lists every value to pick from. */
 function guideLists(){
