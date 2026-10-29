@@ -779,7 +779,9 @@ function detectIssues(){
         severityOverride: (rule.type==='off-vocab'&&!bad?.length&&pendingDel?.length)?'warn':null});
     }));
   };
-  master.forEach((row,ri)=>scan(row,ri,'draft',null));
+  /* A draft term with a staged change is checked as staged, not as the draft still reads: a fix made in Staging clears its
+     Needs a Decision item at once, and a staged removal clears them all (Perry, 29 Oct 2026). Unstaging brings them back. */
+  master.forEach((row,ri)=>{ if(staged[row.ID]) return; scan(row,ri,'draft',null); });
   Object.entries(staged).forEach(([k,st])=>{ if(st.action!=='remove') scan({...st.data,ID:k},-1,'staged',k); });
   const seen=new Map();
   master.forEach((r,ri)=>{
