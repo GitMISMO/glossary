@@ -263,6 +263,10 @@ mark.warn{background:#FCEFD6;color:#7A5112;border-radius:2px;padding:0 1px}
 .pill.ok{background:var(--good-soft);color:var(--good)}.pill.bad{background:var(--bad-soft);color:var(--bad)}
 .probs{margin:0;padding-left:18px;font-size:12.5px;color:var(--bad)}
 .srow{border:1px solid var(--line-2);border-radius:6px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
+.sjump{border:0;background:none;padding:0;font:inherit;font-weight:600;color:var(--link);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.sjump:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}
+.srow.sjumped{box-shadow:0 0 0 3px var(--accent);transition:box-shadow .3s}
+@media (prefers-reduced-motion: reduce){ .srow.sjumped{transition:none} }
 .srow .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
 .srow .top b{font-size:14px}
 .srow .top small{font-size:12px;color:var(--ink-3)}
@@ -3108,7 +3112,8 @@ function stagingHTML(){
   const all=Object.entries(staged);
   /* Rows with problems first, so they are never on page 40 of a large tag. */
   const pk=problemsByKey();
-  const ordered=all.slice().sort((a,b)=>(pk.has(b[0])?1:0)-(pk.has(a[0])?1:0));
+  const bkS=blockersByKey(), rank=k=>(bkS.has(k)?2:0)+(pk.has(k)?1:0);   /* terms that fail a check first, then problems (Perry, 29 Oct 2026) */
+  const ordered=all.slice().sort((a,b)=>rank(b[0])-rank(a[0]));
   const cnt={add:0,update:0,remove:0}; all.forEach(([,s])=>{cnt[s.action]=(cnt[s.action]||0)+1;});
   if(stab==='import') stab='all';   /* "From import" is gone (Perry, 16 Oct 2026): once staged, where a row came from no longer matters */
   const inTab=([,s])=>stab==='all'||s.action===stab;
@@ -3127,7 +3132,7 @@ function stagingHTML(){
       :s.action==='add'?`<div class="diff">${EDIT_FIELDS.filter(f=>f!=='Term'&&String(s.data[f]||'').trim()).map(f=>diffLine(f,undefined,s.data[f])).join('')}</div>`
       :`<div class="diff"><span class="k">Definition</span><span class="v"><del>${esc(s.data.Definition||orig?.Definition||'')}</del></span></div>`;
     const p=pk.get(k)||[], fl=blockersByKey().get(k)||0;
-    return `<div class="srow"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
+    return `<div class="srow" data-skey="${esc(k)}"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
       ${s.origin==='import'?'':`<small>${({bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>`}
       ${fl?`<span class="flag" title="Decide each below before this term can be applied">Fails ${fl} check${fl===1?'':'s'}</span>`:''}
       <span class="r">${s.action!=='remove'?`<button class="btn sm" type="button" data-edit="${esc(k)}">Edit</button>`:''}<button class="btn sm danger" type="button" data-unstage="${esc(k)}">Remove</button></span></div>
@@ -3141,7 +3146,7 @@ function stagingHTML(){
     <p class="say">Nothing here has changed the draft yet. Apply term edits and classification changes separately, or export the term edits as a change-set CSV. Applying moves them into <b>Draft &amp; Publish</b>${vo?'':' and saves the draft online'}.</p>
     <div class="tiles stiles" role="group" aria-label="Show">${[['add','add',cnt.add,'Additions'],['update','update',cnt.update,'Updates'],['remove','remove',cnt.remove,'Removals'],['','all',nT+nV,'Total staged']].map(([cls,k,c,l])=>
       `<button type="button" class="tile ${cls}" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''} title="${k==='all'?'Show everything staged':'Show just the '+l.toLowerCase()}"><b>${c}</b><span>${l}</span></button>`).join('')}</div>
-    ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each is decided, on the term below: approve its fix, edit it, or keep it as is.</span></div>`:''}
+    ${nT&&blk.length?`<div class="checks"><span class="pill bad">${n(blkTerms)} term${blkTerms===1?'':'s'} fail${blkTerms===1?'s':''} a check</span><span>Nothing is applied until each is decided on the term itself: approve its fix, edit it, or keep it as is. ${blkTerms===1?'It is':'They are'} listed first: ${blkNames()}.</span></div>`:''}
     ${nT?(probs.length?`<div class="checks"><span class="pill bad">${probs.length} problem${probs.length===1?'':'s'}</span><span>Fix these before applying. Select Edit on the row.</span></div>`
       :`<div class="checks"><span class="pill ok">Passed</span><span><b>All checks passed.</b> ${nT} row${nT===1?'':'s'} ready.</span></div>`):''}
     ${nT?`<div class="vt" role="group" aria-label="Which changes">${TABS.map(([k,l,c])=>`<button type="button" data-st="${k}" aria-pressed="${stab===k}"${!c&&k!=='all'?' disabled':''}>${l} <small>${n(c)}</small></button>`).join('')}</div>`:''}
@@ -3158,7 +3163,20 @@ function stagingHTML(){
       <button class="btn danger" type="button" id="discard"${!nT&&!nV?' disabled':''}>Discard all changes</button>
     </div></div></div>`;
 }
+/* The terms that fail a check, by name, for the Staging banner (Perry, 29 Oct 2026: the banner said "below" while they
+   sat on page 18). Each name jumps to its term. */
+function blkNames(){
+  const keys=[...blockersByKey().keys()], name=k=>(staged[k]&&staged[k].data&&staged[k].data.Term)||(idMap().get(k)||{}).Term||'(new term)';
+  const btns=keys.slice(0,6).map(k=>`<button type="button" class="sjump" data-sjump="${esc(k)}">${esc(name(k))}</button>`);
+  const more=keys.length-btns.length;
+  const list=more>0?btns.concat(`${n(more)} more`):btns;
+  return list.length<3?list.join(' and '):list.slice(0,-1).join(', ')+' and '+list.at(-1);
+}
 function wireStaging(root){
+  root.querySelectorAll('[data-sjump]').forEach(b=>b.onclick=()=>{ const k=b.dataset.sjump; stab='all'; sq=''; spage=1; render();
+    const row=document.querySelector(`#stagingCard .srow[data-skey="${CSS.escape(k)}"]`); if(!row) return;
+    row.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'center'});
+    row.classList.add('sjumped'); setTimeout(()=>row.classList.remove('sjumped'),2200); });
   root.querySelectorAll('[data-st]').forEach(b=>b.onclick=()=>{ stab=b.dataset.st; spage=1; render(); });
   const sfind=id=>stagedIssues.find(i=>i.id===id);
   root.querySelectorAll('[data-sfix]').forEach(b=>b.onclick=async()=>{ const r=approveStagedFix(sfind(b.dataset.sfix)); await persist(); touch(); toast(r===true?'Fix approved':r); render(); });
