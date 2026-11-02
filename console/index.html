@@ -402,6 +402,30 @@ button.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent);c
 .f label.radio{font-size:13.5px;font-weight:400;letter-spacing:0;text-transform:none;color:var(--ink)}
 .dlg .err{color:var(--bad);font-weight:600;font-size:12.5px}
 .dlg .err:empty{display:none}
+/* ---------- Suggestions from the public glossary (Perry, 2 Nov 2026; design A, one card per suggestion) ---------- */
+.sugc{display:flex;flex-wrap:wrap;gap:16px;padding:16px 18px;border-top:1px solid var(--line)}
+.sugc:first-child{border-top:0}
+.sugm{flex:999 1 460px;min-width:0;display:flex;flex-direction:column;gap:8px}
+.sugc>.r{flex:1 1 200px;display:flex;flex-wrap:wrap;align-content:flex-start;justify-content:flex-end;gap:8px}
+.sugc a.btn{text-decoration:none;display:inline-flex;align-items:center}
+.sugtop{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-3)}
+.sugtag{font-size:10.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:3px}
+.sugtag.n{background:var(--good-soft);color:var(--good)}
+.sugtag.u{background:var(--accent-soft);color:var(--accent)}
+.sugst{font-weight:600;color:var(--ink-2)}
+.sugc h3{margin:0;font-size:16px;font-weight:700;line-height:1.3;color:var(--ink)}
+.sugf{display:flex;flex-direction:column;gap:2px}
+.sugf p{margin:0;font-size:14px;white-space:pre-wrap;overflow-wrap:anywhere}
+.sugf p.was{color:var(--ink-2)}
+.sugcmp{display:flex;flex-wrap:wrap;gap:12px}
+.sugcmp>.sugf{flex:1 1 260px}
+.sugf.sugnew{background:var(--good-soft);border-radius:4px;padding:8px 10px}
+.sugf.sugnew .eyebrow{color:var(--good)}
+.sugfrom{font-size:13px;color:var(--ink-2)}
+.sugfrom b{color:var(--ink)}
+.sugfrom a{color:var(--link)}
+.sugnote{display:flex;flex-direction:column;gap:4px;margin:0 0 14px;padding:12px 14px;border-radius:4px;background:var(--accent-soft);color:var(--ink);font-size:13.5px;line-height:1.5}
+.sugnote span.m{color:var(--ink-2)}
 </style>
 </head>
 <body>
@@ -452,6 +476,7 @@ c57 -33 76 -84 76 -200 0 -116 -19 -167 -76 -200 -32 -19 -52 -20 -294 -20
     <button type="button" data-view="terms" title="Terms"><svg class="i" viewBox="0 0 24 24"><path d="M5 4.5h11a3 3 0 013 3V20H8a3 3 0 01-3-3V4.5z"/><path d="M5 17a3 3 0 013-3h11M9 8.5h6"/></svg><span>Terms</span><b class="dot" id="dTerms"></b></button>
     <button type="button" data-view="staging" title="Staging"><svg class="i" viewBox="0 0 24 24"><path d="M12 3l8.5 4.5L12 12 3.5 7.5 12 3z"/><path d="M3.5 12L12 16.5 20.5 12M3.5 16.5L12 21l8.5-4.5"/></svg><span>Staging</span><b class="dot" id="dStaging"></b></button>
     <button type="button" data-view="issues" title="Needs a Decision"><svg class="i" viewBox="0 0 24 24"><path d="M5 21V4.5M5 4.5h11l-2 4 2 4H5"/></svg><span>Needs a Decision</span><b class="dot warn" id="dIssues"></b></button>
+    <button type="button" data-view="suggestions" title="Suggestions"><svg class="i" viewBox="0 0 24 24"><path d="M4 13l2.5-7.5h11L20 13v5.5a1 1 0 01-1 1H5a1 1 0 01-1-1V13z"/><path d="M4 13h4.5l1.2 2.2h4.6L15.5 13H20"/></svg><span>Suggestions</span><b class="dot" id="dSuggest"></b></button>
     <button type="button" data-view="publish" title="Draft &amp; Publish"><svg class="i" viewBox="0 0 24 24"><path d="M12 16V4M7 8.5L12 4l5 4.5"/><path d="M4.5 15v3.5a1.5 1.5 0 001.5 1.5h12a1.5 1.5 0 001.5-1.5V15"/></svg><span>Draft &amp; Publish</span><b class="dot" id="dPublish"></b></button>
     <button type="button" data-view="import" title="Import"><svg class="i" viewBox="0 0 24 24"><path d="M12 4v11M7.5 10.5L12 15l4.5-4.5"/><path d="M4.5 16v2.5A1.5 1.5 0 006 20h12a1.5 1.5 0 001.5-1.5V16"/></svg><span>Import</span><b class="dot" id="dImport"></b></button>
   </nav>
@@ -2488,7 +2513,7 @@ function counts(){
 }
 function paintCounts(){
   const c=counts();
-  $('dIssues').textContent=c.iss?n(c.iss):''; $('dStaging').textContent=c.st?n(c.st):''; $('dPublish').textContent=c.d.total?n(c.d.total):'';
+  $('dIssues').textContent=c.iss?n(c.iss):''; $('dStaging').textContent=c.st?n(c.st):''; paintSugDot(); $('dPublish').textContent=c.d.total?n(c.d.total):'';
   return c;
 }
 document.querySelectorAll('.rail [data-view]').forEach(b=>b.addEventListener('click',()=>go(b.dataset.view)));
@@ -2608,6 +2633,7 @@ function render(){
   const M=$('main');
   if(view==='terms') renderTerms(M,c);
   else if(view==='issues') renderIssuesPage(M,c);
+  else if(view==='suggestions') renderSuggestions(M,c);
   else if(view==='staging') renderStagingPage(M,c);
   else if(view==='publish') renderPublish(M,c);
   else if(view==='classes') renderClasses(M,c);
@@ -2753,7 +2779,7 @@ function renderPane(){
   const title=form.Term||(isNew?'New term':'(untitled)');
   const status=s?`<i class="tag ${s.action}">${s.action==='add'?'New, staged':s.action==='update'?'Update staged':'Removal staged'}</i>`
     :isNew?'<i class="tag add">New</i>':(ds.added.has(sel)?`<i class="tag draft">Added since ${esc(sinceLabel())}</i>`:ds.edited.has(sel)?`<i class="tag draft">Changed since ${esc(sinceLabel())}</i>`:'');
-  const origin=s?({import:'Staged from an import.',bulk:'Staged by tagging a set of results.',fix:'Staged as a fix from Needs a Decision.'}[s.origin]||'Staged here.'):'';
+  const origin=s?({import:'Staged from an import.',bulk:'Staged by tagging a set of results.',fix:'Staged as a fix from Needs a Decision.',suggestion:'Staged from a public suggestion.'}[s.origin]||'Staged here.'):'';
   const nSt=Object.keys(staged).length+vocabPending.length;
   P.innerHTML=`<div class="panein">
     <header class="ehead">
@@ -2761,6 +2787,7 @@ function renderPane(){
       <h2 id="eTitle">${esc(title)}</h2>
       <div class="row">${isNew?'ID assigned when the change is applied':'ID '+esc(sel)+(baseMap().has(sel)?` · published in ${esc(sinceLabel())}`:` · added since ${esc(sinceLabel())}`)}</div>
     </header>
+    ${sugNoteHTML()}
     ${s&&s.action==='remove'?`<div class="banner bad"><span>This term is staged for removal. It leaves the glossary when staged changes are applied.</span><button class="btn sm" type="button" id="unstage">Keep this term</button></div>`:''}
     ${s&&s.action!=='remove'?`<div class="banner warn"><span>${origin} Changes below update the staged version.</span><button class="btn sm" type="button" id="unstage">Unstage</button></div>`:''}
     <div class="form">
@@ -2977,10 +3004,10 @@ function diffLine(f,a,b){
   return `<span class="k">${LABEL[f]||esc(fieldLabel(f))}</span><span class="v">${a!==undefined&&A.trim()?`<del>${esc(w.from)}</del> → `:''}<ins>${B.trim()?esc(w.to):'<em>(empty)</em>'}</ins>${ws?' <i class="tag update">spacing only</i>':''}</span>`;
 }
 async function stageForm(){
-  const data=formData(), prev=staged[sel];
+  const data=formData(), prev=staged[sel], fromSug=sugFrom&&sugFrom.key===sel?sugFrom:null;
   if(sel==='__new'){
     const key='new:'+(newCounter++);
-    staged[key]={action:'add',data,origin:'manual'}; sel=key;
+    staged[key]={action:'add',data,origin:fromSug?'suggestion':'manual'}; sel=key;
     await persist(); touch(); toast('Addition staged: '+(data.Term||'new term'));
   }else if(prev&&prev.action==='add'){
     prev.data=data; await persist(); touch(); toast('Staged addition updated');
@@ -2988,11 +3015,12 @@ async function stageForm(){
     const orig=idMap().get(sel); if(!orig) return;
     if(sameRow(orig,data)){ delete staged[sel]; await persist(); touch(); toast('Matches the draft, so nothing is staged'); }
     else{
-      const e={action:'update',data:{...data,ID:sel},origin:prev&&prev.action==='update'?prev.origin:'manual'};
+      const e={action:'update',data:{...data,ID:sel},origin:fromSug?'suggestion':prev&&prev.action==='update'?prev.origin:'manual'};
       if(prev?.fix) e.fix=prev.fix;
       staged[sel]=e; await persist(); touch(); toast('Change staged: '+data.Term);
     }
   }
+  if(fromSug&&staged[sel]){ sugFrom=null; sugUpdate(fromSug.ref,{status:'staged',stagedAt:new Date().toISOString(),stagedBy:sugWho(),stageKey:sel}); }
   render(); select(sel);
 }
 async function stageRemoval(){
@@ -3135,7 +3163,7 @@ function stagingHTML(){
       :`<div class="diff"><span class="k">Definition</span><span class="v"><del>${esc(s.data.Definition||orig?.Definition||'')}</del></span></div>`;
     const p=pk.get(k)||[], fl=blockersByKey().get(k)||0;
     return `<div class="srow" data-skey="${esc(k)}"><div class="top"><i class="tag ${s.action}">${s.action}</i><b>${esc(s.data.Term||'(new term)')}</b>
-      ${s.origin==='import'?'':`<small>${({bulk:'tagged in bulk',fix:'fix'}[s.origin])||'edited here'}</small>`}
+      ${s.origin==='import'?'':`<small>${({bulk:'tagged in bulk',fix:'fix',suggestion:'from a suggestion'}[s.origin])||'edited here'}</small>`}
       ${fl?`<span class="flag" title="Decide each below before this term can be applied">Fails ${fl} check${fl===1?'':'s'}</span>`:''}
       <span class="r">${s.action!=='remove'?`<button class="btn sm" type="button" data-edit="${esc(k)}">Edit</button>`:''}<button class="btn sm danger" type="button" data-unstage="${esc(k)}">Remove</button></span></div>
       ${body}${p.length?`<ul class="probs">${p.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:''}${fl?`<div class="sissues">${stagedBlockers().filter(i=>i.stageKey===k).map(stagedIssueHTML).join('')}</div>`:''}</div>`;
@@ -3284,6 +3312,142 @@ async function applyVocab(){
 
 /* ===== Needs a decision ===== */
 let ifocus=null;   // a staged term whose items the Staging flag opened (7 Oct 2026)
+/* ---------- Suggestions from the public glossary (Perry, 2 Nov 2026; design A, one card per suggestion) ----------
+   People send them through Suggest a Term on the public glossary. The relay keeps them in data/suggestions.json of the
+   private GitMISMO-glossary-data (relay request 10), readable only by people with Edit or Admin on the glossary and the
+   platform administrators, and emails the glossary's facilitator (Kellie Stoll). Nothing here changes the glossary:
+   Add to Staging opens the suggestion in Terms, filled in, and staging it marks the suggestion In Staging.
+   Statuses: new, staged, declined. "Updated definition" is what people read; the stored kind stays 'better'. */
+const SUG_URL=`${RELAY_URL}/glossary-data/data/suggestions`;
+const SUG={docs:{},sha:null,loaded:false,error:'',at:0};
+let sugTab='new', sugFrom=null;   /* sugFrom: {ref,key} while the editor holds a suggestion */
+async function sugCall(opts={}){
+  const tok=sessionActive()&&window.ResourcesSession.token();
+  if(!tok){ const e=new Error('Sign in to see suggestions.'); e.status=401; throw e; }
+  const r=await fetch(SUG_URL,{...opts,cache:'no-store',headers:{'Authorization':'Bearer '+tok,...(opts.body?{'Content-Type':'application/json'}:{})}});
+  let b=null; try{ b=await r.json(); }catch(e){}
+  if(!r.ok){ const e=new Error(b?.message||`The saving service returned ${r.status}${b?.error?' ('+b.error+')':''}.`); e.status=r.status; e.code=b?.error||''; throw e; }
+  return b||{};
+}
+async function loadSuggestions(){
+  try{ const b=await sugCall(); SUG.docs=(b.data&&b.data.docs&&typeof b.data.docs==='object')?b.data.docs:{}; SUG.sha=b.sha||null; SUG.error=''; }
+  catch(e){ SUG.error=e.status===403?'editors':e.message; }
+  SUG.loaded=true; SUG.at=Date.now(); paintSugDot(); if(booted&&view==='suggestions') render();
+}
+function sugList(){ return Object.values(SUG.docs).filter(x=>x&&x.id).sort((a,b)=>String(b.at||'').localeCompare(String(a.at||''))); }
+function paintSugDot(){ const d=$('dSuggest'); if(!d) return; const k=sugList().filter(x=>(x.status||'new')==='new').length; d.textContent=k?n(k):''; }
+function sugWho(){ const c=window.ResourcesSession&&window.ResourcesSession.current&&window.ResourcesSession.current(); return (c&&(c.name||c.email))||''; }
+/* Change one suggestion: read the file fresh, change only that one, and save against the version just read. If a new
+   suggestion arrived in between (409), do it again, so new arrivals and other people's changes are never saved over. */
+async function sugUpdate(ref,patch){
+  for(let tries=0;tries<4;tries++){
+    try{
+      const b=await sugCall(), data=b.data&&typeof b.data==='object'?b.data:{docs:{}};
+      const docs=data.docs&&typeof data.docs==='object'?data.docs:{};
+      if(!docs[ref]){ toast('That suggestion is no longer there'); return false; }
+      docs[ref]={...docs[ref],...patch};
+      const w=await sugCall({method:'PUT',body:JSON.stringify({content:{...data,docs},sha:b.sha})});
+      SUG.docs=docs; SUG.sha=w.sha||null; SUG.at=Date.now(); paintSugDot(); if(view==='suggestions') render(); return true;
+    }catch(e){
+      if(e.status===409&&tries<3) continue;
+      toast(e.status===401?'Your sign-in has expired. Sign in again, then try once more.':'The suggestion couldn’t be updated: '+e.message,5000); return false;
+    }
+  }
+  return false;
+}
+const sugFind=ref=>SUG.docs[ref]||null;
+function sugTermRow(x){   /* the term an updated definition is for: by its glossary ID, else by its name */
+  if(x.termId){ const r=currentRow(x.termId); if(r) return {key:x.termId,row:r}; }
+  const want=normName(x.term||''); if(!want) return null;
+  for(const [k,r] of idMap()){ if(normName(r.Term)===want){ const cr=currentRow(k); if(cr) return {key:k,row:cr}; } }
+  return null;
+}
+function sugOpen(ref){
+  const x=sugFind(ref); if(!x) return;
+  if(sel&&isDirty()) return guard(()=>{ sel=null; form=null; sugOpen(ref); });
+  const t=x.kind==='better'?sugTermRow(x):null;
+  if(t){ select0(t.key); if(!form) return; form.Definition=x.definition||''; sugFrom={ref,key:t.key}; }
+  else { newTerm0(); form=toForm({Term:x.term||'',Definition:x.definition||''}); sugFrom={ref,key:'__new'}; }
+  renderPane(); const d=$('fDef'); if(d) d.focus();
+}
+/* Add to Staging: stage it exactly as suggested, the same change the editor's Stage button would make (Perry, 2 Nov 2026:
+   "the option to open the new term and edit what was suggested" is Open and Edit). A new term is staged unclassified;
+   Staging and Needs a Decision ask for its classifications as they do for any term. */
+const sugDataOf=(f,isNew,id)=>({ID:isNew?'':id,Term:f.Term.replace(/\s+/g,' ').trim(),Definition:f.Definition.replace(/[ \t]+\n/g,'\n').trim(),
+  Source:splitMulti(f.Source).join('|'),TermType:splitMulti(f.TermType).join('|'),FocusArea:splitMulti(f.FocusArea).join('|'),
+  AKA:f.AKA.join('|'),Related:f.Related.join('|'),Action:isNew?'add':'update'});
+async function sugStage(ref){
+  const x=sugFind(ref); if(!x) return;
+  const t=x.kind==='better'?sugTermRow(x):null; let key, said;
+  if(t){
+    const prev=staged[t.key];
+    if(prev&&prev.action==='remove'){ toast('That term is staged for removal. Use Open and Edit to decide what to do with it.',5000); return; }
+    const f=toForm(t.row); f.Definition=x.definition||''; const data=sugDataOf(f,false,t.key);
+    if(!data.Definition){ toast('This suggestion has no definition to stage'); return; }
+    if(sameRow(idMap().get(t.key),data)){ toast('That’s already the definition, so nothing is staged'); return; }
+    staged[t.key]={action:'update',data,origin:'suggestion',...(prev&&prev.fix?{fix:prev.fix}:{})}; key=t.key; said='Change staged: '+data.Term;
+  }else{
+    const f=toForm({Term:x.term||'',Definition:x.definition||''}), data=sugDataOf(f,true,'');
+    if(!data.Term){ toast('This suggestion has no term to stage'); return; }
+    key='new:'+(newCounter++); staged[key]={action:'add',data,origin:'suggestion'}; said='Addition staged: '+data.Term;
+  }
+  await persist(); touch();
+  await sugUpdate(ref,{status:'staged',stagedAt:new Date().toISOString(),stagedBy:sugWho(),stageKey:key});
+  toast(said+'. It’s in Staging.'); render();
+}
+function sugNoteHTML(){
+  if(!sugFrom||sugFrom.key!==sel) return '';
+  const x=sugFind(sugFrom.ref); if(!x) return '';
+  return `<div class="sugnote" role="note"><b>From a public suggestion, ${esc(x.id)}</b><span>${esc(x.name||'')}, ${esc(x.organization||'')} · ${esc(x.email||'')}${x.why?`. Why: “${esc(x.why)}”`:''}</span><span class="m">When you stage it, the suggestion moves to In Staging. ${sel==='__new'?'Classify it as you would any new term.':'The suggested definition is filled in below; compare it with today’s before staging.'}</span></div>`;
+}
+const sugDay=iso=>{ const d=new Date(iso); return iso&&!isNaN(d)?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):''; };
+function renderSuggestions(M,c){
+  const all=sugList(), st=x=>x.status||'new', by=k=>all.filter(x=>st(x)===k);
+  if(!['new','staged','declined','all'].includes(sugTab)) sugTab='new';
+  const list=sugTab==='all'?all:by(sugTab), vo=viewOnly();
+  const tabs=[['new','New',by('new').length],['staged','In Staging',by('staged').length],['declined','Declined',by('declined').length],['all','All',all.length]];
+  const card=x=>{
+    const upd=x.kind==='better', t=upd?sugTermRow(x):null, s=st(x);
+    const mail=`mailto:${encodeURIComponent(x.email||'')}?subject=${encodeURIComponent('Your suggestion for MISMO’s Business Glossary ('+x.id+')')}`;
+    const state=s==='staged'?`<span class="sugst">In Staging since ${esc(sugDay(x.stagedAt))}${x.stagedBy?` (${esc(x.stagedBy)})`:''}</span>`
+      :s==='declined'?`<span class="sugst">Declined ${esc(sugDay(x.declinedAt))}${x.declinedBy?` by ${esc(x.declinedBy)}`:''}</span>`:'';
+    const reply=`<a class="btn sm" href="${esc(mail)}">Reply</a>`;
+    const acts=s==='new'?`${vo?'':`<button class="btn sm p" type="button" data-sugadd="${esc(x.id)}">Add to Staging</button><button class="btn sm" type="button" data-sugedit="${esc(x.id)}">Open and Edit</button>`}${reply}${vo?'':`<button class="btn sm" type="button" data-sugno="${esc(x.id)}">Decline</button>`}`
+      :s==='staged'?`<button class="btn sm" type="button" data-go="staging">Open Staging</button>${reply}`
+      :`${vo?'':`<button class="btn sm" type="button" data-sugback="${esc(x.id)}">Reopen</button>`}${reply}`;
+    return `<article class="sugc"><div class="sugm">
+      <div class="sugtop"><span class="sugtag ${upd?'u':'n'}">${upd?'Updated definition':'New term'}</span><span>${esc(x.id)} · ${esc(sugDay(x.at))}</span>${state}</div>
+      <h3>${esc(x.term||'(no term given)')}</h3>
+      ${upd?`<div class="sugcmp"><div class="sugf"><span class="eyebrow">Today</span><p class="was">${t?esc(t.row.Definition||'(no definition)'):'Not found in the glossary under that name.'}</p></div><div class="sugf sugnew"><span class="eyebrow">Suggested</span><p>${esc(x.definition||'')}</p></div></div>`
+        :`<div class="sugf"><span class="eyebrow">Definition</span><p>${esc(x.definition||'')}</p></div>`}
+      ${x.why?`<div class="sugf"><span class="eyebrow">Why</span><p>${esc(x.why)}</p></div>`:''}
+      ${x.sourceRef?`<div class="sugf"><span class="eyebrow">Source or reference</span><p>${esc(x.sourceRef)}</p></div>`:''}
+      <div class="sugfrom">From <b>${esc(x.name||'')}</b>, ${esc(x.organization||'')} · <a href="${esc(mail)}">${esc(x.email||'')}</a></div>
+    </div><div class="r">${acts}</div></article>`;
+  };
+  const say=!SUG.loaded?'Reading suggestions…'
+    :SUG.error==='editors'?'Suggestions are for people who edit the glossary. Ask an administrator for Edit access if you need them.'
+    :SUG.error?`Suggestions couldn’t be read: ${SUG.error}`:'';
+  const empty={new:'No new suggestions.',staged:'Nothing from a suggestion is in Staging.',declined:'Nothing has been declined.',all:'No suggestions yet. They arrive here from Suggest a Term on the public glossary.'}[sugTab];
+  M.innerHTML=topBar('Suggestions',c,'')+
+  `<div class="page"><div class="pagein">${statusBanner()}
+    <header class="mast"><div><div class="eyebrow">From the public glossary</div><h2>Suggestions</h2>
+      <div class="sub">What people send through Suggest a Term on the public glossary. Add to Staging stages it as it was suggested; Open and Edit opens it in Terms first, so you can change the term or the definition and classify it before staging. Either way, nothing reaches the public site until it’s published. The glossary’s facilitator is emailed when one arrives.</div></div>
+      <button class="btn sm" type="button" id="sugRefresh">Refresh</button></header>
+    ${say?`<div class="banner${SUG.error?' bad':''}"><span>${esc(say)}</span>${SUG.error&&SUG.error!=='editors'?'<button class="btn sm" type="button" id="sugRetry">Try again</button>':''}</div>`:''}
+    ${SUG.loaded&&!SUG.error?`<div class="vt" role="group" aria-label="Show">${tabs.map(([k,l,v])=>`<button type="button" data-sugtab="${k}" aria-pressed="${sugTab===k}">${l} <small>${n(v)}</small></button>`).join('')}</div>
+    <div class="card">${list.length?list.map(card).join(''):`<div class="empty">${empty}</div>`}</div>`:''}
+  </div></div>`;
+  wireGo(M);
+  M.querySelectorAll('[data-sugtab]').forEach(b=>b.onclick=()=>{ sugTab=b.dataset.sugtab; render(); });
+  M.querySelectorAll('[data-sugadd]').forEach(b=>b.onclick=async()=>{ b.disabled=true; await sugStage(b.dataset.sugadd); b.disabled=false; });
+  M.querySelectorAll('[data-sugedit]').forEach(b=>b.onclick=()=>sugOpen(b.dataset.sugedit));
+  M.querySelectorAll('[data-sugno]').forEach(b=>b.onclick=async()=>{ b.disabled=true; if(await sugUpdate(b.dataset.sugno,{status:'declined',declinedAt:new Date().toISOString(),declinedBy:sugWho()})) toast('Declined. It’s under Declined if you change your mind.'); else b.disabled=false; });
+  M.querySelectorAll('[data-sugback]').forEach(b=>b.onclick=async()=>{ b.disabled=true; if(await sugUpdate(b.dataset.sugback,{status:'new',reopenedAt:new Date().toISOString(),reopenedBy:sugWho()})) toast('Back under New'); else b.disabled=false; });
+  const again=()=>{ SUG.loaded=false; render(); loadSuggestions(); };
+  const rf=M.querySelector('#sugRefresh'), rt=M.querySelector('#sugRetry'); if(rf) rf.onclick=again; if(rt) rt.onclick=again;
+  if(SUG.loaded&&Date.now()-SUG.at>60000) loadSuggestions();   /* coming back to the section reads it again */
+}
 function renderIssuesPage(M,c){
   let all=(showSkipped?skippedIss():openIss()).filter(i=>i.scope!=='staged');   /* staged terms are decided in Staging (15 Oct 2026) */
   if(ifocus&&!showSkipped){ const f=all.filter(i=>i.stageKey===ifocus); if(f.length) all=f; else ifocus=null; }
@@ -3905,7 +4069,8 @@ async function boot(){
   const ok=await connect();
   if(ok) await reconcile();
   if(fresh&&!reconciled) await persist();
-  booted=true; touch(); go('terms');
+  booted=true; touch(); go(/^#(open=)?suggestions$/.test(location.hash)?'suggestions':'terms');   /* Kellie's email links to #open=suggestions */
+  loadSuggestions();
   if(ok&&reconciled) maybeAutoSave();
 }
 /* Gated like every resources.mismo.org tool that needs an account: nothing of the console
