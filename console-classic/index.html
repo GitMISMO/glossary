@@ -2612,6 +2612,12 @@ async function publishVersion(){
      the 2 September export — and publishing it would replace every version
      since with data that predates all of them. Autosave refused this from the
      start; publish did not, and it is the more destructive of the two. */
+  /* Read again first (November 5, 2026): a draft saved since this page loaded counts too. */
+  if(repo && repoState?.ok && !(await checkRemoteDraft())){
+    alert('The online draft could not be read just now, so this browser cannot tell whether a newer '
+      +'one has been saved there. Nothing was published. Try again in a moment.');
+    renderRail(); return;
+  }
   if(repo && repoState?.ok && repoState.behind){
     alert(`This browser is behind the repository.\n\n`
       +`A newer draft was saved${repoState.remoteEditor?` by ${repoState.remoteEditor}`:''} on `
@@ -2639,6 +2645,14 @@ async function publishVersion(){
   // changed for the working group, not as the delivery mechanism.
   let sha=null;
   if(repo && repoState?.ok){
+    /* And once more after the note was asked for, which can take a while (November 5, 2026). */
+    if(!(await checkRemoteDraft()) || repoState.behind){
+      alert(`Version ${version} was NOT published.\n\n`
+        +(repoState.behind ? `A newer draft was saved online while this was being prepared. Use "Load the online copy" first.`
+                           : `The online draft could not be read just now. Try again in a moment.`)
+        +`\n\nNothing has changed in the repository. The change-set CSV has still downloaded.`);
+      renderRail(); return;
+    }
     try{ sha=await repoPublish(String(note||'').trim()); }
     catch(e){
       alert(`Version ${version} was NOT published.\n\n${e.message}\n\n`
@@ -3146,6 +3160,10 @@ async function maybeAutoSave(){
   const vocabChanged=JSON.stringify({vocab,refDoc})!==(lastSavedVocab||'');
   if(!d.total && !Object.keys(staged).length && !vocabChanged) return;
   if(lastAutoSave && Date.now()-new Date(lastAutoSave) < AUTOSAVE_AFTER) return;
+  /* Checked again straight before writing (November 5, 2026). "Behind" used to be worked
+     out once, on load or on signing in, so a page left open for hours went on saving its
+     whole draft every hour over a newer one someone else had saved since. */
+  if(!(await checkRemoteDraft()) || repoState.behind){ renderRail(); return; }
   try{ await repoSaveDraft('hourly save'); }
   catch(e){ console.warn('Autosave failed:',e); repoState.error=e.message; renderRail(); }
 }
@@ -3157,17 +3175,20 @@ async function maybeAutoSave(){
    invisible otherwise: this browser keeps its own copy in IndexedDB and would
    go on editing a stale one. Compared on connect as well as on load, because
    connecting is exactly when a new machine is at its most out of date. */
+/* Answers whether the online draft could be read (November 5, 2026): every save now
+   calls this straight before writing, and a save must not go ahead on a read that failed. */
 async function checkRemoteDraft(){
-  if(!repo||!repoState?.ok) return;
+  if(!repo||!repoState?.ok) return false;
   try{
     const txt=await ghReadFile(DRAFT_PATH);
-    if(!txt) return;
+    if(!txt) return true;
     const remote=JSON.parse(txt);
     repoState.remoteSavedAt=remote.savedAt||null;
     repoState.remoteEditor=remote.editor||null;
     repoState.behind = !!remote.savedAt && (!lastAutoSave
       || new Date(remote.savedAt) > new Date(lastAutoSave));
-  }catch(e){ /* a convenience check; failing it is not fatal */ }
+    return true;
+  }catch(e){ /* a convenience check; failing it is not fatal */ return false; }
 }
 
 async function verifyRepo(){
@@ -3788,6 +3809,10 @@ $('repoTest').onclick=async()=>{
 async function saveDraftNow(btn){
   // The same hazard as autosave, but the person asked for it, so warn rather
   // than refuse — they may genuinely be discarding what is stored.
+  // Read again first (November 5, 2026), so the warning covers a save made since this page loaded.
+  if(repo && repoState?.ok && !(await checkRemoteDraft()) && !confirm(
+      `The online draft could not be read just now, so this browser cannot tell whether a newer one `
+      +`has been saved there.\n\nSaving now could replace it. Save anyway?`)) return;
   if(repoState?.behind && !confirm(
       `The repository holds a NEWER draft than this browser.\n\n`
       +`Saved${repoState.remoteEditor?` by ${repoState.remoteEditor}`:''} on `
