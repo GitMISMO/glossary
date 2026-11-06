@@ -2660,7 +2660,7 @@ const HELP={what:'The Business Glossary defines MISMO’s terms. The public glos
     ['Anyone Using the Glossary','You look up MISMO’s terms on the public glossary.',
      ['Search a term, a phrase or an acronym; the list narrows as you type.','Browse by letter with the A to Z bar.','Narrow the list by term type, focus area or source.',
       'Open a term for its full definition and classifications. Each term has its own link to share.','Suggest a new term, or a clearer definition, with Suggest a Term.'],
-     ['The public glossary has a guided tour: Start the Guided Tour at the top of the page.','Members can download the full release workbook.']]]};
+     ['The public glossary has a guided tour: Start the Guided Tour at the top of the page.','Members can download the full glossary in Excel.']]]};
 function renderHelp(M){
   const R=HELP.roles[helpRole]||HELP.roles[0], node=x=>`<div class="gh-node ${x[2]||''}">${esc(x[0])}${x[1]?`<small>${esc(x[1])}</small>`:''}</div>`;
   M.innerHTML=`<div class="page gh"><header class="gh-band"><div class="gh-ey">Help</div><h1>How the Business Glossary Works</h1><p>For each person who uses it: pick who you are. Questions: Perry Williams.</p>
