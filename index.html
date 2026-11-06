@@ -670,6 +670,31 @@ button.gl-card:hover,button.gl-card:focus-visible{border-color:rgba(116,191,235,
 .sg .hp{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
 @media (max-width:600px){ .sg{width:100%;height:100%;max-height:100%;border-radius:0} .sg-in{padding:calc(16px + env(safe-area-inset-top,0px)) 20px calc(28px + env(safe-area-inset-bottom,0px))} .sg-top h2{font-size:22px} }
 @media (prefers-reduced-motion:no-preference){ .sg[open]{animation:sg-in .16s ease-out} @keyframes sg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}} }
+
+/* Guided tour (Perry, 6 Nov 2026), in the design of the Business Domains page's tour */
+.tour-btn{display:inline-flex;align-items:center;gap:9px;border:0;background:#1f5f8f;color:#fff;border-radius:8px;padding:13px 22px;font:inherit;font-weight:700;font-size:15.5px;cursor:pointer;box-shadow:0 0 0 3px rgba(116,191,235,.35)}
+.tour-btn:hover{background:#2a72a8} .tour-btn svg{width:16px;height:16px} .tour-btn:focus-visible{outline:3px solid #74BFEB;outline-offset:2px}
+.gl-tourcta{margin-top:22px} .gl-tourcta p{margin:10px 0 0;font-size:13.5px;line-height:1.5;color:#a9c7dc;max-width:46ch}
+body.touring #page{padding-bottom:320px}
+#spot{position:absolute;z-index:50;pointer-events:none;border-radius:12px;box-shadow:0 0 0 3px #74BFEB,0 0 0 9999px rgba(8,24,42,.55);opacity:0;transition:top .4s ease,left .4s ease,width .4s ease,height .4s ease,opacity .25s ease}
+#spot.on{opacity:1}
+#dock{position:fixed;z-index:60;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));width:min(700px,calc(100vw - 24px));background:#fff;color:#0F314C;border:1px solid #D5E2ED;border-radius:14px;box-shadow:0 24px 60px -18px rgba(0,0,0,.55);overflow:hidden;display:none;font-family:inherit;text-align:left}
+#dock.on{display:block}
+#dock .prog{height:4px;background:#E5EEF5} #dock .prog i{display:block;height:100%;width:0;background:#1f77c8;transition:width .3s ease}
+#dock .top{display:flex;align-items:center;gap:10px;padding:12px 18px 0;font-size:13px} #dock .where{font-weight:700;font-size:14px} #dock .count{color:#7794aa}
+#dock .x{margin-left:auto;border:0;background:none;color:#14486E;font:inherit;font-weight:700;cursor:pointer}
+#cap{max-height:4.9em;overflow:auto;padding:8px 18px 10px;font-size:15.5px;line-height:1.55;color:#7794aa;scrollbar-width:none}
+#cap span{cursor:pointer} #cap span.done{color:#0F314C} #cap span.now{color:#0F314C;background:#E4F2FB;border-radius:4px}
+#dock .ctl{display:flex;align-items:center;gap:8px;padding:10px 18px 14px;border-top:1px solid #E5EEF5;flex-wrap:wrap}
+#dock .ctl .b{display:inline-flex;align-items:center;gap:6px;border:1px solid #D5E2ED;background:#fff;color:#0F314C;border-radius:8px;padding:7px 12px;font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+#dock .ctl .b svg{width:13px;height:13px} #dock .ctl .b:disabled{opacity:.45;cursor:default} #dock .ctl .b.p{background:#0F314C;color:#fff;border-color:#0F314C}
+#dock .opts{margin-left:auto;display:flex;align-items:center;gap:8px;font-size:12.5px;color:#546F88}
+#dock .tog{border:1px solid #D5E2ED;background:#fff;border-radius:8px;padding:6px 10px;font:inherit;font-weight:700;font-size:12.5px;color:#0F314C;cursor:pointer} #dock .tog[aria-pressed="false"]{color:#7794aa}
+#dock select{font:inherit;font-size:12.5px;border:1px solid #D5E2ED;border-radius:7px;padding:4px 6px;background:#fff;color:#0F314C}
+#dock .note{display:none;padding:0 18px 12px;font-size:12.5px;color:#7a5413} #dock .note.on{display:block}
+#dock button:focus-visible,#dock select:focus-visible{outline:2px solid #74BFEB;outline-offset:1px}
+@media (max-width:640px){ #dock .opts{margin-left:0;width:100%} }
+@media (prefers-reduced-motion: reduce){ #spot,#dock .prog i{transition:none} }
 </style>
 
 <!-- MISMO site chrome v2 (October 25, 2026): loads IBM Plex Sans and matches the website header -->
@@ -907,6 +932,7 @@ function build(){
 <h1 style="margin: 0 0 18px; font-family: inherit; font-size: clamp(33px,5.3vw,53px); font-weight: bold; line-height: 1.04; letter-spacing: -.027em; color: #ffffff; text-shadow: 0 2px 18px rgba(7,29,46,.6);">Business Glossary<span style="display: block; color: #74bfeb;">Shared Definitions</span></h1>
 <p style="margin: 0 0 12px; font-family: inherit; font-size: clamp(16.5px,1.8vw,19px); font-weight: 500; line-height: 1.5; color: #ffffff; max-width: 40ch;">Standard definitions for ${n(Math.floor(T.length/1000)*1000)}+ terms used across the mortgage industry, maintained by MISMO’s communities and workgroups.</p>
 <p id="aVer" style="margin: 0; font-family: inherit; font-size: 15px; line-height: 1.6; color: #a9d8f3; max-width: 52ch;">Latest version</p>
+<div class="gl-tourcta"><button class="tour-btn" id="gTourBtn" type="button" data-tour><svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>Start the Guided Tour</button><p>About two minutes, read aloud with captions. Pause, go back or skip ahead at any point, or just scroll and read.</p></div>
 </div>
 <div class="gl-cards"><a class="gl-card" href="${DL_URL}" target="_blank" rel="noopener" title="Opens MISMO Connect. Signing in is required."><b>Download the Glossary</b><span>The full release workbook, version ${esc(D.meta.label||'')} ${D.meta.stage==='final'?'Final':D.meta.stage==='comment-period'?'(30-Day Comment Period)':''}, with every term and its classifications.</span><span class="f"><span class="who">Members Only</span><span class="go">Download&nbsp;&rarr;</span></span></a><${SUGGEST_LIVE?'button type="button" data-suggest':'div aria-disabled="true"'} class="gl-card"><b>Suggest a Term</b><span>Missing a term, or one that could be clearer? Tell the glossary team.</span><span class="f"><span class="who">Open to Everyone</span><span class="go${SUGGEST_LIVE?'':' soon'}">${SUGGEST_LIVE?'Suggest&nbsp;&rarr;':'Coming Soon'}</span></span></${SUGGEST_LIVE?'button':'div'}></div>
 </div>
@@ -1198,6 +1224,166 @@ paintStats();
 openFromHash();
 })();
 
+</script>
+<div id="spot" aria-hidden="true"></div>
+<div id="dock" role="region" aria-label="Guided tour">
+  <div class="prog"><i id="prog"></i></div>
+  <div class="top"><span class="where" id="where"></span><span class="count" id="count"></span><button class="x" id="t-close" type="button">Close Tour</button></div>
+  <div id="cap" aria-live="polite"></div>
+  <div class="ctl">
+    <button class="b" id="t-prev" type="button" aria-label="Previous stop"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg><span>Back</span></button>
+    <button class="b p" id="t-play" type="button"></button>
+    <button class="b" id="t-next" type="button" aria-label="Next stop"><span>Next</span><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l5 5-5 5"/></svg></button>
+    <span class="opts"><button class="tog" id="t-voice" type="button" aria-pressed="true">Voice On</button>
+      <label>Speed <select id="t-rate"><option value="0.9">0.9×</option><option value="1">1×</option><option value="1.15">1.15×</option><option value="1.3">1.3×</option></select></label>
+      <label>Voice <select id="t-vsel"></select></label></span>
+  </div>
+  <div class="note" id="t-note"></div>
+</div>
+<script>
+// Guided tour (Perry, 6 Nov 2026): reads the page aloud with captions and a moving spotlight; the same engine as the
+// Business Domains page. The stops and their wording are in STOPS; each sentence lights up what it talks about.
+(function(){
+  var STOPS = [["Welcome", [["Welcome to MISMO’s Business Glossary: standard definitions for more than eight thousand terms used across the mortgage industry, kept by MISMO’s communities and workgroups. I’ll show you how to find what you need in about two minutes. You can pause, go back or skip ahead at any time.", [["#page h1", 0], ["#aVer", 0]]]]], ["The Latest Version", [["This line shows the glossary’s latest version, and whether it’s Final or out for a thirty-day comment period, when MISMO asks for feedback on the changes.", [["#aVer", 0]]]]], ["Searching", [["Type a term, a phrase or an acronym here. The list narrows as you type, searching both the terms and their definitions.", [["label.search", 0]]]]], ["Browse by Letter", [["Or browse by letter: pick one to see every term that starts with it.", [["#aAz", 0]]]]], ["Narrow the List", [["Narrow the list by term type, focus area or source. Each has a short explanation of what it means, so you know what you’re choosing.", [["#aSide", 0]]]]], ["A Term", [["Open any term to read its full definition, its type, its focus areas and where the definition comes from. Each term has its own link, so you can share exactly the one you mean.", [["#aMain .A-row", 0]]]]], ["Download and Suggest", [["Members can download the full release workbook. And anyone can suggest a new term, or a clearer definition, to the glossary team.", [[".gl-cards", 0]]]]], ["That’s It", [["That’s the glossary. Start the tour again any time from the button at the top of the page.", [["#gTourBtn", 0]]]]]];
+  var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>', PAUSE = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>';
+  var $ = function(s, r){ return (r || document).querySelector(s); };
+  var strip = $(".strip") || { offsetHeight: 0 };   // no sticky strip on this page
+  var probe = document.createElement("div"); probe.style.cssText = "position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden"; document.body.appendChild(probe);
+  function topSafe(){ return probe.offsetHeight + strip.offsetHeight; }
+  var reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  var dock = $("#dock"), spot = $("#spot"), cap = $("#cap"), where = $("#where"), count = $("#count"), bar = $("#prog");
+  var bPlay = $("#t-play"), bPrev = $("#t-prev"), bNext = $("#t-next"), bClose = $("#t-close"), tVoice = $("#t-voice"), sRate = $("#t-rate"), sVoice = $("#t-vsel"), note = $("#t-note");
+  var synth = ("speechSynthesis" in window) ? window.speechSynthesis : null;
+  var voices = [], voice = null, rate = 1, voiceOn = !!synth, playing = false, open = false, i = 0, sent = 0, seg = -1, timer = null, token = 0, parts = [];
+  try{ var r0 = parseFloat(localStorage.getItem("mismo.tour.rate")); if(r0) rate = r0; if(localStorage.getItem("mismo.tour.voiceOn") === "0") voiceOn = false; }catch(e){}
+  if(!synth){ tVoice.disabled = true; voiceOn = false; note.textContent = "This browser can’t read aloud, so the tour shows captions and moves on by itself."; note.classList.add("on"); }
+  sRate.value = String(rate);
+
+  // How the voice says things; the captions keep the written form.
+  function say(t){ return t.replace(/\bMISMO\b/g, "Mismo").replace(/\bversion 2s\b/g, "version twos").replace(/\bversion 2\b/g, "version two"); }
+  function split(t){ return (t.match(/[^.!?]+[.!?]+[’”]?(\s+|$)|[^.!?]+$/g) || [t]).map(function(s){ return s.trim(); }).filter(Boolean); }
+
+  function pickVoice(){
+    if(!synth) return;
+    var all = synth.getVoices() || [];
+    voices = all.filter(function(v){ return /^en([-_]|$)/i.test(v.lang); });
+    var saved = null; try{ saved = localStorage.getItem("mismo.tour.voice"); }catch(e){}
+    var pref = [/natural/i, /neural/i, /online/i, /google us english/i, /samantha/i, /\bava\b/i, /aria/i, /jenny/i, /allison/i, /daniel/i];
+    function find(re, us){ return voices.find(function(v){ return re.test(v.name) && (!us || /en[-_]US/i.test(v.lang)); }); }
+    voice = voices.find(function(v){ return v.name === saved; }) || pref.map(function(re){ return find(re, true); }).find(Boolean)
+         || pref.map(function(re){ return find(re, false); }).find(Boolean) || voices.find(function(v){ return /en[-_]US/i.test(v.lang); }) || voices[0] || null;
+    sVoice.innerHTML = "";
+    voices.forEach(function(v){ var o = document.createElement("option"); o.value = v.name; o.textContent = v.name.replace(/^(Microsoft|Google)\s+/, "").replace(/\s*\(.*?\)\s*/g, " ").trim(); if(voice && v.name === voice.name) o.selected = true; sVoice.appendChild(o); });
+    sVoice.parentNode.style.display = voices.length > 1 ? "" : "none";
+  }
+  if(synth){ pickVoice(); if(synth.addEventListener) synth.addEventListener("voiceschanged", pickVoice); else synth.onvoiceschanged = pickVoice; }
+
+  // The From Idea to Publication switch
+  function setSwitch(k){ var b = document.querySelector('.sw button[data-k="' + k + '"]'); if(b && !b.classList.contains("on")) b.click(); }
+
+  // What to light up
+  function resolve(targets){ var out = []; targets.forEach(function(t){ var e = document.querySelectorAll(t[0])[t[1] || 0]; if(e) out.push(e); }); return out; }
+  function reveal(list){ // bring targets inside a sideways-scrolling block into view
+    var done = [];
+    list.forEach(function(e){ var sx = e.closest && e.closest(".lanes-wrap, .scroll"); if(!sx || done.indexOf(sx) >= 0 || sx.scrollWidth <= sx.clientWidth) return; done.push(sx);
+      var mine = list.filter(function(x){ return sx.contains(x) && x !== sx; }); if(!mine.length) return;
+      var c = sx.getBoundingClientRect(), l = Infinity, r = -Infinity;
+      mine.forEach(function(x){ var q = x.getBoundingClientRect(); l = Math.min(l, q.left); r = Math.max(r, q.right); });
+      var pin = sx.querySelector(".lname"), pinW = pin && getComputedStyle(pin).position === "sticky" ? pin.offsetWidth + 6 : 0;
+      if(l < c.left + pinW + 8 || r > c.right - 8) sx.scrollLeft += (l - c.left) - pinW - 8; });
+  }
+  function box(list){ var t = Infinity, l = Infinity, b = -Infinity, r = -Infinity;
+    list.forEach(function(e){ var q = e.getBoundingClientRect(); if(!q.width && !q.height) return; t = Math.min(t, q.top); l = Math.min(l, q.left); b = Math.max(b, q.bottom); r = Math.max(r, q.right); });
+    var vw = document.documentElement.clientWidth; l = Math.max(l, 6); r = Math.min(r, vw - 6); if(r < l + 20){ r = l + 20; }
+    return {top: t + window.scrollY, left: l + window.scrollX, w: r - l, h: b - t}; }
+  function place(targets, scroll){
+    var list = resolve(targets); if(!list.length) return;
+    reveal(list);
+    var pad = 10, bx = box(list);
+    spot.style.top = (bx.top - pad) + "px"; spot.style.left = (bx.left - pad) + "px"; spot.style.width = (bx.w + pad * 2) + "px"; spot.style.height = (bx.h + pad * 2) + "px";
+    spot.classList.add("on");
+    if(!scroll) return;
+    var ts = topSafe(), low = window.innerHeight - dock.offsetHeight - 28, avail = low - ts;
+    var vTop = bx.top - pad - window.scrollY, vBot = vTop + bx.h + pad * 2;
+    if(vTop >= ts + 4 && vBot <= low) return;                     // already in view: leave the page still
+    var y = (bx.h + pad * 2 <= avail) ? bx.top - pad - ts - Math.max(8, (avail - bx.h - pad * 2) / 2) : bx.top - pad - ts - 12;
+    window.scrollTo({top: Math.max(0, y), behavior: reduced ? "auto" : "smooth"});
+  }
+  function focusSeg(g, force){ if(g === seg && !force) return; seg = g; var sg = STOPS[i][1][g], acts = (sg[2] || "").split(",").filter(Boolean);
+    acts.forEach(function(a){ if(a.indexOf("sw:") === 0) setSwitch(a.slice(3)); });
+    place(sg[1], true); }
+
+  function renderCap(){ parts = []; cap.innerHTML = "";
+    STOPS[i][1].forEach(function(sg, g){ split(sg[0]).forEach(function(p){ var s = document.createElement("span"); s.textContent = p + " "; s.setAttribute("data-k", parts.length); parts.push({t: p, g: g}); cap.appendChild(s); }); });
+    mark(-1); }
+  // The caption box shows about three lines: it keeps the sentence being read at the top,
+  // and slides through a sentence too long to fit as the voice reaches its later words.
+  function capTo(y){ cap.scrollTop = Math.max(0, Math.min(y, cap.scrollHeight - cap.clientHeight));
+    cap.classList.toggle("end", cap.scrollTop >= cap.scrollHeight - cap.clientHeight - 2); }
+  function spanBox(s){ var r = s.getBoundingClientRect(), c = cap.getBoundingClientRect(); return {top: r.top - c.top + cap.scrollTop, h: r.height}; }
+  function follow(frac){ var now = cap.querySelector("span.now"); if(!now) return; var b = spanBox(now), over = b.h - cap.clientHeight;
+    if(over > 0) capTo(b.top + over * Math.max(0, Math.min(1, frac))); }
+  function mark(k){ Array.prototype.forEach.call(cap.children, function(s, n){ s.className = n < k ? "done" : (n === k ? "now" : ""); });
+    var now = cap.children[k]; if(now) capTo(spanBox(now).top); else if(k < 0) capTo(0); }
+  function ui(){ var end = i === STOPS.length - 1 && sent >= parts.length;
+    bPlay.innerHTML = (playing ? PAUSE + "<span>Pause</span>" : PLAY + "<span>" + (end ? "Replay" : "Play") + "</span>");
+    bPlay.setAttribute("aria-label", playing ? "Pause the tour" : "Play the tour");
+    bPrev.disabled = i === 0; bNext.disabled = i === STOPS.length - 1;
+    tVoice.setAttribute("aria-pressed", voiceOn ? "true" : "false"); tVoice.textContent = voiceOn ? "Voice On" : "Voice Off";
+    where.textContent = STOPS[i][0]; count.textContent = (i + 1) + " of " + STOPS.length; bar.style.width = ((i + 1) / STOPS.length * 100) + "%"; }
+
+  function stopSpeech(){ token++; clearTimeout(timer); if(synth){ try{ synth.cancel(); }catch(e){} } }
+  function run(k){ var my = ++token; clearTimeout(timer);
+    function step(j){ if(my !== token) return;
+      if(j >= parts.length){ sent = parts.length; mark(parts.length); done(); return; }
+      sent = j; mark(j); focusSeg(parts[j].g);
+      if(voiceOn && synth){ var u = new SpeechSynthesisUtterance(say(parts[j].t)); if(voice){ u.voice = voice; u.lang = voice.lang; } else u.lang = "en-US"; u.rate = rate;
+        var fired = false; u.onend = function(){ if(fired) return; fired = true; step(j + 1); };
+        u.onboundary = function(ev){ if(my !== token || typeof ev.charIndex !== "number") return; follow((ev.charIndex - 25) / Math.max(1, u.text.length - 50)); };
+        u.onerror = function(ev){ if(fired || my !== token) return; fired = true; if(ev && (ev.error === "interrupted" || ev.error === "canceled")) return; timed(j); };
+        synth.speak(u);
+        var guard = Math.max(4000, parts[j].t.length * 95 / rate); timer = setTimeout(function(){ if(!fired && my === token && !synth.speaking){ fired = true; step(j + 1); } }, guard);
+      } else timed(j);
+    }
+    function timed(j){ var ms = Math.max(2200, parts[j].t.length * 62) / rate;
+      setTimeout(function(){ if(my === token && sent === j) follow(0.5); }, ms * 0.4);
+      setTimeout(function(){ if(my === token && sent === j) follow(1); }, ms * 0.75);
+      timer = setTimeout(function(){ step(j + 1); }, ms); }
+    step(k);
+  }
+  function done(){ if(!playing) return; if(i < STOPS.length - 1) timer = setTimeout(function(){ go(i + 1); }, 750); else { playing = false; ui(); } }
+  function go(n){ stopSpeech(); i = Math.max(0, Math.min(STOPS.length - 1, n)); sent = 0; seg = -1; renderCap(); ui(); focusSeg(0, true); if(playing) run(0); }
+
+  function quiet(){ var pop = $("#pop"), back = $("#back"); if(pop) pop.hidden = true; if(back) back.hidden = true; }
+  function start(){ open = true; quiet(); document.body.classList.add("touring"); dock.classList.add("on"); playing = true; if(synth){ try{ synth.cancel(); }catch(e){} } go(0); bPlay.focus({preventScroll:true}); }
+  function close(){ stopSpeech(); playing = false; open = false; document.body.classList.remove("touring"); dock.classList.remove("on"); spot.classList.remove("on"); }
+  function toggle(){ if(playing){ playing = false; stopSpeech(); mark(sent); ui(); }
+    else { playing = true; if(sent >= parts.length){ if(i === STOPS.length - 1){ go(0); return; } go(i + 1); return; } ui(); run(sent); } }
+
+  // The header is drawn from a template after the glossary loads, so the button is found when it is clicked.
+  document.addEventListener("click", function(ev){ var b = ev.target && ev.target.closest && ev.target.closest("[data-tour]"); if(b) start(); });
+  bPlay.addEventListener("click", toggle);
+  bNext.addEventListener("click", function(){ go(i + 1); });
+  bPrev.addEventListener("click", function(){ go(i - 1); });
+  bClose.addEventListener("click", close);
+  cap.addEventListener("scroll", function(){ cap.classList.toggle("end", cap.scrollTop >= cap.scrollHeight - cap.clientHeight - 2); }, {passive:true});
+  cap.addEventListener("click", function(ev){ var k = ev.target && ev.target.getAttribute && ev.target.getAttribute("data-k"); if(k === null || k === undefined) return;
+    stopSpeech(); sent = +k; mark(sent); focusSeg(parts[sent].g); if(playing) run(sent); });
+  tVoice.addEventListener("click", function(){ voiceOn = !voiceOn; try{ localStorage.setItem("mismo.tour.voiceOn", voiceOn ? "1" : "0"); }catch(e){} var was = playing; stopSpeech(); ui(); if(was){ playing = true; run(sent); } });
+  sRate.addEventListener("change", function(){ rate = parseFloat(sRate.value) || 1; try{ localStorage.setItem("mismo.tour.rate", String(rate)); }catch(e){} if(playing){ stopSpeech(); run(sent); } });
+  sVoice.addEventListener("change", function(){ voice = voices.find(function(v){ return v.name === sVoice.value; }) || voice; try{ localStorage.setItem("mismo.tour.voice", voice ? voice.name : ""); }catch(e){} if(playing){ stopSpeech(); run(sent); } });
+  document.addEventListener("keydown", function(ev){ if(!open) return; var tag = (ev.target && ev.target.tagName) || "";
+    if(ev.key === "Escape"){ close(); }
+    else if(tag === "SELECT") return;
+    else if(ev.key === "ArrowRight"){ ev.preventDefault(); go(i + 1); }
+    else if(ev.key === "ArrowLeft"){ ev.preventDefault(); go(i - 1); }
+    else if(ev.key === " " && tag !== "BUTTON"){ ev.preventDefault(); toggle(); } });
+  var rz; window.addEventListener("resize", function(){ if(!open || seg < 0) return; clearTimeout(rz); rz = setTimeout(function(){ place(STOPS[i][1][seg][1], false); }, 120); });
+  var lw = $(".lanes-wrap"); if(lw) lw.addEventListener("scroll", function(){ if(open && seg >= 0) place(STOPS[i][1][seg][1], false); }, {passive:true});
+  if(document.fonts && document.fonts.ready) document.fonts.ready.then(function(){ if(open && seg >= 0) place(STOPS[i][1][seg][1], false); });
+  ui();
+})();
 </script>
 </body>
 </html>

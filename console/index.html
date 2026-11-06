@@ -28,16 +28,7 @@
   --rail:62px; --hq:64px;
   --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%23546F88' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
-  --paper:#0B1826; --surface:#112336; --sunk:#172D44;
-  --ink:#EEF3F8; --ink-2:#B9C8D6; --ink-3:#8C9FB1;
-  --line:#1A3048; --line-2:#243E5A; --line-3:#3A5A7C;
-  --accent:#50A4DB; --accent-soft:#173A57; /* Import (15 Oct 2026) */ --ground:var(--paper); --surface-2:#123143; --wash:#173A57; --link:#94C8E9; --bad-line:#7A3A33; --warn-line:#8A6A26; --warn-bg:#2B2410; --chg:#3A3216; --chg-line:#6B5A22; --sel:#16405A; --sel-line:#74BFEB; --mark-bad:#5A2420; --mark-bad-ink:#FFC9C2; --mark-good:#1B4A39; --mark-good-ink:#B8F0D6; --note-ink:#A9D8F3; --flash-bg:#1D4C69;
-  --bad:#F08579; --bad-soft:#3D2220; --warn:#E0A83C; --warn-soft:#3A3020; --good:#72C08E; --good-soft:#1F3328;
-  --btn:#50A4DB; --btn-ink:#0F314C; --go-ink:#06202f; --scrim:rgba(0,0,0,.65);
-  --shadow:0 1px 2px rgba(0,0,0,.45), 0 10px 26px -18px rgba(0,0,0,.9);
-  --chev:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5L6 8l3.5-3.5' fill='none' stroke='%237A9DB4' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  color-scheme:dark } }
+/* Light unless someone picks Dark Mode (Perry, 6 Nov 2026): no longer follows the computer’s own dark setting. */
 :root[data-theme="dark"]{
   --paper:#0B1826; --surface:#112336; --sunk:#172D44;
   --ink:#EEF3F8; --ink-2:#B9C8D6; --ink-3:#8C9FB1;
@@ -426,6 +417,34 @@ button.lnk{background:none;border:0;padding:0;font:inherit;color:var(--accent);c
 .sugfrom a{color:var(--link)}
 .sugnote{display:flex;flex-direction:column;gap:4px;margin:0 0 14px;padding:12px 14px;border-radius:4px;background:var(--accent-soft);color:var(--ink);font-size:13.5px;line-height:1.5}
 .sugnote span.m{color:var(--ink-2)}
+
+/* Help (Perry, 6 Nov 2026) */
+.gh{padding:22px 28px 40px}
+.gh-band{position:relative;overflow:hidden;border-radius:16px;background:linear-gradient(120deg,#0F314C 0%,#14486E 58%,#0F7A86 135%);color:#fff;padding:22px 26px 0}
+.gh-ey{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#94C8E9}
+.gh-band h1{font-size:30px;font-weight:800;margin:6px 0 0;color:#fff;letter-spacing:-.01em} .gh-band p{color:#cfe3f1;font-size:14px;margin:6px 0 0}
+.gh-tabs{display:flex;gap:10px;margin:18px -26px 0;padding:8px 26px 0;background:rgba(5,22,36,.28);border-top:1px solid rgba(255,255,255,.08)}
+.gh-tabs .lbl{align-self:center;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#94C8E9;margin-right:6px}
+.gh-tabs button{all:unset;cursor:pointer;padding:10px 18px 11px;border-radius:11px 11px 0 0;font-size:13.5px;font-weight:600;color:#cfe3f1}
+.gh-tabs button[aria-selected="true"]{background:var(--paper);color:var(--ink);font-weight:700} .gh-tabs button:focus-visible{outline:2px solid #74BFEB;outline-offset:-2px}
+.gh-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:16px;margin-top:18px}
+.gh-card{background:var(--surface);border:1px solid var(--line-2);border-radius:14px;padding:18px 20px}
+.gh-card h2{font-size:16.5px;margin:0 0 6px;color:var(--ink)} .gh-card h2.more{margin-top:18px}
+.gh-who{color:var(--ink-2);margin:0 0 12px;font-size:14px}
+.gh-steps{list-style:none;margin:0;padding:0;counter-reset:s}
+.gh-steps li{counter-increment:s;display:grid;grid-template-columns:30px 1fr;gap:10px;padding:9px 0;border-top:1px solid var(--line);font-size:14px;line-height:1.5}
+.gh-steps li::before{content:counter(s);width:26px;height:26px;border-radius:50%;background:#0F314C;color:#fff;font-weight:800;font-size:12.5px;display:flex;align-items:center;justify-content:center}
+[data-theme="dark"] .gh-steps li::before{background:#50A4DB;color:#0F314C}
+.gh-good{margin:0;padding-left:18px;font-size:14px;line-height:1.55} .gh-good li{margin:4px 0}
+.gh-what{margin:0;font-size:14px;line-height:1.6;color:var(--ink-2)}
+.gh-q{margin-top:14px;padding:10px 12px;border-radius:10px;background:var(--sunk);font-size:13px;color:var(--ink-2)} .gh-q b{color:var(--ink)}
+.gh-flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px}
+.gh-node{border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;background:var(--sunk);color:var(--ink);border:1px solid var(--line-2);text-align:center}
+.gh-node small{display:block;font-weight:600;font-size:11px;color:var(--ink-3)}
+.gh-node.go{background:#E3F3EC;border-color:#BFE3D2;color:#0b5c44} .gh-node.ask{background:#FBF1DE;border-color:#EBD7AE;color:#7a5413}
+.gh-node.go small,.gh-node.ask small{color:inherit;opacity:.8} .gh-node.dk{background:#0F314C;color:#fff;border-color:#0F314C} .gh-node.dk small{color:#a9c7dc}
+.gh-arr{color:var(--ink-3);font-weight:800} .gh-split{display:flex;flex-direction:column;gap:6px}
+@media (max-width:900px){ .gh-grid{grid-template-columns:1fr} }
 </style>
 </head>
 <body>
@@ -488,7 +507,7 @@ c57 -33 76 -84 76 -200 0 -116 -19 -167 -76 -200 -32 -19 -52 -20 -294 -20
     </nav>
   </div>
   <div class="rfoot"><nav>
-    <button type="button" id="helpBtn" title="Getting started"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 014.8 1c0 1.7-2.4 2.1-2.4 3.7M12 17.2h.01"/></svg><span>Getting Started</span></button>
+    <button type="button" id="helpBtn" data-view="help" title="Help"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M9.6 9.3a2.5 2.5 0 014.8 1c0 1.7-2.4 2.1-2.4 3.7M12 17.2h.01"/></svg><span>Help</span></button>
     <button type="button" id="themeBtn" title="Dark mode"><svg class="i" viewBox="0 0 24 24" id="themeIcon"><path d="M12 3a6.4 6.4 0 009 9 9 9 0 11-9-9z"/></svg><span id="themeLbl">Dark Mode</span></button>
   </nav></div>
 </aside>
@@ -2530,18 +2549,13 @@ const store={get(k){try{return localStorage.getItem(k);}catch(e){return null;}},
 function setWide(on){ document.documentElement.classList.toggle('wide',on); $('railBtn').setAttribute('aria-label',on?'Narrow the sections':'Widen the sections'); $('railBtn').title=on?'Narrow the sections':'Widen the sections'; store.set('gc:rail',on?'wide':'narrow'); }
 $('railBtn').addEventListener('click',()=>setWide(!document.documentElement.classList.contains('wide')));
 setWide(store.get('gc:rail')!=='narrow');
-function isDark(){ const a=document.documentElement.getAttribute('data-theme'); return a?a==='dark':matchMedia('(prefers-color-scheme: dark)').matches; }
+function isDark(){ return document.documentElement.getAttribute('data-theme')==='dark'; }   /* light unless chosen (Perry, 6 Nov 2026) */
 function paintTheme(){ const d=isDark(); $('themeLbl').textContent=d?'Light Mode':'Dark Mode'; $('themeBtn').title=d?'Light mode':'Dark mode';
   $('themeIcon').innerHTML=d?'<circle cx="12" cy="12" r="4.1"/><path d="M12 2.4v2.3M12 19.3v2.3M4.2 4.2l1.7 1.7M18.1 18.1l1.7 1.7M2.4 12h2.3M19.3 12h2.3M4.2 19.8l1.7-1.7M18.1 5.9l1.7-1.7"/>':'<path d="M12 3a6.4 6.4 0 009 9 9 9 0 11-9-9z"/>'; }
 $('themeBtn').addEventListener('click',()=>{ const next=isDark()?'light':'dark'; document.documentElement.setAttribute('data-theme',next); store.set('gc:theme',next); paintTheme(); });
 { const t=store.get('gc:theme'); if(t==='dark'||t==='light') document.documentElement.setAttribute('data-theme',t); paintTheme(); }
-$('helpBtn').addEventListener('click',()=>dialog({title:'Getting started',body:`
-  <p style="margin:0">The glossary is edited in three steps, and nothing reaches the public site until the last one.</p>
-  <div class="kv"><b>1. Stage</b><span>Open a term and change it, or add one. Stage Change puts it in Staging. Nothing in the draft has changed yet.</span></div>
-  <div class="kv"><b>2. Apply</b><span>In Staging, the checks run over everything staged. Applying moves it into the draft and saves the draft online, so everyone signed in works from the same copy.</span></div>
-  <div class="kv"><b>3. Publish</b><span>Draft &amp; Publish lists everything applied since ${esc(sinceLabel())}. Publishing makes it the next version of the public glossary.</span></div>
-  <p style="margin:0;color:var(--ink-2)">Click a term to open it beside the list, and click it again (or press Esc) to close it. Press / to search.</p>
-`,ok:'Got it',cancel:null}));
+/* Help (Perry, 6 Nov 2026): a page of its own in Jonna's pattern, in place of the Getting Started box; the rail's
+   [data-view] wiring opens it (renderHelp below). */
 
 /* ---------- dialogs ---------- */
 function dialog({title,body,ok='OK',cancel='Cancel',danger=false,wide=false,onOk,onOpen}){
@@ -2627,6 +2641,37 @@ function wireActs(root){
 }
 
 /* ---------- render ---------- */
+
+/* ---------- Help (Perry, 6 Nov 2026): a guide for each kind of user, as in Jonna's apps ---------- */
+let helpRole=0;
+const HELP={what:'The Business Glossary defines MISMO’s terms. The public glossary is where anyone looks them up; this Console is where MISMO staff edit them and publish new versions.',
+  flow:[['Stage','a change, or an Import',''],['Apply','the checks run; the draft saves online',''],['Needs a Decision','problems to resolve','ask'],['Publish','the next version',''],
+        [['30-Day Comment Period','','ask'],['Final','','go']],['Versions','and the release workbook','dk']],
+  roles:[['Glossary Editor','MISMO staff who keep the glossary’s terms and publish its versions. Nothing reaches the public glossary until you publish.',
+     ['Open a term in Terms and change it, or add one with + New Term. Stage Change puts it in Staging; nothing in the draft has changed yet.',
+      'Bring in a batch of changes with Import, from an Excel workbook. It lands in Staging too.',
+      'In Staging, the checks run over everything staged. Applying moves it into the draft and saves the draft online, so everyone signed in works from the same copy.',
+      'Work through Needs a Decision (terms with a problem to resolve) and Suggestions sent in from the public glossary.',
+      'In Draft & Publish, publish the next version: its number (like 2026.01), whether it’s out for a 30-Day Comment Period or Final, and its Version History wording.',
+      'Download each version’s release workbook from Versions.'],
+     ['Click a term to open it beside the list; click it again, or press Esc, to close it. Press / to search.',
+      'Backups keeps earlier copies of the draft you can go back to.',
+      'Classifications holds the term types, focus areas and sources that terms are filed under.']],
+    ['Anyone Using the Glossary','You look up MISMO’s terms on the public glossary.',
+     ['Search a term, a phrase or an acronym; the list narrows as you type.','Browse by letter with the A to Z bar.','Narrow the list by term type, focus area or source.',
+      'Open a term for its full definition and classifications. Each term has its own link to share.','Suggest a new term, or a clearer definition, with Suggest a Term.'],
+     ['The public glossary has a guided tour: Start the Guided Tour at the top of the page.','Members can download the full release workbook.']]]};
+function renderHelp(M){
+  const R=HELP.roles[helpRole]||HELP.roles[0], node=x=>`<div class="gh-node ${x[2]||''}">${esc(x[0])}${x[1]?`<small>${esc(x[1])}</small>`:''}</div>`;
+  M.innerHTML=`<div class="page gh"><header class="gh-band"><div class="gh-ey">Help</div><h1>How the Business Glossary Works</h1><p>For each person who uses it: pick who you are. Questions: Perry Williams.</p>
+    <div class="gh-tabs" role="tablist" aria-label="Who are you?"><span class="lbl" aria-hidden="true">Who Are You?</span>${HELP.roles.map((r,i)=>`<button type="button" role="tab" data-hrole="${i}" aria-selected="${i===helpRole}" tabindex="${i===helpRole?0:-1}">${esc(r[0])}</button>`).join('')}</div></header>
+    <div class="gh-grid"><section class="gh-card"><h2>${esc(R[0])}: What You Do Here</h2><p class="gh-who">${esc(R[1])}</p><ol class="gh-steps">${R[2].map(x=>`<li><span>${esc(x)}</span></li>`).join('')}</ol></section>
+      <section class="gh-card"><h2>Good to Know</h2><ul class="gh-good">${R[3].map(x=>`<li>${esc(x)}</li>`).join('')}</ul><h2 class="more">What This Is</h2><p class="gh-what">${esc(HELP.what)}</p>
+        <div class="gh-q">Something missing or unclear? Tell <b>Perry Williams</b> (<a href="mailto:pwilliams@mba.org">pwilliams@mba.org</a>).</div></section></div>
+    <section class="gh-card" style="margin-top:16px"><h2>How a Change Gets Published</h2><div class="gh-flow">${HELP.flow.map(x=>Array.isArray(x[0])?`<div class="gh-split">${x.map(node).join('')}</div>`:node(x)).join('<span class="gh-arr" aria-hidden="true">→</span>')}</div></section></div>`;
+  M.querySelectorAll('[data-hrole]').forEach(b=>{ b.addEventListener('click',()=>{ helpRole=+b.dataset.hrole; renderHelp(M); const f=M.querySelector(`[data-hrole="${helpRole}"]`); if(f) f.focus(); });
+    b.addEventListener('keydown',ev=>{ if(ev.key!=='ArrowRight'&&ev.key!=='ArrowLeft') return; ev.preventDefault(); helpRole=(helpRole+1)%HELP.roles.length; renderHelp(M); const f=M.querySelector(`[data-hrole="${helpRole}"]`); if(f) f.focus(); }); });
+}
 function render(){
   if(!booted) return;
   const c=paintCounts();
@@ -2640,6 +2685,7 @@ function render(){
   else if(view==='versions') renderVersions2(M,c);
   else if(view==='backups') renderBackups(M,c);
   else if(view==='import') renderImport(M,c);
+  else if(view==='help') renderHelp(M,c);
   wireActs(M);
 }
 /* No Publish button up here (Sept 29, 2026): publishing happens on Draft & Publish only. */
