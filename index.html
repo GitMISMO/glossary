@@ -695,6 +695,15 @@ body.touring #page{padding-bottom:320px}
 #dock button:focus-visible,#dock select:focus-visible{outline:2px solid #74BFEB;outline-offset:1px}
 @media (max-width:640px){ #dock .opts{margin-left:0;width:100%} }
 @media (prefers-reduced-motion: reduce){ #spot,#dock .prog i{transition:none} }
+
+/* Search in: term names, definitions, or both (Perry, 6 Nov 2026) */
+.scope3{display:inline-flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:10px;background:#F1F6FA;border:1px solid #D5E2ED;border-radius:999px;padding:3px}
+.scope3 button{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:700;color:#456179;padding:6px 14px;border-radius:999px}
+.scope3 button b{font-weight:800;font-size:12px;color:#7794aa}
+.scope3 button:hover{color:#0F314C;background:#E4F2FB}
+.scope3 button[aria-pressed="true"]{background:#0F314C;color:#fff} .scope3 button[aria-pressed="true"] b{color:#94C8E9}
+.scope3 button:focus-visible{outline:2px solid #74BFEB;outline-offset:2px}
+@media (max-width:640px){ .scope3{border-radius:14px} }
 </style>
 
 <!-- MISMO site chrome v2 (October 25, 2026): loads IBM Plex Sans and matches the website header -->
@@ -798,12 +807,19 @@ const PUBLISHED=new Date(String(D.meta.published||D.meta.version||'').slice(0,10
 /* ---------- search and filters, shared by all three ---------- */
 function rank(t,q){ if(!q) return 0; if(t.lt===q) return 0; if(t.lt.startsWith(q)) return 1;
   if(t.lt.includes(' '+q)) return 2; if(t.lt.includes(q)) return 3; if(t.ld.includes(q)) return 4; return -1; }
+/* Search in term names only, or definitions only (Perry, 6 Nov 2026); 'all', the default, is the search as it always was.
+   A name match still ranks first in Definitions Only when the definition matches too. */
+const SCOPES=[['all','Terms and Definitions'],['term','Term Names Only'],['def','Definitions Only']];
+function inScope(t,q,sc){ const r=rank(t,q); if(!q||r<0) return r;
+  if(sc==='term') return r<4?r:-1;
+  if(sc==='def') return t.ld.includes(q)?r:-1;
+  return r; }
 function run(st){
   const q=st.q.trim().toLowerCase();
   const picked=['fa','tt','src'].flatMap(k=>[...st.sel[k]].map(x=>[k,x]));
   const out=[];
   for(const t of T){
-    const r=rank(t,q); if(r<0) continue;
+    const r=inScope(t,q,st.scope); if(r<0) continue;
     if(picked.length){ const has=picked.map(([k,x])=>t[k].includes(x)); if(st.mode==='any'?!has.some(Boolean):!has.every(Boolean)) continue; }
     if(st.letter&&t.letter!==st.letter) continue;
     out.push([r,t]);
@@ -814,10 +830,10 @@ function run(st){
 /* How many terms each value would give, with the search applied but not the value's own group. */
 function facetCounts(st){
   const q=st.q.trim().toLowerCase(); const c={fa:V.fa.map(()=>0),tt:V.tt.map(()=>0),src:V.src.map(()=>0)};
-  for(const t of T){ if(rank(t,q)<0) continue; if(st.letter&&t.letter!==st.letter) continue; ['fa','tt','src'].forEach(k=>t[k].forEach(x=>c[k][x]++)); }
+  for(const t of T){ if(inScope(t,q,st.scope)<0) continue; if(st.letter&&t.letter!==st.letter) continue; ['fa','tt','src'].forEach(k=>t[k].forEach(x=>c[k][x]++)); }
   return c;
 }
-const newState=()=>({q:'',sel:{fa:new Set(),tt:new Set(),src:new Set()},mode:'all',letter:''});
+const newState=()=>({q:'',sel:{fa:new Set(),tt:new Set(),src:new Set()},mode:'all',letter:'',scope:'all'});
 function hl(text,q){ q=(q||'').trim(); if(!q) return esc(text); const lo=text.toLowerCase(), ql=q.toLowerCase(); let out='',i=0,j;
   while((j=lo.indexOf(ql,i))>-1){ out+=esc(text.slice(i,j))+'<mark>'+esc(text.slice(j,j+q.length))+'</mark>'; i=j+q.length; } return out+esc(text.slice(i)); }
 /* Definitions use the console's link syntax: [[Term]], [[Term|words]], [words](https://…), bare links. */
@@ -939,7 +955,8 @@ function build(){
 </div>
     <section class="gl-sec"><div class="gl-head"><div><p class="mm-eyebrow">${n(T.length)} Terms</p><h2 class="mm-h2">Search the Glossary</h2><p class="mm-lede">Type a term, a phrase or an acronym, or browse by letter. <span id="aStats"></span></p></div></div>
       <label class="search"><span class="vh">Search the glossary</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"><button type="button" class="qx" id="aQx" aria-label="Clear the search" tabindex="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></label></section>
+        <input id="aQ" type="search" placeholder="Search ${n(T.length)} terms and definitions" autocomplete="off"><button type="button" class="qx" id="aQx" aria-label="Clear the search" tabindex="-1"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button></label>
+      <div class="scope3" id="aScope" role="group" aria-label="Search in"></div></section>
     <nav class="A-az" aria-label="Jump to a letter"><div class="in" id="aAz"></div></nav>
     <div class="A-body"><section class="A-main" id="aMain" aria-live="polite"></section><aside class="A-side" id="aSide" aria-label="Classifications"></aside></div>`+footer;
   /* Phone and tablet menu: the hamburger opens the same menu as a panel under the header bar. */
@@ -965,7 +982,8 @@ function build(){
     const qa=e.target.closest('[data-qall]'); if(qa){ A.st.sel[qa.dataset.qall].clear(); paint(true); return; }
     if(e.target.closest('[data-fold]')){ A.sideOpen=!A.sideOpen; paintSide(); return; }
     if(e.target.closest('[data-clearcls]')){ ['fa','tt','src'].forEach(k=>A.st.sel[k].clear()); paint(); return; }
-    if(e.target.closest('[data-clearall]')){ A.st=newState(); $('aQ').value=''; A.open=null; A.pop=null; A.tray=null; paint(); return; }
+    { const sb=e.target.closest('[data-scope]'); if(sb){ A.st.scope=sb.dataset.scope; A.shown=40; A.open=null; paint(); const f=document.querySelector(`[data-scope="${A.st.scope}"]`); if(f) f.focus({preventScroll:true}); return; } }
+  if(e.target.closest('[data-clearall]')){ A.st=newState(); $('aQ').value=''; A.open=null; A.pop=null; A.tray=null; paint(); return; }
     if(e.target.closest('#aMore')){ A.shown+=40; paintMain(); return; }
     const cp=e.target.closest('[data-copy]'); if(cp){ copyLink(T[+cp.dataset.copy]); }
   });
@@ -981,11 +999,15 @@ function toggle(k,x){ A.st.sel[k].has(x)?A.st.sel[k].delete(x):A.st.sel[k].add(x
 function paint(keep){
   if($('aQx')) $('aQx').classList.toggle('on',!!$('aQ').value);
   const f=keep&&document.activeElement&&document.activeElement.dataset?document.activeElement.dataset.toggle:null;
-  A.res=run(A.st); paintAz(); paintMain(); paintSide(); fitPop();
+  A.res=run(A.st); paintScope(); paintAz(); paintMain(); paintSide(); fitPop();
   if(f){ const el=document.querySelector(`[data-toggle="${f}"]`); if(el) el.focus({preventScroll:true}); }
 }
+function paintScope(){
+  const el=$('aScope'); if(!el) return; const q=A.st.q.trim();
+  el.innerHTML=SCOPES.map(([k,l])=>`<button type="button" data-scope="${k}" aria-pressed="${A.st.scope===k}">${l}${q?`<b>${n(run(Object.assign({},A.st,{scope:k})).length)}</b>`:''}</button>`).join('');
+}
 function paintAz(){
-  const q=A.st.q.trim().toLowerCase(); const has=new Set(T.filter(t=>rank(t,q)>=0).map(t=>t.letter));
+  const q=A.st.q.trim().toLowerCase(); const has=new Set(T.filter(t=>inScope(t,q,A.st.scope)>=0).map(t=>t.letter));
   $('aAz').innerHTML=`<button type="button" data-letter="" aria-pressed="${!A.st.letter}">All</button>`+LETTERS.map(l=>`<button type="button" data-letter="${l}" aria-pressed="${A.st.letter===l}"${has.has(l)?'':' disabled'}>${l}</button>`).join('');
 }
 const picked=()=>['fa','tt','src'].reduce((s,k)=>s+A.st.sel[k].size,0);
@@ -1244,7 +1266,7 @@ openFromHash();
 // Guided tour (Perry, 6 Nov 2026): reads the page aloud with captions and a moving spotlight; the same engine as the
 // Business Domains page. The stops and their wording are in STOPS; each sentence lights up what it talks about.
 (function(){
-  var STOPS = [["Welcome", [["Welcome to MISMO’s Business Glossary: standard definitions for more than eight thousand terms used across the mortgage industry. The terms grow out of the work of MISMO’s groups, and you’ll see some of those groups among the sources, such as the AI Community of Practice, Data Governance and Management, and Life of Loan. I’ll show you how to find what you need in about two minutes. You can pause, go back or skip ahead at any time.", [["#page h1", 0], ["#aVer", 0]]]]], ["The Latest Version", [["This line shows the glossary’s latest version, and whether it’s Final or out for a thirty-day comment period, when MISMO asks for feedback on the changes.", [["#aVer", 0]]]]], ["Searching", [["Type a term, a phrase or an acronym here. The list narrows as you type, searching both the terms and their definitions.", [["label.search", 0]]]]], ["Browse by Letter", [["Or browse by letter: pick one to see every term that starts with it.", [["#aAz", 0]]]]], ["Narrow the List", [["On the right, you can narrow the list. Every term has a type, one or more focus areas, and a source.", [["#aSide", 0]], ""], ["Term Type is what kind of thing a term is. Most are data; others are documents, processes, actors, products, regulations and events. Each shows how many terms it has.", [["#aSide .C-sec.tt", 0], ["#aSide .C-sec.tt .Q-pop", 0]], "open:[data-qpart=tt]"], ["Focus Area is the part of the mortgage business a term belongs to, such as origination, servicing, loan delivery or credit reporting. A term can have several focus areas.", [["#aSide .C-sec.fa", 0], ["#aSide .C-sec.fa .Q-pop", 0]], "shut:[data-qpart=tt],open:[data-qpart=fa]"], ["Source is where a definition comes from, such as MISMO’s Logical Data Dictionary or the MBA Glossary.", [["#aSide .C-sec.src", 0], ["#aSide .C-sec.src .Q-pop", 0]], "shut:[data-qpart=fa],open:[data-qpart=src]"], ["Pick any of them, and the list shows only the terms that match.", [["#aSide", 0]], "shut:[data-qpart=src]"]]], ["A Term", [["Open any term to see everything about it. Here’s the first one.", [["#aMain .A-row", 0]], "open:#aMain .A-row .A-head"], ["First, its full definition.", [["#aMain .A-row.open .def", 0]], "open:#aMain .A-row .A-head"], ["Then its term type.", [["#aMain .A-row.open .pill.tt", 0]], "open:#aMain .A-row .A-head"], ["Its focus areas: a term can have several.", [["#aMain .A-row.open .pill.fa", 0]], "open:#aMain .A-row .A-head"], ["And its source: where the definition comes from.", [["#aMain .A-row.open .pill.src", 0]], "open:#aMain .A-row .A-head"], ["Click any of these to see every other term that shares it.", [["#aMain .A-row.open .A-tags", 0]], "open:#aMain .A-row .A-head"], ["Opening a term also gives it its own link. Copy the address from your browser to share exactly the term you mean.", [["#aMain .A-row.open .A-head", 0]], "open:#aMain .A-row .A-head"]]], ["Download and Suggest", [["Members can download the full glossary in Excel. And anyone can suggest a new term, or a clearer definition, to the glossary team.", [[".gl-cards", 0]]]]], ["That’s It", [["That’s the glossary. Start the tour again any time from the button at the top of the page.", [["#gTourBtn", 0]]]]]];
+  var STOPS = [["Welcome", [["Welcome to MISMO’s Business Glossary: standard definitions for more than eight thousand terms used across the mortgage industry. The terms grow out of the work of MISMO’s groups, and you’ll see some of those groups among the sources, such as the AI Community of Practice, Data Governance and Management, and Life of Loan. I’ll show you how to find what you need in about two minutes. You can pause, go back or skip ahead at any time.", [["#page h1", 0], ["#aVer", 0]]]]], ["The Latest Version", [["This line shows the glossary’s latest version, and whether it’s Final or out for a thirty-day comment period, when MISMO asks for feedback on the changes.", [["#aVer", 0]]]]], ["Searching", [["Type a term, a phrase or an acronym here. The list narrows as you type, searching both the terms and their definitions.", [["label.search", 0]]], ["Under the box, you can search only term names, or only definitions. Each choice shows how many terms it finds.", [["#aScope", 0]], ""]]], ["Browse by Letter", [["Or browse by letter: pick one to see every term that starts with it.", [["#aAz", 0]]]]], ["Narrow the List", [["On the right, you can narrow the list. Every term has a type, one or more focus areas, and a source.", [["#aSide", 0]], ""], ["Term Type is what kind of thing a term is. Most are data; others are documents, processes, actors, products, regulations and events. Each shows how many terms it has.", [["#aSide .C-sec.tt", 0], ["#aSide .C-sec.tt .Q-pop", 0]], "open:[data-qpart=tt]"], ["Focus Area is the part of the mortgage business a term belongs to, such as origination, servicing, loan delivery or credit reporting. A term can have several focus areas.", [["#aSide .C-sec.fa", 0], ["#aSide .C-sec.fa .Q-pop", 0]], "shut:[data-qpart=tt],open:[data-qpart=fa]"], ["Source is where a definition comes from, such as MISMO’s Logical Data Dictionary or the MBA Glossary.", [["#aSide .C-sec.src", 0], ["#aSide .C-sec.src .Q-pop", 0]], "shut:[data-qpart=fa],open:[data-qpart=src]"], ["Pick any of them, and the list shows only the terms that match.", [["#aSide", 0]], "shut:[data-qpart=src]"]]], ["A Term", [["Open any term to see everything about it. Here’s the first one.", [["#aMain .A-row", 0]], "open:#aMain .A-row .A-head"], ["First, its full definition.", [["#aMain .A-row.open .def", 0]], "open:#aMain .A-row .A-head"], ["Then its term type.", [["#aMain .A-row.open .pill.tt", 0]], "open:#aMain .A-row .A-head"], ["Its focus areas: a term can have several.", [["#aMain .A-row.open .pill.fa", 0]], "open:#aMain .A-row .A-head"], ["And its source: where the definition comes from.", [["#aMain .A-row.open .pill.src", 0]], "open:#aMain .A-row .A-head"], ["Click any of these to see every other term that shares it.", [["#aMain .A-row.open .A-tags", 0]], "open:#aMain .A-row .A-head"], ["Opening a term also gives it its own link. Copy the address from your browser to share exactly the term you mean.", [["#aMain .A-row.open .A-head", 0]], "open:#aMain .A-row .A-head"]]], ["Download and Suggest", [["Members can download the full glossary in Excel. And anyone can suggest a new term, or a clearer definition, to the glossary team.", [[".gl-cards", 0]]]]], ["That’s It", [["That’s the glossary. Start the tour again any time from the button at the top of the page.", [["#gTourBtn", 0]]]]]];
   var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>', PAUSE = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>';
   var $ = function(s, r){ return (r || document).querySelector(s); };
   var strip = $(".strip") || { offsetHeight: 0 };   // no sticky strip on this page
