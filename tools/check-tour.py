@@ -21,6 +21,26 @@ with sync_playwright() as p:
         pg.click('#t-next'); pg.wait_for_timeout(1200)
         ck(pg.inner_text('#where')==name and f'{k} of 8' in pg.inner_text('#count') and spot_on(sel), f'Next: {name} ({k} of 8), the spotlight on it', [pg.inner_text('#where'), spot_on(sel)])
     pg.click('#t-prev'); pg.wait_for_timeout(500); ck(pg.inner_text('#where')=='Download and Suggest', 'Back goes to the stop before')
+    # Narrow the List, one list at a time, each opened as it's described (Perry, 6 Nov 2026)
+    pg.click('#t-prev'); pg.wait_for_timeout(700)
+    ck(pg.inner_text('#where')=='A Term' and pg.query_selector('#aMain .A-row.open') is not None, 'A Term opens the first term')
+    def say(text):
+        pg.evaluate("t => { const s = [...document.querySelectorAll('#cap span')].find(x => x.textContent.trim().startsWith(t)); s.click(); }", text); pg.wait_for_timeout(450)
+    for text, sel, name in [('First, its full definition.', '#aMain .A-row.open .def', 'the definition'), ('Then its term type.', '#aMain .A-row.open .pill.tt', 'its term type'),
+                            ('Its focus areas', '#aMain .A-row.open .pill.fa', 'its focus areas'), ('And its source', '#aMain .A-row.open .pill.src', 'its source'),
+                            ('Click any of these', '#aMain .A-row.open .A-tags', 'the tags'), ('Opening a term also gives it its own link.', '#aMain .A-row.open .A-head', 'its link')]:
+        say(text); ck(spot_on(sel), f'...then the spotlight walks to {name}')
+    ck(pg.evaluate('location.hash') == '#2004-end-user-license-ipr-policy', '...and the address is the term’s own link')
+    pg.click('#t-prev'); pg.wait_for_timeout(700)
+    ck(pg.inner_text('#where')=='Narrow the List' and pg.query_selector('#aMain .A-row.open') is None, 'moving on closes the term again')
+    exp = lambda q: pg.get_attribute(f'[data-qpart="{q}"]', 'aria-expanded') == 'true'
+    say('Term Type is'); ck(exp('tt') and spot_on('#aSide .C-sec.tt .Q-pop'), 'Term Type: its list opens, in the spotlight')
+    say('Focus Area is'); ck(exp('fa') and not exp('tt') and spot_on('#aSide .C-sec.fa .Q-pop'), 'Focus Area: its list opens, Term Type’s closes')
+    say('Source is'); ck(exp('src') and not exp('fa') and spot_on('#aSide .C-sec.src .Q-pop'), 'Source: its list opens, Focus Area’s closes')
+    say('Pick any of them'); ck(not exp('src') and not exp('tt') and not exp('fa'), 'the last sentence closes them all')
+    say('Focus Area is'); pg.keyboard.press('Escape'); pg.wait_for_timeout(300)
+    ck(not exp('fa'), 'closing the tour with a list open closes the list too')
+    pg.click('#gTourBtn'); pg.wait_for_timeout(500); [pg.click('#t-next') for _ in range(6)]; pg.wait_for_timeout(500)
     pg.keyboard.press('ArrowLeft'); pg.wait_for_timeout(500); ck(pg.inner_text('#where')=='A Term', 'the arrow keys move between stops')
     pg.keyboard.press('Escape'); pg.wait_for_timeout(300); ck(not pg.is_visible('#dock') and 'on' not in (pg.get_attribute('#spot','class') or ''), 'Escape closes the tour')
     pg.set_viewport_size({'width':390,'height':844}); pg.click('#gTourBtn'); pg.wait_for_timeout(600)

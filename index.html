@@ -1244,7 +1244,7 @@ openFromHash();
 // Guided tour (Perry, 6 Nov 2026): reads the page aloud with captions and a moving spotlight; the same engine as the
 // Business Domains page. The stops and their wording are in STOPS; each sentence lights up what it talks about.
 (function(){
-  var STOPS = [["Welcome", [["Welcome to MISMO’s Business Glossary: standard definitions for more than eight thousand terms used across the mortgage industry, kept by MISMO’s communities and workgroups. I’ll show you how to find what you need in about two minutes. You can pause, go back or skip ahead at any time.", [["#page h1", 0], ["#aVer", 0]]]]], ["The Latest Version", [["This line shows the glossary’s latest version, and whether it’s Final or out for a thirty-day comment period, when MISMO asks for feedback on the changes.", [["#aVer", 0]]]]], ["Searching", [["Type a term, a phrase or an acronym here. The list narrows as you type, searching both the terms and their definitions.", [["label.search", 0]]]]], ["Browse by Letter", [["Or browse by letter: pick one to see every term that starts with it.", [["#aAz", 0]]]]], ["Narrow the List", [["Narrow the list by term type, focus area or source. Each has a short explanation of what it means, so you know what you’re choosing.", [["#aSide", 0]]]]], ["A Term", [["Open any term to read its full definition, its type, its focus areas and where the definition comes from. Each term has its own link, so you can share exactly the one you mean.", [["#aMain .A-row", 0]]]]], ["Download and Suggest", [["Members can download the full release workbook. And anyone can suggest a new term, or a clearer definition, to the glossary team.", [[".gl-cards", 0]]]]], ["That’s It", [["That’s the glossary. Start the tour again any time from the button at the top of the page.", [["#gTourBtn", 0]]]]]];
+  var STOPS = [["Welcome", [["Welcome to MISMO’s Business Glossary: standard definitions for more than eight thousand terms used across the mortgage industry, kept by MISMO’s communities and workgroups. I’ll show you how to find what you need in about two minutes. You can pause, go back or skip ahead at any time.", [["#page h1", 0], ["#aVer", 0]]]]], ["The Latest Version", [["This line shows the glossary’s latest version, and whether it’s Final or out for a thirty-day comment period, when MISMO asks for feedback on the changes.", [["#aVer", 0]]]]], ["Searching", [["Type a term, a phrase or an acronym here. The list narrows as you type, searching both the terms and their definitions.", [["label.search", 0]]]]], ["Browse by Letter", [["Or browse by letter: pick one to see every term that starts with it.", [["#aAz", 0]]]]], ["Narrow the List", [["On the right, you can narrow the list. Every term has a type, one or more focus areas, and a source.", [["#aSide", 0]], ""], ["Term Type is what kind of thing a term is. Most are data; others are documents, processes, actors, products, regulations and events. Each shows how many terms it has.", [["#aSide .C-sec.tt", 0], ["#aSide .C-sec.tt .Q-pop", 0]], "open:[data-qpart=tt]"], ["Focus Area is the part of the mortgage business a term belongs to, such as origination, servicing, loan delivery or credit reporting. A term can have several focus areas.", [["#aSide .C-sec.fa", 0], ["#aSide .C-sec.fa .Q-pop", 0]], "shut:[data-qpart=tt],open:[data-qpart=fa]"], ["Source is where a definition comes from, such as MISMO’s Logical Data Dictionary or the MBA Glossary.", [["#aSide .C-sec.src", 0], ["#aSide .C-sec.src .Q-pop", 0]], "shut:[data-qpart=fa],open:[data-qpart=src]"], ["Pick any of them, and the list shows only the terms that match.", [["#aSide", 0]], "shut:[data-qpart=src]"]]], ["A Term", [["Open any term to see everything about it. Here’s the first one.", [["#aMain .A-row", 0]], "open:#aMain .A-row .A-head"], ["First, its full definition.", [["#aMain .A-row.open .def", 0]], "open:#aMain .A-row .A-head"], ["Then its term type.", [["#aMain .A-row.open .pill.tt", 0]], "open:#aMain .A-row .A-head"], ["Its focus areas: a term can have several.", [["#aMain .A-row.open .pill.fa", 0]], "open:#aMain .A-row .A-head"], ["And its source: where the definition comes from.", [["#aMain .A-row.open .pill.src", 0]], "open:#aMain .A-row .A-head"], ["Click any of these to see every other term that shares it.", [["#aMain .A-row.open .A-tags", 0]], "open:#aMain .A-row .A-head"], ["Opening a term also gives it its own link. Copy the address from your browser to share exactly the term you mean.", [["#aMain .A-row.open .A-head", 0]], "open:#aMain .A-row .A-head"]]], ["Download and Suggest", [["Members can download the full release workbook. And anyone can suggest a new term, or a clearer definition, to the glossary team.", [[".gl-cards", 0]]]]], ["That’s It", [["That’s the glossary. Start the tour again any time from the button at the top of the page.", [["#gTourBtn", 0]]]]]];
   var PLAY = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>', PAUSE = '<svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M3.5 2.5h3v11h-3zM9.5 2.5h3v11h-3z"/></svg>';
   var $ = function(s, r){ return (r || document).querySelector(s); };
   var strip = $(".strip") || { offsetHeight: 0 };   // no sticky strip on this page
@@ -1310,9 +1310,19 @@ openFromHash();
     var y = (bx.h + pad * 2 <= avail) ? bx.top - pad - ts - Math.max(8, (avail - bx.h - pad * 2) / 2) : bx.top - pad - ts - 12;
     window.scrollTo({top: Math.max(0, y), behavior: reduced ? "auto" : "smooth"});
   }
+  /* What a sentence opens (Perry, 6 Nov 2026): "open:<selector>" clicks a closed button (a Narrow the List list, a term);
+     "shut:<selector>" closes one the tour opened. Moving to another stop, or closing the tour, closes them all. */
+  var opened = [];
+  // What was opened is remembered by its selector: the page redraws a term when it opens, so the element itself changes.
+  function act(a){ var k = a.indexOf(":"), how = a.slice(0, k), sel = a.slice(k + 1), el = document.querySelector(sel); if(!el) return false;
+    var isOpen = el.getAttribute("aria-expanded") === "true";
+    if(how === "open" && !isOpen){ el.click(); if(opened.indexOf(sel) < 0) opened.push(sel); return true; }
+    if(how === "shut" && isOpen){ el.click(); return true; }
+    return false; }
+  function shutAll(){ opened.forEach(function(sel){ var el = document.querySelector(sel); if(el && el.getAttribute("aria-expanded") === "true") el.click(); }); opened = []; }
   function focusSeg(g, force){ if(g === seg && !force) return; seg = g; var sg = STOPS[i][1][g], acts = (sg[2] || "").split(",").filter(Boolean);
-    acts.forEach(function(a){ if(a.indexOf("sw:") === 0) setSwitch(a.slice(3)); });
-    place(sg[1], true); }
+    var did = false; acts.forEach(function(a){ if(a.indexOf("sw:") === 0) setSwitch(a.slice(3)); else did = act(a) || did; });
+    if(did) setTimeout(function(){ if(open) place(STOPS[i][1][seg][1], true); }, 150); else place(sg[1], true); }
 
   function renderCap(){ parts = []; cap.innerHTML = "";
     STOPS[i][1].forEach(function(sg, g){ split(sg[0]).forEach(function(p){ var s = document.createElement("span"); s.textContent = p + " "; s.setAttribute("data-k", parts.length); parts.push({t: p, g: g}); cap.appendChild(s); }); });
@@ -1353,11 +1363,11 @@ openFromHash();
     step(k);
   }
   function done(){ if(!playing) return; if(i < STOPS.length - 1) timer = setTimeout(function(){ go(i + 1); }, 750); else { playing = false; ui(); } }
-  function go(n){ stopSpeech(); i = Math.max(0, Math.min(STOPS.length - 1, n)); sent = 0; seg = -1; renderCap(); ui(); focusSeg(0, true); if(playing) run(0); }
+  function go(n){ stopSpeech(); shutAll(); i = Math.max(0, Math.min(STOPS.length - 1, n)); sent = 0; seg = -1; renderCap(); ui(); focusSeg(0, true); if(playing) run(0); }
 
   function quiet(){ var pop = $("#pop"), back = $("#back"); if(pop) pop.hidden = true; if(back) back.hidden = true; }
   function start(){ open = true; quiet(); document.body.classList.add("touring"); dock.classList.add("on"); playing = true; if(synth){ try{ synth.cancel(); }catch(e){} } go(0); bPlay.focus({preventScroll:true}); }
-  function close(){ stopSpeech(); playing = false; open = false; document.body.classList.remove("touring"); dock.classList.remove("on"); spot.classList.remove("on"); }
+  function close(){ stopSpeech(); shutAll(); playing = false; open = false; document.body.classList.remove("touring"); dock.classList.remove("on"); spot.classList.remove("on"); }
   function toggle(){ if(playing){ playing = false; stopSpeech(); mark(sent); ui(); }
     else { playing = true; if(sent >= parts.length){ if(i === STOPS.length - 1){ go(0); return; } go(i + 1); return; } ui(); run(sent); } }
 
