@@ -22,3 +22,8 @@ desktop.ini
 __pycache__/
 *.pyc
 .venv/
+
+# Built by tools/build-embed.py (the deploy builds its own)
+/version.json
+/app-*.js
+/app-*.css

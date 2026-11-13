@@ -92,6 +92,14 @@ jobs:
           print(f"OK - {len(terms)} terms, all links resolve")
           PY
 
+      # The public glossary is built from src/ into the files mismo.org's Glossary page loads (docs/embed.md). A build that
+      # fails here (an id without gl-, a style rule it can't scope) stops the deploy rather than shipping a broken page.
+      - name: Build the embeddable glossary
+        run: |
+          python3 tools/build-embed.py /tmp/embed-check
+          node --check /tmp/embed-check/embed.js
+          node --check /tmp/embed-check/app-*.js
+
   # ------------------------------------------------------------ GitHub Pages
   deploy-pages:
     needs: validate
@@ -112,6 +120,10 @@ jobs:
           mkdir -p _site
           cp index.html _site/
           cp -r data _site/
+          # The glossary itself: embed.js (the loader, whose address never changes), version.json (which build is
+          # current) and app-<fingerprint>.js and .css. mismo.org's Glossary page and the standalone index.html both
+          # load these, so they always show the same glossary. src/ is the source and is not published.
+          python3 tools/build-embed.py _site
           # The console ships too. It has no write access of its own: publishing
           # goes through MISMO's save relay, which checks the facilitator's email
           # and password and holds the only GitHub credential. Without an account
@@ -168,6 +180,16 @@ jobs:
         run: |
           aws s3 cp index.html "s3://${{ vars.S3_BUCKET }}/index.html" \
             --cache-control "no-cache"
+
+      # The embeddable glossary: the loader and version.json are read fresh every time; the app files have a new name
+      # whenever they change, so they can be cached for good.
+      - name: Upload the embeddable glossary
+        run: |
+          python3 tools/build-embed.py _embed
+          aws s3 cp _embed/ "s3://${{ vars.S3_BUCKET }}/" --recursive --exclude "*" \
+            --include "app-*" --cache-control "public,max-age=31536000,immutable"
+          aws s3 cp _embed/embed.js "s3://${{ vars.S3_BUCKET }}/embed.js" --cache-control "no-cache"
+          aws s3 cp _embed/version.json "s3://${{ vars.S3_BUCKET }}/version.json" --cache-control "no-cache"
 
       - name: Upload console
         run: |

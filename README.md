@@ -3,7 +3,9 @@
 Two related things live in this repository:
 
 - **`index.html`** — the public glossary browse page (redesigned Sept 2026, in the Summit HQ
-  look). Search, an A–Z index, and a "Narrow the list" panel with a drop-down and a
+  look). Since 13 Nov 2026 its code is `src/glossary.js` and `src/glossary.css`, built into the files that both
+  this page and mismo.org's Glossary page load (see `docs/embed.md`); at go-live this page forwards to
+  www.mismo.org/glossary. Search, an A–Z index, and a "Narrow the list" panel with a drop-down and a
   definition for each classification (term type, focus area, source). Under the search it
   shows the latest version's stage and date, which the console sets when a version is
   published (`meta.stage`: `final` or `comment-period`, `meta.published`, and the version
@@ -41,7 +43,11 @@ not share that project's data or design system.
 ## Layout
 
 ```
-index.html              public browse page
+index.html              standalone public page: mounts the built glossary
+embed.js                the loader mismo.org's Glossary page loads (stable address)
+src/
+  glossary.js           the public glossary's code
+  glossary.css          its styles (scoped to #mm-glossary when built)
 data/
   glossary.json         all 8,397 terms, one per line
   reference.json        focus area / term type / source descriptions
@@ -59,8 +65,12 @@ docs/
   saving-pattern-immediate.md  the same, for an editor that publishes on save
   data-notes.md         data shape, known quirks, verified counts
   encoding.md           damaged characters, repair rules, platform test
+  embed.md              the glossary on mismo.org: what the website loads, the rules, the checks
   deployment.md         hosting plan and what AWS needs to provision
 tools/
+  build-embed.py        builds embed.js's app files and version.json from src/
+  check-embed.py        the glossary on a stand-in for mismo.org's Glossary page
+  embed-test-page.html  that stand-in
   extract-data.py       regenerates data/ from a console export
   encoding-canary.csv   change-set for testing what the platform preserves
   check-encoding.py     checks a platform export against the canary
@@ -70,16 +80,17 @@ tools/
 
 ## Working locally
 
-Everything is static — no build step, no dependencies.
+Everything is static, with no dependencies. The public page has one build step, which the deploy runs on every
+push: `python3 tools/build-embed.py` writes the files `index.html` and mismo.org load (`version.json` and
+`app-*.js`/`.css`, ignored by git). Run it before opening the public page locally.
 
 The console opens directly from disk: double-click `console/index.html`. It embeds its
 own baseline precisely so it works over `file://`, where `fetch()` is blocked.
 
-The public page will need a local server once it reads `data/glossary.json`, for the
-same reason — `fetch()` does not work from `file://`:
+The public page needs a local server, since `fetch()` does not work from `file://`:
 
 ```bash
-python3 -m http.server 8000
+python3 tools/build-embed.py && python3 -m http.server 8000
 # then open http://localhost:8000
 ```
 

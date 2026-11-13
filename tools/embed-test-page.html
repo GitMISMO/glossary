@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Business Glossary · MISMO (stand-in for the website's Glossary page)</title>
+<!-- A stand-in for the frame the website builds (Jonna, 10 Nov 2026), used by tools/check-embed.py. It is deliberately
+     unfriendly: it has a jQuery-style $, a 60-pixel sticky header (90 with the administrator bar) at z-index 1030 with a
+     menu, an Ask MISMO button, a positioned box around the glossary, and site-wide rules on headings, links, buttons,
+     inputs, lists and more. None of them may reach into the glossary, and the glossary may change none of them.
+     GLOSSARY_BASE is replaced by the check with where the glossary's files are served. -->
+<style>
+body{margin:0;font-family:"IBM Plex Sans","Segoe UI",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;font-size:14px;color:#333;letter-spacing:.02em;text-align:justify;line-height:1.42857;background:#f4f4f4}
+h1,h2,h3,h4{font-family:Georgia,serif;color:#c00;margin:40px 0;text-transform:uppercase}
+p{margin:0 0 30px;font-size:19px}
+a{color:#e0a;text-decoration:underline wavy}
+button,input,select,textarea{background:#ff0;border:3px solid #f00;border-radius:0;text-transform:uppercase;margin:6px;font-family:monospace}
+label{display:block;font-weight:900}
+ul{list-style:square;padding-left:60px}
+li{margin:8px 0}
+mark{background:#f0f;padding:6px}
+dialog{border:5px solid #f00}
+section,aside,nav{padding:20px;outline:2px dashed #0c0}
+.hidden{display:none!important}
+.toast{display:none}
+.site-header{position:sticky;top:0;z-index:1030;height:60px;background:#0d314c;color:#fff;display:flex;align-items:center;gap:24px;padding:0 24px;box-sizing:border-box}
+.site-header.admin{height:90px;border-top:30px solid #333}
+.site-header nav{padding:0;outline:0;position:relative}
+.site-header .menu{position:absolute;top:100%;left:0;display:none;background:#fff;color:#0d314c;min-width:260px;box-shadow:0 8px 24px rgba(0,0,0,.2);margin:0;padding:8px 0;list-style:none}
+.site-header nav:hover .menu,.site-header nav.open .menu{display:block}
+.site-header .menu a{display:block;padding:10px 16px;color:#0d314c;text-decoration:none}
+.site-header .sign-in{margin-left:auto}
+.site-main{position:relative;top:0;margin-top:0}
+.site-title{height:80px;line-height:80px;padding:0 24px;background:#e4f2fb;color:#0d314c;font-weight:700}
+.site-footer{background:#071d2e;color:#fff;padding:40px 24px}
+#ask-mismo{position:fixed;right:20px;bottom:20px;z-index:1040;background:#74bfeb;color:#0d314c;border:0;border-radius:24px;padding:12px 18px;font-weight:700;text-transform:none}
+</style>
+<script>
+  /* The website's own globals: the glossary must leave them alone. */
+  window.jQuery = window.$ = function(){ return 'the website\u2019s jQuery'; }; window.$.fn = {jquery: '3.6.0'};
+  window.siteMenuWorks = true;
+</script>
+</head>
+<body>
+<header class="site-header" id="site-header">
+  <strong>MISMO</strong>
+  <nav id="site-nav"><a href="#" id="site-menu-link" style="color:#fff">Standards &amp; Resources</a>
+    <ul class="menu" id="site-menu"><li><a href="#">Business Glossary</a></li><li><a href="#">Certifications</a></li><li><a href="#">MISMO Link</a></li><li><a href="#">Digital Mortgage Resource Center</a></li></ul>
+  </nav>
+  <a class="sign-in" href="#" style="color:#fff">Sign In</a>
+</header>
+<div class="site-title" id="site-title">Standards &amp; Resources</div>
+<main class="site-main" id="site-main">
+  <div id="mm-glossary"></div>
+</main>
+<footer class="site-footer" id="site-footer"><p>MISMO · 1919 M Street NW, Washington, DC 20036</p><a href="#">Privacy</a></footer>
+<button id="ask-mismo" type="button">Ask MISMO</button>
+<script>
+  window.MISMO_GLOSSARY = { options: {
+    embedded: true,
+    headerOffset: function(){ var h = document.getElementById('site-header'); return h ? h.offsetHeight : 0; }
+  } };
+</script>
+<script src="GLOSSARY_BASE/embed.js"></script>
+</body>
+</html>
