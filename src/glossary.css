@@ -664,9 +664,10 @@ button.gl-card:hover,button.gl-card:focus-visible{border-color:rgba(116,191,235,
 @media (prefers-reduced-motion:no-preference){ .sg[open]{animation:gl-sg-in .16s ease-out} @keyframes gl-sg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}} }
 
 /* Guided tour (Perry, 6 Nov 2026), in the design of the Business Domains page's tour */
-.tour-btn{display:inline-flex;align-items:center;gap:9px;border:0;background:#1f5f8f;color:#fff;border-radius:8px;padding:13px 22px;font:inherit;font-weight:700;font-size:15.5px;cursor:pointer;box-shadow:0 0 0 3px rgba(116,191,235,.35)}
-.tour-btn:hover{background:#2a72a8} .tour-btn svg{width:16px;height:16px} .tour-btn:focus-visible{outline:3px solid #74BFEB;outline-offset:2px}
-.gl-tourcta{margin-top:22px} .gl-tourcta p{margin:10px 0 0;font-size:13.5px;line-height:1.5;color:#a9c7dc;max-width:46ch}
+/* The website's primary hero button (Jonna's hero styles, 13 Nov 2026; Perry chose it for the tour button the same day). */
+.tour-btn{display:inline-flex;align-items:center;gap:9px;padding:14px 22px;border:1.5px solid #1a8fe3;border-radius:8px;background:linear-gradient(180deg,#2e9dee 0%,#1a8fe3 100%);color:#fff;font:inherit;font-size:15px;font-weight:600;line-height:1.2;white-space:nowrap;min-width:max-content;cursor:pointer;box-shadow:0 5px 16px -4px rgba(26,143,227,.55)}
+ .tour-btn svg{width:16px;height:16px} .tour-btn:focus-visible{outline:2px solid #ffffff;outline-offset:3px}
+.gl-tourcta{margin-top:24px} .gl-tourcta p{margin:10px 0 0;font-size:13.5px;line-height:1.5;color:#a9c7dc;max-width:46ch}
 #mm-glossary.touring #gl-page{padding-bottom:320px}
 #gl-spot{position:absolute;z-index:50;pointer-events:none;border-radius:12px;box-shadow:0 0 0 3px #74BFEB,0 0 0 9999px rgba(8,24,42,.55);opacity:0;transition:top .4s ease,left .4s ease,width .4s ease,height .4s ease,opacity .25s ease}
 #gl-spot.on{opacity:1}
