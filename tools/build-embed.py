@@ -24,7 +24,11 @@ BOX = '#mm-glossary'
 # starts from nothing the page around it set, and inside it every property the glossary doesn't set falls back to the
 # browser's own default, exactly as on the standalone page. SVG keeps its drawing attributes, so it is left out.
 RESET = (BOX + '{all:initial;display:block}\n'
-         + BOX + ' :where(*:not(svg,svg *)),' + BOX + ' :where(*:not(svg,svg *))::before,' + BOX + ' :where(*:not(svg,svg *))::after{all:revert}\n')
+         + BOX + ' :where(*:not(svg,svg *)),' + BOX + ' :where(*:not(svg,svg *))::before,' + BOX + ' :where(*:not(svg,svg *))::after{all:revert}\n'
+         # The browser hides [hidden] with a rule at the lowest priority, which the line above would cancel (Perry, 13 Nov
+         # 2026: Submit an Idea's Other field showed). This puts it back at the same low priority, so the page's own rules
+         # still win over it exactly as before.
+         + BOX + ' :where([hidden]:not([hidden="until-found" i])){display:none}\n')
 
 
 def strip_comments(css):
